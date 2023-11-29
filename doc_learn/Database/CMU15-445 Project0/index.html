@@ -6,12 +6,12 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="HandheldFriendly" content="True">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
-    <meta name="description" content="CMU15-445简介作为 CMU 数据库的入门课，这门课由数据库领域的大牛 Andy Pavlo 讲授（“这个世界上我只在乎两件事，一是我的老婆，二就是数据库”）。 这是一门质量极高，资源极齐全的 Database 入门课，这门课的 Faculty 和背后的 CMU Database Group 将课程对应的基础设施 (Autograder, Discord) 和课程资料 (Lectures,">
+    <meta name="description" content="CMU15-445简介 作为 CMU 数据库的入门课，这门课由数据库领域的大牛 Andy Pavlo 讲授（“这个世界上我只在乎两件事，一是我的老婆，二就是数据库”）。 这是一门质量极高，资源极齐全的 Database 入门课，这门课的 Faculty 和背后的 CMU Database Group 将课程对应的基础设施 (Autograder, Discord) 和课程资料 (Lectures">
 <meta property="og:type" content="article">
 <meta property="og:title" content="CMU15-445 Project#0">
 <meta property="og:url" content="https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project0/index.html">
 <meta property="og:site_name" content="WJL">
-<meta property="og:description" content="CMU15-445简介作为 CMU 数据库的入门课，这门课由数据库领域的大牛 Andy Pavlo 讲授（“这个世界上我只在乎两件事，一是我的老婆，二就是数据库”）。 这是一门质量极高，资源极齐全的 Database 入门课，这门课的 Faculty 和背后的 CMU Database Group 将课程对应的基础设施 (Autograder, Discord) 和课程资料 (Lectures,">
+<meta property="og:description" content="CMU15-445简介 作为 CMU 数据库的入门课，这门课由数据库领域的大牛 Andy Pavlo 讲授（“这个世界上我只在乎两件事，一是我的老婆，二就是数据库”）。 这是一门质量极高，资源极齐全的 Database 入门课，这门课的 Faculty 和背后的 CMU Database Group 将课程对应的基础设施 (Autograder, Discord) 和课程资料 (Lectures">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231129141237.png">
 <meta property="og:image" content="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231129144859.png">
@@ -24,7 +24,7 @@
 <meta property="og:image" content="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231129190637.png">
 <meta property="og:image" content="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231129191231.png">
 <meta property="article:published_time" content="2023-11-28T15:44:18.000Z">
-<meta property="article:modified_time" content="2023-11-29T11:31:10.279Z">
+<meta property="article:modified_time" content="2023-11-29T16:47:29.258Z">
 <meta property="article:author" content="Weijiale">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231129141237.png">
@@ -121,7 +121,7 @@
     
     
       <div id="toc">
-        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#CMU15-445%E7%AE%80%E4%BB%8B"><span class="toc-number">1.</span> <span class="toc-text">CMU15-445简介</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.1.</span> <span class="toc-text">前言</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Project0-C-Primer"><span class="toc-number">2.</span> <span class="toc-text">Project0-C++ Primer</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A6%82%E8%BF%B0"><span class="toc-number">2.1.</span> <span class="toc-text">概述</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%89%80%E9%9C%80%E5%89%8D%E7%BD%AE%E7%9F%A5%E8%AF%86"><span class="toc-number">2.2.</span> <span class="toc-text">所需前置知识</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%96%87%E4%BB%B6%E7%BB%93%E6%9E%84"><span class="toc-number">2.3.</span> <span class="toc-text">文件结构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-1-%E5%AD%97%E5%85%B8%E6%A0%91"><span class="toc-number">2.4.</span> <span class="toc-text">Task#1 字典树</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#TrieNode"><span class="toc-number">2.4.1.</span> <span class="toc-text">TrieNode</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#TrieNodeWithValue"><span class="toc-number">2.4.2.</span> <span class="toc-text">TrieNodeWithValue</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Trie-Class"><span class="toc-number">2.4.3.</span> <span class="toc-text">Trie Class</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Insert"><span class="toc-number">2.4.3.1.</span> <span class="toc-text">Insert</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Remove"><span class="toc-number">2.4.3.2.</span> <span class="toc-text">Remove</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#GetValue"><span class="toc-number">2.4.3.3.</span> <span class="toc-text">GetValue</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-2-%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AD%97%E5%85%B8%E6%A0%91"><span class="toc-number">2.5.</span> <span class="toc-text">Task #2 - 多线程字典树</span></a></li></ol></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#cmu15-445%E7%AE%80%E4%BB%8B"><span class="toc-number">1.</span> <span class="toc-text"> CMU15-445简介</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.1.</span> <span class="toc-text"> 前言</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#project0-c-primer"><span class="toc-number">2.</span> <span class="toc-text"> Project0-C++ Primer</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A6%82%E8%BF%B0"><span class="toc-number">2.1.</span> <span class="toc-text"> 概述</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%89%80%E9%9C%80%E5%89%8D%E7%BD%AE%E7%9F%A5%E8%AF%86"><span class="toc-number">2.2.</span> <span class="toc-text"> 所需前置知识</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%96%87%E4%BB%B6%E7%BB%93%E6%9E%84"><span class="toc-number">2.3.</span> <span class="toc-text"> 文件结构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#task1-%E5%AD%97%E5%85%B8%E6%A0%91"><span class="toc-number">2.4.</span> <span class="toc-text"> Task#1 字典树</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#trienode"><span class="toc-number">2.4.1.</span> <span class="toc-text"> TrieNode</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#trienodewithvalue"><span class="toc-number">2.4.2.</span> <span class="toc-text"> TrieNodeWithValue</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#trie-class"><span class="toc-number">2.4.3.</span> <span class="toc-text"> Trie Class</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#insert"><span class="toc-number">2.4.3.1.</span> <span class="toc-text"> Insert</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#remove"><span class="toc-number">2.4.3.2.</span> <span class="toc-text"> Remove</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#getvalue"><span class="toc-number">2.4.3.3.</span> <span class="toc-text"> GetValue</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#task-2-%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AD%97%E5%85%B8%E6%A0%91"><span class="toc-number">2.5.</span> <span class="toc-text"> Task #2 - 多线程字典树</span></a></li></ol></li></ol>
       </div>
     
   </span>
@@ -166,48 +166,70 @@
   
 
   <div class="content e-content" itemprop="articleBody">
-    <h1 id="CMU15-445简介"><a href="#CMU15-445简介" class="headerlink" title="CMU15-445简介"></a>CMU15-445简介</h1><p>作为 CMU 数据库的入门课，这门课由数据库领域的大牛 Andy Pavlo 讲授（“这个世界上我只在乎两件事，一是我的老婆，二就是数据库”）。</p>
+    <h1 id="cmu15-445简介"><a class="markdownIt-Anchor" href="#cmu15-445简介"></a> CMU15-445简介</h1>
+<p>作为 CMU 数据库的入门课，这门课由数据库领域的大牛 Andy Pavlo 讲授（“这个世界上我只在乎两件事，一是我的老婆，二就是数据库”）。</p>
 <p>这是一门质量极高，资源极齐全的 Database 入门课，这门课的 Faculty 和背后的 CMU Database Group 将课程对应的基础设施 (Autograder, Discord) 和课程资料 (Lectures, Notes, Homework) 完全开源，让每一个愿意学习数据库的同学都可以享受到几乎等同于 CMU 本校学生的课程体验。</p>
 <p>亮点在于这门课程实现了一个关系型数据库的Demo–bustub，并对组成部分进行修改，最后达到完成整个数据库的目的，非常的有意思。</p>
 <p>近年来由于CMU15-445这门课的热度大增，无论是找工作还是保研的简历上都少不了这个课程。到了可以说是人手一个的地步（还有MIT6.824），但是最后的排行榜上真正完成4个项目并且有成绩的不过100余人。在这种背景下也催生出了很多卖课的机构和个人。还有种种乱象。暂且按下不表，进入主题。</p>
-<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>先附上 <a target="_blank" rel="noopener" href="https://15445.courses.cs.cmu.edu/fall2022">课程链接</a>我原本是想要完成最新的课程即2023fall的，但是2023fall的P0直接就把我劝退了，相较于2022fall的P0我认为难度上升了不止一点。但是其他的Project的实现差别并不是太大，所以我选择了较为容易下手的2022fall的课程进行学习。</p>
-<h1 id="Project0-C-Primer"><a href="#Project0-C-Primer" class="headerlink" title="Project0-C++ Primer"></a>Project0-C++ Primer</h1><p>还是先放上<a target="_blank" rel="noopener" href="https://15445.courses.cs.cmu.edu/fall2022/project0/">项目Project#0-C++primer链接</a></p>
-<h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>这是一个相当于先导课程的项目，<strong>旨在培养和检验学生的现代C++编程能力</strong> ，BusTub大量使用C++17，当你上手之后<strong>可能</strong>就会发现和你印象中的C++不一样。</p>
-<p>在CMU如果你没能满分通过P0，那么你会被要求退课。<br><img src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231129141237.png" alt="image.png"></p>
-<h2 id="所需前置知识"><a href="#所需前置知识" class="headerlink" title="所需前置知识"></a>所需前置知识</h2><p>我认为需要的前置知识主要包括<a target="_blank" rel="noopener" href="https://github.com/cmu-db/15445-bootcamp"><strong>C++11的新特性</strong></a><br>这是在2023fall课程的一个可能是助教写的一个小demo包含了几个例子能够帮助你快速的上手c++11的新特性。</p>
+<h2 id="前言"><a class="markdownIt-Anchor" href="#前言"></a> 前言</h2>
+<p>先附上 <a target="_blank" rel="noopener" href="https://15445.courses.cs.cmu.edu/fall2022">课程链接</a>我原本是想要完成最新的课程即2023fall的，但是2023fall的P0直接就把我劝退了，相较于2022fall的P0我认为难度上升了不止一点。但是其他的Project的实现差别并不是太大，所以我选择了较为容易下手的2022fall的课程进行学习。</p>
+<h1 id="project0-c-primer"><a class="markdownIt-Anchor" href="#project0-c-primer"></a> Project0-C++ Primer</h1>
+<p>还是先放上<a target="_blank" rel="noopener" href="https://15445.courses.cs.cmu.edu/fall2022/project0/">项目Project#0-C++primer链接</a></p>
+<h2 id="概述"><a class="markdownIt-Anchor" href="#概述"></a> 概述</h2>
+<p>这是一个相当于先导课程的项目，<strong>旨在培养和检验学生的现代C++编程能力</strong> ，BusTub大量使用C<ins>17，当你上手之后<strong>可能</strong>就会发现和你印象中的C</ins>不一样。</p>
+<p>在CMU如果你没能满分通过P0，那么你会被要求退课。<br />
+<img src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231129141237.png" alt="image.png" /></p>
+<h2 id="所需前置知识"><a class="markdownIt-Anchor" href="#所需前置知识"></a> 所需前置知识</h2>
+<p>我认为需要的前置知识主要包括<a target="_blank" rel="noopener" href="https://github.com/cmu-db/15445-bootcamp"><strong>C++11的新特性</strong></a><br />
+这是在2023fall课程的一个可能是助教写的一个小demo包含了几个例子能够帮助你快速的上手c++11的新特性。</p>
 <p>熟悉<strong>字典树</strong>能够理解字典树原理能够完成一个字典树的小demo<a target="_blank" rel="noopener" href="https://leetcode.cn/problems/implement-trie-prefix-tree/description/">LeetCode.208实现前缀字典树</a> 可以先把这个做了，了解一下什么是字典树。</p>
-<p><img src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231129144859.png" alt="image.png"></p>
+<p><img src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231129144859.png" alt="image.png" /></p>
 <p>上图就是一个字典树的简单示意图</p>
-<h2 id="文件结构"><a href="#文件结构" class="headerlink" title="文件结构"></a>文件结构</h2><p><img src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231129162120.png" alt="image.png|264"></p>
+<h2 id="文件结构"><a class="markdownIt-Anchor" href="#文件结构"></a> 文件结构</h2>
+<p><img src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231129162120.png" alt="image.png|264" /></p>
 <p>在文件中作为字典树的架子文件中包含了三个类。</p>
 <ul>
-<li>TrieNode </li>
+<li>TrieNode</li>
 <li>TrieNodeWithValue</li>
 <li>Trie</li>
 </ul>
-<h2 id="Task-1-字典树"><a href="#Task-1-字典树" class="headerlink" title="Task#1 字典树"></a>Task#1 字典树</h2><p>先完成一个单线程版本的字典树，后期再考虑并发。</p>
-<h3 id="TrieNode"><a href="#TrieNode" class="headerlink" title="TrieNode"></a>TrieNode</h3><p><code>TrieNode</code>定义了一个Trie树的一个节点。<br><img src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231129160311.png" alt="image.png"></p>
+<h2 id="task1-字典树"><a class="markdownIt-Anchor" href="#task1-字典树"></a> Task#1 字典树</h2>
+<p>先完成一个单线程版本的字典树，后期再考虑并发。</p>
+<h3 id="trienode"><a class="markdownIt-Anchor" href="#trienode"></a> TrieNode</h3>
+<p><code>TrieNode</code>定义了一个Trie树的一个节点。<br />
+<img src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231129160311.png" alt="image.png" /></p>
 <ul>
-<li>一个包含关键字的char类型&#96;key_char_。</li>
+<li>一个包含关键字的char类型`key_char_。</li>
 <li>一个bool类型<code>is_node</code>的标志来标记这个节点是否是<strong>值节点</strong></li>
-<li>包含一个存储类型为 <code>char</code> to <code>unique_ptr&lt;TrieNode&gt;</code>映射的哈希表<br><strong>需要注意的点：</strong><br>C++中智能指针<a target="_blank" rel="noopener" href="https://www.learncpp.com/cpp-tutorial/stdunique_ptr/">std::unique_ptr的特性</a>所带来的：<br>The <code>InsertChildNode</code> and <code>GetChildNode</code> both return a pointer to <code>unique_ptr</code><br>这个独享类型的智能指针也不支持被复制，所以要么使用<code>std::move()</code>把所有权交出去，要么就用<code>get()</code>函数把裸指针交出去。<br>the move constructor <code>TrieNode(TrieNode &amp;&amp;other_trie_node)</code> is used to transfer old TrieNode’s unique pointers to a new TrieNode。因为是unique_ptr所以在传递的时候不能对指针进行复制。（解决方法就是使用move()函数）。<br><img src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231129173037.png" alt="image.png"></li>
+<li>包含一个存储类型为 <code>char</code> to <code>unique_ptr&lt;TrieNode&gt;</code>映射的哈希表<br />
+<strong>需要注意的点：</strong><br />
+C++中智能指针<a target="_blank" rel="noopener" href="https://www.learncpp.com/cpp-tutorial/stdunique_ptr/">std::unique_ptr的特性</a>所带来的：<br />
+The <code>InsertChildNode</code> and <code>GetChildNode</code> both return a pointer to <code>unique_ptr</code><br />
+这个独享类型的智能指针也不支持被复制，所以要么使用<code>std::move()</code>把所有权交出去，要么就用<code>get()</code>函数把裸指针交出去。<br />
+the move constructor <code>TrieNode(TrieNode &amp;&amp;other_trie_node)</code> is used to transfer old TrieNode’s unique pointers to a new TrieNode。因为是unique_ptr所以在传递的时候不能对指针进行复制。（解决方法就是使用move()函数）。<br />
+<img src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231129173037.png" alt="image.png" /></li>
 </ul>
-<p><img src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231129173224.png" alt="image.png"></p>
-<h3 id="TrieNodeWithValue"><a href="#TrieNodeWithValue" class="headerlink" title="TrieNodeWithValue"></a>TrieNodeWithValue</h3><p><img src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231129180408.png" alt="image.png|290"></p>
+<p><img src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231129173224.png" alt="image.png" /></p>
+<h3 id="trienodewithvalue"><a class="markdownIt-Anchor" href="#trienodewithvalue"></a> TrieNodeWithValue</h3>
+<p><img src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231129180408.png" alt="image.png|290" /></p>
 <ul>
 <li>这个是[[CMU15-445 Project0#TrieNode]]类的子类，多了一个能保存任意类型的值T。而且is_end被设定为True。</li>
 <li>根据不同的情况调用不同的构造函数。如果原本是一个普通节点就调用参数为（TrieNode&amp;&amp;，T），如果是创建一个全新的节点则调用参数为(char,T).</li>
 </ul>
-<h3 id="Trie-Class"><a href="#Trie-Class" class="headerlink" title="Trie Class"></a>Trie Class</h3><ul>
+<h3 id="trie-class"><a class="markdownIt-Anchor" href="#trie-class"></a> Trie Class</h3>
+<ul>
 <li>有一个root_节点，是整个树的根节点，而且不存储任何的值。</li>
 </ul>
-<h4 id="Insert"><a href="#Insert" class="headerlink" title="Insert"></a>Insert</h4><p>要插入到trie中，您需要首先使用给定的键遍历trie，如果不存在，则插入TrieNode。请注意，不允许插入重复的键，并且应该返回false。一旦到达键的结束字符，有三种可能性：</p>
+<h4 id="insert"><a class="markdownIt-Anchor" href="#insert"></a> Insert</h4>
+<p>要插入到trie中，您需要首先使用给定的键遍历trie，如果不存在，则插入TrieNode。请注意，不允许插入重复的键，并且应该返回false。一旦到达键的结束字符，有三种可能性：</p>
 <ol>
 <li>到达的节点不存在，需要调用参数为(char,T)的构造函数构造一个全新的值节点。利用“Make use of the fact that a <code>unique_ptr</code> to <code>TrieNode</code> can also store a <code>unique_ptr</code> to <code>TrieNodeWithValue</code>”这一特性可以以最后一个节点为模板（无论是不是值节点都能够成功创建）创建一个新的值节点。</li>
 <li>到达的节点存在但不是值节点，调用（TrieNode&amp;&amp;，T）为参数的这样一个转换的构造函数，把普通节点转换为值节点。</li>
-<li>存在且是值节点，直接返回false。<br><img src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231129185358.png" alt="image.png"></li>
+<li>存在且是值节点，直接返回false。<br />
+<img src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231129185358.png" alt="image.png" /></li>
 </ol>
-<h4 id="Remove"><a href="#Remove" class="headerlink" title="Remove"></a>Remove</h4><p>我认为Remove()是这几个函数中相对来说比较难的，因为涉及到递归删除。</p>
+<h4 id="remove"><a class="markdownIt-Anchor" href="#remove"></a> Remove</h4>
+<p>我认为Remove()是这几个函数中相对来说比较难的，因为涉及到递归删除。</p>
 <p>目的就是删除给定路径的节点的值。</p>
 <ol>
 <li>key不存在直接返回</li>
@@ -215,8 +237,15 @@
 <li>如果一个节点没有任何孩子那就应该把他删除</li>
 <li>遍历trie并递归删除没有子节点的节点。遇到包含子节点的节点时停止。</li>
 </ol>
-<h4 id="GetValue"><a href="#GetValue" class="headerlink" title="GetValue"></a>GetValue</h4><p>没找到或者类型不匹配将success的值设置为false。<br><img src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231129190637.png" alt="image.png"><br>个人认为这个的关键点在于节点类型的转换从而获取到节点的值，又因为current是unique_ptr类型所以只能用get()先获取裸指针再进行转换。</p>
-<h2 id="Task-2-多线程字典树"><a href="#Task-2-多线程字典树" class="headerlink" title="Task #2 - 多线程字典树"></a>Task #2 - 多线程字典树</h2><p>简单概括就是涉及读的操作就上读锁，涉及写的操作就上写锁，涉及读写的操作就上读写锁<br>千万别忘记返回直接解锁，以免造成死锁。<br><img src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231129191231.png" alt="image.png|254"><br>最后附上通过截图。</p>
+<h4 id="getvalue"><a class="markdownIt-Anchor" href="#getvalue"></a> GetValue</h4>
+<p>没找到或者类型不匹配将success的值设置为false。<br />
+<img src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231129190637.png" alt="image.png" /><br />
+个人认为这个的关键点在于节点类型的转换从而获取到节点的值，又因为current是unique_ptr类型所以只能用get()先获取裸指针再进行转换。</p>
+<h2 id="task-2-多线程字典树"><a class="markdownIt-Anchor" href="#task-2-多线程字典树"></a> Task #2 - 多线程字典树</h2>
+<p>简单概括就是涉及读的操作就上读锁，涉及写的操作就上写锁，涉及读写的操作就上读写锁<br />
+千万别忘记返回直接解锁，以免造成死锁。<br />
+<img src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231129191231.png" alt="image.png|254" /><br />
+最后附上通过截图。</p>
 
   </div>
 </article>
@@ -242,7 +271,7 @@
     
     
       <div id="toc-footer" style="display: none">
-        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#CMU15-445%E7%AE%80%E4%BB%8B"><span class="toc-number">1.</span> <span class="toc-text">CMU15-445简介</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.1.</span> <span class="toc-text">前言</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Project0-C-Primer"><span class="toc-number">2.</span> <span class="toc-text">Project0-C++ Primer</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A6%82%E8%BF%B0"><span class="toc-number">2.1.</span> <span class="toc-text">概述</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%89%80%E9%9C%80%E5%89%8D%E7%BD%AE%E7%9F%A5%E8%AF%86"><span class="toc-number">2.2.</span> <span class="toc-text">所需前置知识</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%96%87%E4%BB%B6%E7%BB%93%E6%9E%84"><span class="toc-number">2.3.</span> <span class="toc-text">文件结构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-1-%E5%AD%97%E5%85%B8%E6%A0%91"><span class="toc-number">2.4.</span> <span class="toc-text">Task#1 字典树</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#TrieNode"><span class="toc-number">2.4.1.</span> <span class="toc-text">TrieNode</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#TrieNodeWithValue"><span class="toc-number">2.4.2.</span> <span class="toc-text">TrieNodeWithValue</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Trie-Class"><span class="toc-number">2.4.3.</span> <span class="toc-text">Trie Class</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Insert"><span class="toc-number">2.4.3.1.</span> <span class="toc-text">Insert</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Remove"><span class="toc-number">2.4.3.2.</span> <span class="toc-text">Remove</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#GetValue"><span class="toc-number">2.4.3.3.</span> <span class="toc-text">GetValue</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-2-%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AD%97%E5%85%B8%E6%A0%91"><span class="toc-number">2.5.</span> <span class="toc-text">Task #2 - 多线程字典树</span></a></li></ol></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#cmu15-445%E7%AE%80%E4%BB%8B"><span class="toc-number">1.</span> <span class="toc-text"> CMU15-445简介</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.1.</span> <span class="toc-text"> 前言</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#project0-c-primer"><span class="toc-number">2.</span> <span class="toc-text"> Project0-C++ Primer</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A6%82%E8%BF%B0"><span class="toc-number">2.1.</span> <span class="toc-text"> 概述</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%89%80%E9%9C%80%E5%89%8D%E7%BD%AE%E7%9F%A5%E8%AF%86"><span class="toc-number">2.2.</span> <span class="toc-text"> 所需前置知识</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%96%87%E4%BB%B6%E7%BB%93%E6%9E%84"><span class="toc-number">2.3.</span> <span class="toc-text"> 文件结构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#task1-%E5%AD%97%E5%85%B8%E6%A0%91"><span class="toc-number">2.4.</span> <span class="toc-text"> Task#1 字典树</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#trienode"><span class="toc-number">2.4.1.</span> <span class="toc-text"> TrieNode</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#trienodewithvalue"><span class="toc-number">2.4.2.</span> <span class="toc-text"> TrieNodeWithValue</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#trie-class"><span class="toc-number">2.4.3.</span> <span class="toc-text"> Trie Class</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#insert"><span class="toc-number">2.4.3.1.</span> <span class="toc-text"> Insert</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#remove"><span class="toc-number">2.4.3.2.</span> <span class="toc-text"> Remove</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#getvalue"><span class="toc-number">2.4.3.3.</span> <span class="toc-text"> GetValue</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#task-2-%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AD%97%E5%85%B8%E6%A0%91"><span class="toc-number">2.5.</span> <span class="toc-text"> Task #2 - 多线程字典树</span></a></li></ol></li></ol>
       </div>
     
 

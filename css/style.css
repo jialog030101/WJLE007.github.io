@@ -345,7 +345,7 @@ body h3 {
   color: rgba(86,124,119,0.8);
   text-decoration: underline;
   font-weight: bold;
-  font-size: 1.2rem;
+  font-size: 1.3rem;
 }
 body h4,
 body h5,
@@ -354,7 +354,7 @@ body h6 {
   text-decoration: none;
   color: #666;
   font-weight: bold;
-  font-size: 1rem;
+  font-size: 1.1rem;
 }
 body h3,
 body h4,
@@ -1607,10 +1607,13 @@ pre code {
   border: none;
 }
 code {
-  padding: 0 5px;
-  border: 1px dotted #666;
-  border-radius: 2px;
-  -webkit-border-radius: 2px;
+  font-size: 0.9em;
+  font-weight: 1000;
+  background-color: #e6e6e6;
+  color: #333;
+  padding: 4px 6px;
+  margin: 0px 4px;
+  -webkit-border-radius: 3px;
 }
 .highlight {
   overflow-x: auto;
