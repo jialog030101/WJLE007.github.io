@@ -6,12 +6,12 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="HandheldFriendly" content="True">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
-    <meta name="description" content="CMU15-445简介 作为 CMU 数据库的入门课，这门课由数据库领域的大牛 Andy Pavlo 讲授（“这个世界上我只在乎两件事，一是我的老婆，二就是数据库”）。 这是一门质量极高，资源极齐全的 Database 入门课，这门课的 Faculty 和背后的 CMU Database Group 将课程对应的基础设施 (Autograder, Discord) 和课程资料 (Lectures">
+    <meta name="description" content="CMU15-445 作为 CMU 数据库的入门课，这门课由数据库领域的大牛 Andy Pavlo 讲授（“这个世界上我只在乎两件事，一是我的老婆，二就是数据库”）。 这是一门质量极高，资源极齐全的 Database 入门课，这门课的 Faculty 和背后的 CMU Database Group 将课程对应的基础设施 (Autograder, Discord) 和课程资料 (Lectures,">
 <meta property="og:type" content="article">
-<meta property="og:title" content="CMU15-445 Project#0">
-<meta property="og:url" content="https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project0/index.html">
+<meta property="og:title" content="CMU15-445- Project #0 - C++ Primer">
+<meta property="og:url" content="https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project%200%20-%20C++%20Primer/index.html">
 <meta property="og:site_name" content="WJL">
-<meta property="og:description" content="CMU15-445简介 作为 CMU 数据库的入门课，这门课由数据库领域的大牛 Andy Pavlo 讲授（“这个世界上我只在乎两件事，一是我的老婆，二就是数据库”）。 这是一门质量极高，资源极齐全的 Database 入门课，这门课的 Faculty 和背后的 CMU Database Group 将课程对应的基础设施 (Autograder, Discord) 和课程资料 (Lectures">
+<meta property="og:description" content="CMU15-445 作为 CMU 数据库的入门课，这门课由数据库领域的大牛 Andy Pavlo 讲授（“这个世界上我只在乎两件事，一是我的老婆，二就是数据库”）。 这是一门质量极高，资源极齐全的 Database 入门课，这门课的 Faculty 和背后的 CMU Database Group 将课程对应的基础设施 (Autograder, Discord) 和课程资料 (Lectures,">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231129141237.png">
 <meta property="og:image" content="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231129144859.png">
@@ -24,8 +24,9 @@
 <meta property="og:image" content="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231129190637.png">
 <meta property="og:image" content="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231129191231.png">
 <meta property="article:published_time" content="2023-11-28T15:44:18.000Z">
-<meta property="article:modified_time" content="2023-12-01T03:43:46.722Z">
+<meta property="article:modified_time" content="2024-02-01T15:17:47.236Z">
 <meta property="article:author" content="Weijiale">
+<meta property="article:tag" content="Project">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231129141237.png">
     
@@ -47,7 +48,7 @@
       
     
     <!-- title -->
-    <title>CMU15-445 Project#0</title>
+    <title>CMU15-445- Project #0 - C++ Primer</title>
     <!-- async scripts -->
     <!-- Google Analytics -->
 
@@ -83,6 +84,8 @@
        --><li><a href="/archives/">blog</a></li><!--
      --><!--
        --><li><a href="/categories/">归档</a></li><!--
+     --><!--
+       --><li><a href="/tags/">标签</a></li><!--
      -->
       </ul>
     </span>
@@ -90,10 +93,10 @@
     <span id="actions">
       <ul>
         
-        <li><a class="icon" aria-label="上一篇" href="/doc_learn/Database/CMU15-445%20Project1%20Buffer%20Pool/"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="上一篇" href="/doc_learn/Database/B+%20Tree%20Index/"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
         
         
-        <li><a class="icon" aria-label="下一篇" href="/doc_learn/hello-world/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="下一篇" href="/doc_learn/Database/Introduce/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
         
         <li><a class="icon" aria-label="返回顶部" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
         <li><a class="icon" aria-label="分享文章" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
@@ -106,24 +109,24 @@
     <br/>
     <div id="share" style="display: none">
       <ul>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project0/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project0/&text=CMU15-445 Project#0"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project0/&title=CMU15-445 Project#0"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project0/&is_video=false&description=CMU15-445 Project#0"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="mailto:?subject=CMU15-445 Project#0&body=Check out this article: https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project0/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project0/&title=CMU15-445 Project#0"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project0/&title=CMU15-445 Project#0"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project0/&title=CMU15-445 Project#0"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project0/&title=CMU15-445 Project#0"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project0/&name=CMU15-445 Project#0&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project0/&t=CMU15-445 Project#0"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project%200%20-%20C++%20Primer/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project%200%20-%20C++%20Primer/&text=CMU15-445- Project #0 - C++ Primer"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project%200%20-%20C++%20Primer/&title=CMU15-445- Project #0 - C++ Primer"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project%200%20-%20C++%20Primer/&is_video=false&description=CMU15-445- Project #0 - C++ Primer"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=CMU15-445- Project #0 - C++ Primer&body=Check out this article: https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project%200%20-%20C++%20Primer/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project%200%20-%20C++%20Primer/&title=CMU15-445- Project #0 - C++ Primer"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project%200%20-%20C++%20Primer/&title=CMU15-445- Project #0 - C++ Primer"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project%200%20-%20C++%20Primer/&title=CMU15-445- Project #0 - C++ Primer"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project%200%20-%20C++%20Primer/&title=CMU15-445- Project #0 - C++ Primer"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project%200%20-%20C++%20Primer/&name=CMU15-445- Project #0 - C++ Primer&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project%200%20-%20C++%20Primer/&t=CMU15-445- Project #0 - C++ Primer"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
 </ul>
 
     </div>
     
     
       <div id="toc">
-        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#cmu15-445%E7%AE%80%E4%BB%8B"><span class="toc-number">1.</span> <span class="toc-text"> CMU15-445简介</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.1.</span> <span class="toc-text"> 前言</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#project0-c-primer"><span class="toc-number">2.</span> <span class="toc-text"> Project0-C++ Primer</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A6%82%E8%BF%B0"><span class="toc-number">2.1.</span> <span class="toc-text"> 概述</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%89%80%E9%9C%80%E5%89%8D%E7%BD%AE%E7%9F%A5%E8%AF%86"><span class="toc-number">2.2.</span> <span class="toc-text"> 所需前置知识</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%96%87%E4%BB%B6%E7%BB%93%E6%9E%84"><span class="toc-number">2.3.</span> <span class="toc-text"> 文件结构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#task1-%E5%AD%97%E5%85%B8%E6%A0%91"><span class="toc-number">2.4.</span> <span class="toc-text"> Task#1 字典树</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#trienode"><span class="toc-number">2.4.1.</span> <span class="toc-text"> TrieNode</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#trienodewithvalue"><span class="toc-number">2.4.2.</span> <span class="toc-text"> TrieNodeWithValue</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#trie-class"><span class="toc-number">2.4.3.</span> <span class="toc-text"> Trie Class</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#insert"><span class="toc-number">2.4.3.1.</span> <span class="toc-text"> Insert</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#remove"><span class="toc-number">2.4.3.2.</span> <span class="toc-text"> Remove</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#getvalue"><span class="toc-number">2.4.3.3.</span> <span class="toc-text"> GetValue</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#task-2-%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AD%97%E5%85%B8%E6%A0%91"><span class="toc-number">2.5.</span> <span class="toc-text"> Task #2 - 多线程字典树</span></a></li></ol></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#cmu15-445"><span class="toc-number">1.</span> <span class="toc-text"> CMU15-445</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.1.</span> <span class="toc-text"> 前言</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#project0-c-primer"><span class="toc-number">2.</span> <span class="toc-text"> Project0-C++ Primer</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A6%82%E8%BF%B0"><span class="toc-number">2.1.</span> <span class="toc-text"> 概述</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%89%80%E9%9C%80%E5%89%8D%E7%BD%AE%E7%9F%A5%E8%AF%86"><span class="toc-number">2.2.</span> <span class="toc-text"> 所需前置知识</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%96%87%E4%BB%B6%E7%BB%93%E6%9E%84"><span class="toc-number">2.3.</span> <span class="toc-text"> 文件结构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#task1-%E5%AD%97%E5%85%B8%E6%A0%91"><span class="toc-number">2.4.</span> <span class="toc-text"> Task#1 字典树</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#trienode"><span class="toc-number">2.4.1.</span> <span class="toc-text"> TrieNode</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#trienodewithvalue"><span class="toc-number">2.4.2.</span> <span class="toc-text"> TrieNodeWithValue</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#trie-class"><span class="toc-number">2.4.3.</span> <span class="toc-text"> Trie Class</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#insert"><span class="toc-number">2.4.3.1.</span> <span class="toc-text"> Insert</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#remove"><span class="toc-number">2.4.3.2.</span> <span class="toc-text"> Remove</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#getvalue"><span class="toc-number">2.4.3.3.</span> <span class="toc-text"> GetValue</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#task-2-%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AD%97%E5%85%B8%E6%A0%91"><span class="toc-number">2.5.</span> <span class="toc-text"> Task #2 - 多线程字典树</span></a></li></ol></li></ol>
       </div>
     
   </span>
@@ -136,7 +139,7 @@
   <header>
     
     <h1 class="posttitle p-name" itemprop="name headline">
-        CMU15-445 Project#0
+        CMU15-445- Project #0 - C++ Primer
     </h1>
 
 
@@ -162,13 +165,18 @@
 
 
       
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/Project/" rel="tag">Project</a>
+    </div>
+
 
     </div>
   </header>
   
 
   <div class="content e-content" itemprop="articleBody">
-    <h1 id="cmu15-445简介"><a class="markdownIt-Anchor" href="#cmu15-445简介"></a> CMU15-445简介</h1>
+    <h1 id="cmu15-445"><a class="markdownIt-Anchor" href="#cmu15-445"></a> CMU15-445</h1>
 <p>作为 CMU 数据库的入门课，这门课由数据库领域的大牛 Andy Pavlo 讲授（“这个世界上我只在乎两件事，一是我的老婆，二就是数据库”）。</p>
 <p>这是一门质量极高，资源极齐全的 Database 入门课，这门课的 Faculty 和背后的 CMU Database Group 将课程对应的基础设施 (Autograder, Discord) 和课程资料 (Lectures, Notes, Homework) 完全开源，让每一个愿意学习数据库的同学都可以享受到几乎等同于 CMU 本校学生的课程体验。</p>
 <p>亮点在于这门课程实现了一个关系型数据库的Demo–bustub，并对组成部分进行修改，最后达到完成整个数据库的目的，非常的有意思。</p>
@@ -215,7 +223,7 @@ the move constructor <code>TrieNode(TrieNode &amp;&amp;other_trie_node)</code>�
 <h3 id="trienodewithvalue"><a class="markdownIt-Anchor" href="#trienodewithvalue"></a> TrieNodeWithValue</h3>
 <p><img src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231129180408.png" alt="image.png|290" /></p>
 <ul>
-<li>这个是[[CMU15-445 Project0#TrieNode]]类的子类，多了一个能保存任意类型的值T。而且is_end被设定为True。</li>
+<li>这个是[[CMU15-445 Project 0 - C++ Primer#TrieNode]]类的子类，多了一个能保存任意类型的值T。而且is_end被设定为True。</li>
 <li>根据不同的情况调用不同的构造函数。如果原本是一个普通节点就调用参数为（TrieNode&amp;&amp;，T），如果是创建一个全新的节点则调用参数为(char,T).</li>
 </ul>
 <h3 id="trie-class"><a class="markdownIt-Anchor" href="#trie-class"></a> Trie Class</h3>
@@ -267,29 +275,31 @@ the move constructor <code>TrieNode(TrieNode &amp;&amp;other_trie_node)</code>�
         
           <li><a href="/categories/">归档</a></li>
         
+          <li><a href="/tags/">标签</a></li>
+        
       </ul>
     </div>
 
     
     
       <div id="toc-footer" style="display: none">
-        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#cmu15-445%E7%AE%80%E4%BB%8B"><span class="toc-number">1.</span> <span class="toc-text"> CMU15-445简介</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.1.</span> <span class="toc-text"> 前言</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#project0-c-primer"><span class="toc-number">2.</span> <span class="toc-text"> Project0-C++ Primer</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A6%82%E8%BF%B0"><span class="toc-number">2.1.</span> <span class="toc-text"> 概述</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%89%80%E9%9C%80%E5%89%8D%E7%BD%AE%E7%9F%A5%E8%AF%86"><span class="toc-number">2.2.</span> <span class="toc-text"> 所需前置知识</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%96%87%E4%BB%B6%E7%BB%93%E6%9E%84"><span class="toc-number">2.3.</span> <span class="toc-text"> 文件结构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#task1-%E5%AD%97%E5%85%B8%E6%A0%91"><span class="toc-number">2.4.</span> <span class="toc-text"> Task#1 字典树</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#trienode"><span class="toc-number">2.4.1.</span> <span class="toc-text"> TrieNode</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#trienodewithvalue"><span class="toc-number">2.4.2.</span> <span class="toc-text"> TrieNodeWithValue</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#trie-class"><span class="toc-number">2.4.3.</span> <span class="toc-text"> Trie Class</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#insert"><span class="toc-number">2.4.3.1.</span> <span class="toc-text"> Insert</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#remove"><span class="toc-number">2.4.3.2.</span> <span class="toc-text"> Remove</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#getvalue"><span class="toc-number">2.4.3.3.</span> <span class="toc-text"> GetValue</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#task-2-%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AD%97%E5%85%B8%E6%A0%91"><span class="toc-number">2.5.</span> <span class="toc-text"> Task #2 - 多线程字典树</span></a></li></ol></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#cmu15-445"><span class="toc-number">1.</span> <span class="toc-text"> CMU15-445</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.1.</span> <span class="toc-text"> 前言</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#project0-c-primer"><span class="toc-number">2.</span> <span class="toc-text"> Project0-C++ Primer</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A6%82%E8%BF%B0"><span class="toc-number">2.1.</span> <span class="toc-text"> 概述</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%89%80%E9%9C%80%E5%89%8D%E7%BD%AE%E7%9F%A5%E8%AF%86"><span class="toc-number">2.2.</span> <span class="toc-text"> 所需前置知识</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%96%87%E4%BB%B6%E7%BB%93%E6%9E%84"><span class="toc-number">2.3.</span> <span class="toc-text"> 文件结构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#task1-%E5%AD%97%E5%85%B8%E6%A0%91"><span class="toc-number">2.4.</span> <span class="toc-text"> Task#1 字典树</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#trienode"><span class="toc-number">2.4.1.</span> <span class="toc-text"> TrieNode</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#trienodewithvalue"><span class="toc-number">2.4.2.</span> <span class="toc-text"> TrieNodeWithValue</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#trie-class"><span class="toc-number">2.4.3.</span> <span class="toc-text"> Trie Class</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#insert"><span class="toc-number">2.4.3.1.</span> <span class="toc-text"> Insert</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#remove"><span class="toc-number">2.4.3.2.</span> <span class="toc-text"> Remove</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#getvalue"><span class="toc-number">2.4.3.3.</span> <span class="toc-text"> GetValue</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#task-2-%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AD%97%E5%85%B8%E6%A0%91"><span class="toc-number">2.5.</span> <span class="toc-text"> Task #2 - 多线程字典树</span></a></li></ol></li></ol>
       </div>
     
 
     <div id="share-footer" style="display: none">
       <ul>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project0/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project0/&text=CMU15-445 Project#0"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project0/&title=CMU15-445 Project#0"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project0/&is_video=false&description=CMU15-445 Project#0"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="mailto:?subject=CMU15-445 Project#0&body=Check out this article: https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project0/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project0/&title=CMU15-445 Project#0"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project0/&title=CMU15-445 Project#0"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project0/&title=CMU15-445 Project#0"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project0/&title=CMU15-445 Project#0"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project0/&name=CMU15-445 Project#0&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project0/&t=CMU15-445 Project#0"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project%200%20-%20C++%20Primer/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project%200%20-%20C++%20Primer/&text=CMU15-445- Project #0 - C++ Primer"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project%200%20-%20C++%20Primer/&title=CMU15-445- Project #0 - C++ Primer"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project%200%20-%20C++%20Primer/&is_video=false&description=CMU15-445- Project #0 - C++ Primer"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=CMU15-445- Project #0 - C++ Primer&body=Check out this article: https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project%200%20-%20C++%20Primer/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project%200%20-%20C++%20Primer/&title=CMU15-445- Project #0 - C++ Primer"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project%200%20-%20C++%20Primer/&title=CMU15-445- Project #0 - C++ Primer"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project%200%20-%20C++%20Primer/&title=CMU15-445- Project #0 - C++ Primer"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project%200%20-%20C++%20Primer/&title=CMU15-445- Project #0 - C++ Primer"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project%200%20-%20C++%20Primer/&name=CMU15-445- Project #0 - C++ Primer&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project%200%20-%20C++%20Primer/&t=CMU15-445- Project #0 - C++ Primer"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
 </ul>
 
     </div>
@@ -312,7 +322,7 @@ the move constructor <code>TrieNode(TrieNode &amp;&amp;other_trie_node)</code>�
     Copyright &copy;
     
     
-    2016-2023
+    2016-2024
     Weijiale
   </div>
   <div class="footer-right">
@@ -324,6 +334,8 @@ the move constructor <code>TrieNode(TrieNode &amp;&amp;other_trie_node)</code>�
        --><li><a href="/archives/">blog</a></li><!--
      --><!--
        --><li><a href="/categories/">归档</a></li><!--
+     --><!--
+       --><li><a href="/tags/">标签</a></li><!--
      -->
       </ul>
     </nav>

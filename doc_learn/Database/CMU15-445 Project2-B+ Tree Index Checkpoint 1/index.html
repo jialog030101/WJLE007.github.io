@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="一些工具  BusTub B+Tree PrinterCMU官方在线的B+树的生成工具。我主要用来细节实现的时候进行参考。 JavaScript B+ TreeB+树插入和删除的动态演示。 Graphviz Online可视化自己的树。在debug的时候会用到。将生成的dot文件转换成svg图片。 Log In | Gradescope在线评测网站,邀请码：PXWVR5， Project #2">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CMU15-445-Project #2 - B+ Tree Index Checkpoint 1">
+<meta property="og:url" content="https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project2-B+%20Tree%20Index%20Checkpoint%201/index.html">
+<meta property="og:site_name" content="WJL">
+<meta property="og:description" content="一些工具  BusTub B+Tree PrinterCMU官方在线的B+树的生成工具。我主要用来细节实现的时候进行参考。 JavaScript B+ TreeB+树插入和删除的动态演示。 Graphviz Online可视化自己的树。在debug的时候会用到。将生成的dot文件转换成svg图片。 Log In | Gradescope在线评测网站,邀请码：PXWVR5， Project #2">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240202215423.png">
+<meta property="og:image" content="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240202220003.png">
+<meta property="og:image" content="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240202220853.png">
+<meta property="og:image" content="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240202230539.png">
+<meta property="og:image" content="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240202231733.png">
+<meta property="og:image" content="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240202234104.png">
+<meta property="og:image" content="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240202234934.png">
+<meta property="og:image" content="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240202235613.png">
+<meta property="og:image" content="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240202235848.png">
+<meta property="og:image" content="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240203000849.png">
+<meta property="article:published_time" content="2024-01-31T16:00:00.000Z">
+<meta property="article:modified_time" content="2024-02-02T16:21:12.648Z">
+<meta property="article:author" content="Weijiale">
+<meta property="article:tag" content="Project">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240202215423.png">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>CMU15-445-Project #2 - B+ Tree Index Checkpoint 1</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 7.0.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="顶部" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/archives/">blog</a></li><!--
+     --><!--
+       --><li><a href="/categories/">归档</a></li><!--
+     --><!--
+       --><li><a href="/tags/">标签</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        
+        <li><a class="icon" aria-label="下一篇" href="/doc_learn/C++/Effective%20Modern%20C++/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="返回顶部" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="分享文章" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project2-B+%20Tree%20Index%20Checkpoint%201/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project2-B+%20Tree%20Index%20Checkpoint%201/&text=CMU15-445-Project #2 - B+ Tree Index Checkpoint 1"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project2-B+%20Tree%20Index%20Checkpoint%201/&title=CMU15-445-Project #2 - B+ Tree Index Checkpoint 1"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project2-B+%20Tree%20Index%20Checkpoint%201/&is_video=false&description=CMU15-445-Project #2 - B+ Tree Index Checkpoint 1"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=CMU15-445-Project #2 - B+ Tree Index Checkpoint 1&body=Check out this article: https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project2-B+%20Tree%20Index%20Checkpoint%201/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project2-B+%20Tree%20Index%20Checkpoint%201/&title=CMU15-445-Project #2 - B+ Tree Index Checkpoint 1"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project2-B+%20Tree%20Index%20Checkpoint%201/&title=CMU15-445-Project #2 - B+ Tree Index Checkpoint 1"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project2-B+%20Tree%20Index%20Checkpoint%201/&title=CMU15-445-Project #2 - B+ Tree Index Checkpoint 1"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project2-B+%20Tree%20Index%20Checkpoint%201/&title=CMU15-445-Project #2 - B+ Tree Index Checkpoint 1"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project2-B+%20Tree%20Index%20Checkpoint%201/&name=CMU15-445-Project #2 - B+ Tree Index Checkpoint 1&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project2-B+%20Tree%20Index%20Checkpoint%201/&t=CMU15-445-Project #2 - B+ Tree Index Checkpoint 1"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E4%BA%9B%E5%B7%A5%E5%85%B7"><span class="toc-number">1.</span> <span class="toc-text"> 一些工具</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A6%82%E4%BD%95debug%E8%87%AA%E5%B7%B1%E7%9A%84"><span class="toc-number">1.1.</span> <span class="toc-text"> 如何Debug自己的🌳</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A6%82%E8%A7%88"><span class="toc-number">2.</span> <span class="toc-text"> 概览</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#checkpoint-1"><span class="toc-number">3.</span> <span class="toc-text"> Checkpoint-1</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#task-1-btree-pages"><span class="toc-number">3.1.</span> <span class="toc-text"> Task #1 - B+Tree Pages</span></a></li></ol></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        CMU15-445-Project #2 - B+ Tree Index Checkpoint 1
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">Weijiale</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2024-01-31T16:00:00.000Z" class="dt-published" itemprop="datePublished">2024-02-01</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fa-solid fa-archive"></i>
+        <a class="category-link" href="/categories/CMU15-445/">CMU15-445</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/Project/" rel="tag">Project</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <h2 id="一些工具"><a class="markdownIt-Anchor" href="#一些工具"></a> 一些工具</h2>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://15445.courses.cs.cmu.edu/fall2022/bpt-printer/">BusTub B+Tree Printer</a>CMU官方在线的B+树的生成工具。我主要用来细节实现的时候进行参考。</li>
+<li><a target="_blank" rel="noopener" href="https://goneill.co.nz/btree-demo.php">JavaScript B+ Tree</a>B+树插入和删除的动态演示。</li>
+<li><a target="_blank" rel="noopener" href="https://dreampuf.github.io/GraphvizOnline/#digraph%20G%20%7B%0A%0A%20%20subgraph%20cluster_0%20%7B%0A%20%20%20%20style%3Dfilled%3B%0A%20%20%20%20color%3Dlightgrey%3B%0A%20%20%20%20node%20%5Bstyle%3Dfilled%2Ccolor%3Dwhite%5D%3B%0A%20%20%20%20a0%20-%3E%20a1%20-%3E%20a2%20-%3E%20a3%3B%0A%20%20%20%20label%20%3D%20%22process%20%231%22%3B%0A%20%20%7D%0A%0A%20%20subgraph%20cluster_1%20%7B%0A%20%20%20%20node%20%5Bstyle%3Dfilled%5D%3B%0A%20%20%20%20b0%20-%3E%20b1%20-%3E%20b2%20-%3E%20b3%3B%0A%20%20%20%20label%20%3D%20%22process%20%232%22%3B%0A%20%20%20%20color%3Dblue%0A%20%20%7D%0A%20%20start%20-%3E%20a0%3B%0A%20%20start%20-%3E%20b0%3B%0A%20%20a1%20-%3E%20b3%3B%0A%20%20b2%20-%3E%20a3%3B%0A%20%20a3%20-%3E%20a0%3B%0A%20%20a3%20-%3E%20end%3B%0A%20%20b3%20-%3E%20end%3B%0A%0A%20%20start%20%5Bshape%3DMdiamond%5D%3B%0A%20%20end%20%5Bshape%3DMsquare%5D%3B%0A%7D">Graphviz Online</a>可视化自己的树。在debug的时候会用到。将生成的dot文件转换成svg图片。</li>
+<li><a target="_blank" rel="noopener" href="https://www.gradescope.com/courses/425272">Log In | Gradescope</a>在线评测网站,邀请码：PXWVR5，</li>
+<li><a target="_blank" rel="noopener" href="https://15445.courses.cs.cmu.edu/fall2022/project2/">Project #2 - B+Tree | CMU 15-445/645 :: Intro to Database Systems (Fall 2022)</a>最重要的当然还是课程网站了</li>
+<li>课程的视频，还有对应的教材还是推荐看一下的上面有很多实现细节的。非常值得参考。</li>
+</ul>
+<h3 id="如何debug自己的"><a class="markdownIt-Anchor" href="#如何debug自己的"></a> 如何Debug自己的🌳</h3>
+<p>大致上可以分为两种方式</p>
+<ul>
+<li>可视化的用自带的<code>printer</code>将树生成dot文件然后复制到上面的可视化网站。</li>
+<li>由于本项目采用的是cmake构建的，所以可以很方便的在测试文件中打上断点。进行调试。</li>
+</ul>
+<p><mark>可视化调试</mark></p>
+<p>在终端中执行以下命令，构建和执行<code>printer</code>。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">➜  build git:(main) make b_plus_tree_printer -j2 <span class="comment">// 构建printer</span></span><br><span class="line">➜  build git:(main) ./bin/b_plus_tree_printer    <span class="comment">// 执行printer  </span></span><br></pre></td></tr></table></figure>
+<p>执行完之后就会有以下提示：</p>
+<p><img src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240202215423.png" alt="image.png|675" /></p>
+<p>按照这个提示就可以生成dot文件，然后复制到上述的网站进行可视化。（当你看到自己的树呈现出来的时候还是非常有成就感的😁）</p>
+<p><mark>非可视化</mark></p>
+<p><img src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240202220003.png" alt="image.png|675" /></p>
+<p>可以很方便的直接打断点，然后在vscode中的cmake插件中选择调试进行debug。</p>
+<p>官方还提供了一种大打log的方式进行debug，我是不太习惯这种方式所以没有进行很深入的研究。感兴趣的可以自己进行了解😗。</p>
+<p>两种debug的方式是<strong>相辅相成的</strong>，在你过不了<strong>本地样例</strong>的时候好好的用非可视化的方式进行debug，线上样例过不了大部分原因是细节处理上出问题了。用可视化的方式会更加的直观。</p>
+<p><em>请不要公开代码，尊重Andy劳动成果</em></p>
+<hr />
+<h2 id="概览"><a class="markdownIt-Anchor" href="#概览"></a> 概览</h2>
+<p>Project2是实现B+树索引，整个project大致被分为了两个部分</p>
+<ul>
+<li>checkpoint1：实现一个单线程的b+树。</li>
+<li>checkpoint2：实现一个多线程的b+树。</li>
+</ul>
+<p>实验代码中给出的自由发挥的空间非常的大，只给出了<code>Getvalue()</code>,<code>Insert()</code>,<code>Remove()</code>这三个函数的接口，剩下的所有的实现都非常的自由，整个实验实现的过程就像一个黑盒一样，只在乎输入和输出。</p>
+<p><img src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240202220853.png" alt="image.png|600" /></p>
+<p>本实验需要完成b+ index部分，b+树中的页（page）都需要从上一个实验中实现的buffer pool中取。</p>
+<hr />
+<h2 id="checkpoint-1"><a class="markdownIt-Anchor" href="#checkpoint-1"></a> Checkpoint-1</h2>
+<h3 id="task-1-btree-pages"><a class="markdownIt-Anchor" href="#task-1-btree-pages"></a> Task #1 - B+Tree Pages</h3>
+<p>需要完成以下三个page，主要都是一些getter和setter的函数，重在理解各部分的组成。</p>
+<ul>
+<li>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://15445.courses.cs.cmu.edu/fall2022/project2/#b+tree-page"><strong>B+Tree Parent Page</strong></a></li>
+</ul>
+</li>
+<li>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://15445.courses.cs.cmu.edu/fall2022/project2/#b+tree-internal-page"><strong>B+Tree Internal Page</strong></a></li>
+</ul>
+</li>
+<li>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://15445.courses.cs.cmu.edu/fall2022/project2/#b+tree-leaf-page"><strong>B+Tree Leaf Page</strong></a></li>
+</ul>
+</li>
+</ul>
+<p>其中parentPage是internal page和leaf page的父类。我更<strong>倾向于</strong>把这几个page类型理解为 从buffer pool中取回来的Page的<strong>不同解释形式</strong>。Page还是那个Page。主要就是在于你如何去解释它的组成部分。</p>
+<p><mark>Page的组成</mark></p>
+<p>首先回顾一下在P1中就已经接触到的Page。这个Page我理解为数据在disk上的存储单位。相当于一个计量概念。</p>
+<p><img src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240202230539.png" alt="image.png|600" /></p>
+<p><img src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240202231733.png" alt="image.png|600" /></p>
+<p>可以看出这个data_数组的大小为4096B即4KB。这个大小是定义的常量<code>BUSTUB_PAGE_SIZE</code>决定的。</p>
+<p>本项目的所有的数据都是在data_中的。-----我理解的就是对data数组中的数据解释方式不同。</p>
+<p><mark>BPlusTreePage</mark></p>
+<p>这是internal page和leaf page的父类<code>b_plus_tree_page</code>。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">IndexPageType page_type_;   <span class="comment">// leaf or internal. 4 Byte</span></span><br><span class="line"><span class="type">lsn_t</span> lsn_  <span class="comment">// temporarily unused. 4 Byte</span></span><br><span class="line"><span class="type">int</span> size_;  <span class="comment">// tree page data size(not in byte, in count). 4 Byte</span></span><br><span class="line"><span class="type">int</span> max_size_;  <span class="comment">// tree page data max size(not in byte, in count). 4 Byte</span></span><br><span class="line"><span class="type">page_id_t</span> parent_page_id_; <span class="comment">// 4 Byte</span></span><br><span class="line"><span class="type">page_id_t</span> page_id_; <span class="comment">// 4 Byte</span></span><br><span class="line"><span class="comment">// 24 Byte in total</span></span><br></pre></td></tr></table></figure>
+<p>以上部分组成了两种节点的公共部分，共占据24B，还剩下4KB-24B的空间，但是如何使用这剩下的空间呢？<br />
+可以从下面的这个flexible数组找到答案。这个大佬解释的比较的详细，我也是在这看到的。<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/580014163">做个数据库：2022 CMU15-445 Project2 B+Tree Index - 知乎</a></p>
+<p><img src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240202234104.png" alt="image.png|600" /><br />
+众所周知，数据在数组中的排列是连续的，可以通过下标一直向下进行访问，就是通过利用这个特性使用头指针加上偏移量就到准确的找到我们想要的那个数据。</p>
+<p>因此我认为这个array_数组相当于提供了一个使用剩下空间的一个入口，有个这个<strong>门把手</strong>就可以轻松的使用剩下的空间。<br />
+<img src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240202234934.png" alt="image.png|600" /></p>
+<p>大致可以认为数据就是以上的这种形式。每一个小方格都是一个kv对。</p>
+<p><mark>Internalpage</mark></p>
+<p><img src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240202235613.png" alt="image.png|600" /></p>
+<p>上图中红色的就是internalpage。<br />
+我们发现第一个key是空着的，但是value指向了小于value（1）的page。其实internal的value存放的是pageid。<br />
+<img src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240202235848.png" alt="image.png|600" /><br />
+所以internalpage的第一个key要置空处理，其实最后一个置空也可以了，只要能自洽就可以了。</p>
+<pre><code>需要注意的是：这里只存放孩子节点的pageId，找到这个id之后取buffer pool里取
+</code></pre>
+<p><mark>LeafPage</mark></p>
+<p>基本组成和这个internalpage是一样的，多了一个<code>next_page_id</code>.<br />
+<img src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240203000849.png" alt="image.png|600" /><br />
+这个<code>next_page_id</code>用与指向相邻的叶子节点，从上图中绿色叶子节点的指针就能看出来。<br />
+这个的主要作用就是能够进行<strong>遍历</strong>。</p>
+<p><strong>需要说明的一点是</strong>：在叶子节点中key是索引，value是recordId，这种形式也就是<em>二级索引</em><br />
+在数据库中需要拿到这个recodeId之后返回表中进行查询。大大加快查询的速度。</p>
+<p>我觉得二级索引有以下几个<strong>优势</strong>：</p>
+<ul>
+<li>更新的代价很低：因为value都只是一些id所以占得空间很小，处理起来开销自然就小了。</li>
+<li>一张表能够组织多个索引：更换不同的key就能组织起来一个索引。</li>
+</ul>
+<p>Task1的内容很简单，基本就上述这些，主要是弄清楚page的组成，和框架的构建。被折磨了这么多天的我真心建议多用提供的工具画一些树先不要着急动手，想清楚每个部分的组成和作用再下手也不迟，正所谓磨刀不误砍柴工。</p>
+<p><mark>补充一点</mark></p>
+<p><strong>聚簇索引和非聚簇索引（二级索引）</strong><br />
+一言以蔽及：聚簇索引的value就是你想要找的数据或者是数据所在的页本身，非聚簇索引存放的相当于是你想要的数据所在位置的快速指针帮助你快速定位。</p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">首页</a></li>
+        
+          <li><a href="/archives/">blog</a></li>
+        
+          <li><a href="/categories/">归档</a></li>
+        
+          <li><a href="/tags/">标签</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E4%BA%9B%E5%B7%A5%E5%85%B7"><span class="toc-number">1.</span> <span class="toc-text"> 一些工具</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A6%82%E4%BD%95debug%E8%87%AA%E5%B7%B1%E7%9A%84"><span class="toc-number">1.1.</span> <span class="toc-text"> 如何Debug自己的🌳</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A6%82%E8%A7%88"><span class="toc-number">2.</span> <span class="toc-text"> 概览</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#checkpoint-1"><span class="toc-number">3.</span> <span class="toc-text"> Checkpoint-1</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#task-1-btree-pages"><span class="toc-number">3.1.</span> <span class="toc-text"> Task #1 - B+Tree Pages</span></a></li></ol></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project2-B+%20Tree%20Index%20Checkpoint%201/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project2-B+%20Tree%20Index%20Checkpoint%201/&text=CMU15-445-Project #2 - B+ Tree Index Checkpoint 1"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project2-B+%20Tree%20Index%20Checkpoint%201/&title=CMU15-445-Project #2 - B+ Tree Index Checkpoint 1"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project2-B+%20Tree%20Index%20Checkpoint%201/&is_video=false&description=CMU15-445-Project #2 - B+ Tree Index Checkpoint 1"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=CMU15-445-Project #2 - B+ Tree Index Checkpoint 1&body=Check out this article: https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project2-B+%20Tree%20Index%20Checkpoint%201/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project2-B+%20Tree%20Index%20Checkpoint%201/&title=CMU15-445-Project #2 - B+ Tree Index Checkpoint 1"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project2-B+%20Tree%20Index%20Checkpoint%201/&title=CMU15-445-Project #2 - B+ Tree Index Checkpoint 1"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project2-B+%20Tree%20Index%20Checkpoint%201/&title=CMU15-445-Project #2 - B+ Tree Index Checkpoint 1"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project2-B+%20Tree%20Index%20Checkpoint%201/&title=CMU15-445-Project #2 - B+ Tree Index Checkpoint 1"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project2-B+%20Tree%20Index%20Checkpoint%201/&name=CMU15-445-Project #2 - B+ Tree Index Checkpoint 1&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project2-B+%20Tree%20Index%20Checkpoint%201/&t=CMU15-445-Project #2 - B+ Tree Index Checkpoint 1"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2016-2024
+    Weijiale
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/archives/">blog</a></li><!--
+     --><!--
+       --><li><a href="/categories/">归档</a></li><!--
+     --><!--
+       --><li><a href="/tags/">标签</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板！\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功！");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>

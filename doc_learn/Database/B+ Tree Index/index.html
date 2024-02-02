@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="TABLE INDEX  A table index is a replica of a subset of a table’s attributes that are organized and&#x2F;or sorted for efficient access using those attributes.The DBMS ensures that the contents of the tabl">
+<meta property="og:type" content="article">
+<meta property="og:title" content="B+ Tree Index">
+<meta property="og:url" content="https://weuijiale.gitee.io/doc_learn/Database/B+%20Tree%20Index/index.html">
+<meta property="og:site_name" content="WJL">
+<meta property="og:description" content="TABLE INDEX  A table index is a replica of a subset of a table’s attributes that are organized and&#x2F;or sorted for efficient access using those attributes.The DBMS ensures that the contents of the tabl">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231208203437.png">
+<meta property="og:image" content="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231208214614.png">
+<meta property="og:image" content="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231208215020.png">
+<meta property="og:image" content="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231208220751.png">
+<meta property="og:image" content="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231208223923.png">
+<meta property="og:image" content="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231228152047.png">
+<meta property="article:published_time" content="2023-12-06T16:00:00.000Z">
+<meta property="article:modified_time" content="2023-12-30T11:06:34.183Z">
+<meta property="article:author" content="Weijiale">
+<meta property="article:tag" content="Note">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231208203437.png">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>B+ Tree Index</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 7.0.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="顶部" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/archives/">blog</a></li><!--
+     --><!--
+       --><li><a href="/categories/">归档</a></li><!--
+     --><!--
+       --><li><a href="/tags/">标签</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="上一篇" href="/doc_learn/Database/CMU15-445%20Project1%20Buffer%20Pool%20Manager/"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="下一篇" href="/doc_learn/Database/CMU15-445%20Project%200%20-%20C++%20Primer/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="返回顶部" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="分享文章" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://weuijiale.gitee.io/doc_learn/Database/B+%20Tree%20Index/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://weuijiale.gitee.io/doc_learn/Database/B+%20Tree%20Index/&text=B+ Tree Index"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://weuijiale.gitee.io/doc_learn/Database/B+%20Tree%20Index/&title=B+ Tree Index"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://weuijiale.gitee.io/doc_learn/Database/B+%20Tree%20Index/&is_video=false&description=B+ Tree Index"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=B+ Tree Index&body=Check out this article: https://weuijiale.gitee.io/doc_learn/Database/B+%20Tree%20Index/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://weuijiale.gitee.io/doc_learn/Database/B+%20Tree%20Index/&title=B+ Tree Index"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://weuijiale.gitee.io/doc_learn/Database/B+%20Tree%20Index/&title=B+ Tree Index"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://weuijiale.gitee.io/doc_learn/Database/B+%20Tree%20Index/&title=B+ Tree Index"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://weuijiale.gitee.io/doc_learn/Database/B+%20Tree%20Index/&title=B+ Tree Index"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://weuijiale.gitee.io/doc_learn/Database/B+%20Tree%20Index/&name=B+ Tree Index&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://weuijiale.gitee.io/doc_learn/Database/B+%20Tree%20Index/&t=B+ Tree Index"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#table-index"><span class="toc-number">1.</span> <span class="toc-text"> TABLE INDEX</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#b-tree-family"><span class="toc-number">2.</span> <span class="toc-text"> B-TREE FAMILY</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#btree"><span class="toc-number">2.1.</span> <span class="toc-text"> B+TREE</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#btree-properties"><span class="toc-number">2.2.</span> <span class="toc-text"> B+TREE PROPERTIES</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#btree-example"><span class="toc-number">2.3.</span> <span class="toc-text"> B+TREE EXAMPLE</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#bs-crud"><span class="toc-number">2.4.</span> <span class="toc-text"> B+‘s CRUD</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#b%E6%A0%91%E7%9A%84%E4%B8%80%E4%BA%9B%E5%BA%94%E7%94%A8%E6%89%A9%E5%B1%95"><span class="toc-number">2.5.</span> <span class="toc-text"> B+树的一些应用扩展</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BA%8C%E7%BA%A7%E7%B4%A2%E5%BC%95-%E8%AE%B0%E5%BD%95%E8%BF%81%E7%A7%BB"><span class="toc-number">2.5.1.</span> <span class="toc-text"> 二级索引 &amp;&amp; 记录迁移</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AD%97%E7%AC%A6%E4%B8%B2%E7%B4%A2%E5%BC%95"><span class="toc-number">2.5.2.</span> <span class="toc-text"> 字符串索引</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%89%B9%E9%87%8F%E5%8A%A0%E8%BD%BDb%E6%A0%91%E7%B4%A2%E5%BC%95"><span class="toc-number">2.5.3.</span> <span class="toc-text"> 批量加载B+树索引</span></a></li></ol></li></ol></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        B+ Tree Index
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">Weijiale</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2023-12-06T16:00:00.000Z" class="dt-published" itemprop="datePublished">2023-12-07</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fa-solid fa-archive"></i>
+        <a class="category-link" href="/categories/CMU15-445/">CMU15-445</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/Note/" rel="tag">Note</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <h2 id="table-index"><a class="markdownIt-Anchor" href="#table-index"></a> TABLE INDEX</h2>
+<blockquote>
+<p>A table index is a replica of a subset of a table’s attributes that are organized and/or sorted for efficient access using those attributes.The DBMS ensures that the contents of the table and the index are logically synchronized.</p>
+</blockquote>
+<p><strong>索引</strong>让数据在数据库中的查询更加的高效，DBMS负责使索引和实际内容<strong>同步</strong>。</p>
+<p><img src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231208203437.png" alt="image.png|575" /></p>
+<p>DBMS的工作是选择最优的索引去执行查询，这就带来一个需要权衡的问题——索引越多查询越高效但是相对的<strong>维护成本</strong>（Maintenance Overhead）和<strong>存储成本</strong>（Storage Overhead） 就会相应的提高。</p>
+<h2 id="b-tree-family"><a class="markdownIt-Anchor" href="#b-tree-family"></a> B-TREE FAMILY</h2>
+<p>B-树家族。</p>
+<p>重点了解B+树。</p>
+<p><img src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231208214614.png" alt="image.png|600" /></p>
+<p>（B树虽然是一个平衡树（balance），但B树的B不是balance的缩写，到底代表什么还存疑）</p>
+<h3 id="btree"><a class="markdownIt-Anchor" href="#btree"></a> B+TREE</h3>
+<p><img src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231208215020.png" alt="image.png|600" /></p>
+<p>B+树是一个自平衡树的数据结构，<strong>顺序的</strong>存储数据，并且将查询，顺序访问，插入和删除的时间复杂度基本控制在<strong>O(log n)</strong>。</p>
+<ul>
+<li>是二叉搜索树的推广，因为它可以有超过两个的孩子节点。</li>
+<li>它针对系统和存储之间的大块数据读写进行了特别的优化。</li>
+</ul>
+<h3 id="btree-properties"><a class="markdownIt-Anchor" href="#btree-properties"></a> B+TREE PROPERTIES</h3>
+<p><img src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231208220751.png" alt="image.png|550" /></p>
+<p>B+树是一个多叉搜索树，有以下特性：</p>
+<ul>
+<li>他完美平衡</li>
+<li>除了根节点都至少半满</li>
+<li>k个值会把一个节点分为k+1部分。</li>
+</ul>
+<h3 id="btree-example"><a class="markdownIt-Anchor" href="#btree-example"></a> B+TREE EXAMPLE</h3>
+<p><img src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231208223923.png" alt="image.png|675" /></p>
+<p>上图是一个小例子，能够发现B+树底层是能够双向访问的，这在<strong>多线程</strong>的时候有可能会造成<strong>死锁</strong>问题。这在后面讲解B+树多线程的章节也会对原因进行讲解。</p>
+<h3 id="bs-crud"><a class="markdownIt-Anchor" href="#bs-crud"></a> B+‘s CRUD</h3>
+<p>可以说B+树的增删改查的特性和它的组织形式是密不可分的。每次做改动之后都要符合他的结构特性，所以也没什么好说的。</p>
+<h3 id="b树的一些应用扩展"><a class="markdownIt-Anchor" href="#b树的一些应用扩展"></a> B+树的一些应用扩展</h3>
+<h4 id="二级索引-记录迁移"><a class="markdownIt-Anchor" href="#二级索引-记录迁移"></a> 二级索引 &amp;&amp; 记录迁移</h4>
+<p>如果二级索引的叶子节点直接指向的是对应数据的指针，那么在发生增删的时候结构发生变化二级索引就需要进行重构，这不仅是一项开销非常大的方法，而且还难以保证数据的同步。</p>
+<p><code>解决办法</code>:<br />
+辅助索引的叶子节点存主键的值列表，这种关系的固定的不会改变的，一两个数据的增删不会造成整个树的重构。</p>
+<p>这就避免了由于重构导致变化而二级索引需要跟着重构的带来的开销。现需要在辅助索引上查到需要的主键列表然后再去主键索引上去查找对应的数据。</p>
+<p>这样虽然降低了查询时候的一点效率，但是跟频繁的重构比起来还是难以感知的😃。</p>
+<h4 id="字符串索引"><a class="markdownIt-Anchor" href="#字符串索引"></a> 字符串索引</h4>
+<p>尽力一个B+树的字符串索引有<code>两个问题</code>：</p>
+<ul>
+<li>字符串一般都是变长的，这很难解决</li>
+<li>因为字符串可能会很长，所以扇的<strong>出度</strong>会降低，相应的<strong>树高会变高</strong>。</li>
+</ul>
+<p>对应的解决办法有以下两点：</p>
+<ol>
+<li>灵活的出度。每个扇的出度并不是简单固定的，根据这个扇的字符串所用的空间进行灵活的调整。</li>
+<li>前缀压缩。只用存储到不一样的第一位，能够分辨就够了。</li>
+</ol>
+<p>例如，如果我们有一个名称索引，那么非叶节点上的键值可以是名称的前缀；如果它分离的两个子树中最接近的值分别是“Silas”和“Silver”，那么在非叶节点存储“Silb”而不是完整的“Silberschatz”就足够了。这就是<strong>前缀压缩</strong></p>
+<h4 id="批量加载b树索引"><a class="markdownIt-Anchor" href="#批量加载b树索引"></a> 批量加载B+树索引</h4>
+<p>前面我们知道B+树的插入操作开销非常的大，一定程度上这个插入的开销和树的高度是成正比的。所以树的高度一般最多被控制在5，对于大型项目也是这样的。</p>
+<p>正因为如此，加入现在有100万条数据需要插入，每条数据光是I/O都需要很长的时间，更不用说插入之后B+树重构的时间。</p>
+<p>现在有一种优化的方法，将需要插入的大量数据进行排序后按照B+树的方法构建索引后将这颗构建的树merge到原来的B+树中，这样做有以下几个好处：</p>
+<ul>
+<li>在多线程方面具有优势</li>
+<li>在构建的时候会产生更少的I/O.</li>
+<li>叶子节点会按顺序进行排序。</li>
+</ul>
+<p>下面是一个用chatgpt写出来的一个b+树的小demo，用来窥探一下具体实现是很有帮助的。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;vector&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;algorithm&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">const</span> <span class="type">int</span> ORDER = <span class="number">3</span>;  <span class="comment">// B+树的阶数</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// B+树节点</span></span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> Key, <span class="keyword">typename</span> Value&gt;</span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">BPlusTreeNode</span> &#123;</span><br><span class="line">    <span class="type">bool</span> isLeaf;</span><br><span class="line">    std::vector&lt;Key&gt; keys;</span><br><span class="line">    std::vector&lt;Value&gt; values;</span><br><span class="line">    BPlusTreeNode* parent;</span><br><span class="line">    BPlusTreeNode* next;  <span class="comment">// 用于叶子节点的连接</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// B+树</span></span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> Key, <span class="keyword">typename</span> Value&gt;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">BPlusTree</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">BPlusTree</span>() : <span class="built_in">root</span>(<span class="literal">nullptr</span>) &#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">insert</span><span class="params">(<span class="type">const</span> Key&amp; key, <span class="type">const</span> Value&amp; value)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (root == <span class="literal">nullptr</span>) &#123;</span><br><span class="line">            root = <span class="keyword">new</span> <span class="built_in">BPlusTreeNode</span>&lt;Key, Value&gt;();</span><br><span class="line">            root-&gt;isLeaf = <span class="literal">true</span>;</span><br><span class="line">            root-&gt;keys.<span class="built_in">push_back</span>(key);</span><br><span class="line">            root-&gt;values.<span class="built_in">push_back</span>(value);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="built_in">insertHelper</span>(root, key, value);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function">Value <span class="title">search</span><span class="params">(<span class="type">const</span> Key&amp; key)</span> <span class="type">const</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">searchHelper</span>(root, key);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">print</span><span class="params">()</span> <span class="type">const</span> </span>&#123;</span><br><span class="line">        <span class="built_in">printHelper</span>(root, <span class="number">0</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    BPlusTreeNode&lt;Key, Value&gt;* root;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">insertHelper</span><span class="params">(BPlusTreeNode&lt;Key, Value&gt;* node, <span class="type">const</span> Key&amp; key, <span class="type">const</span> Value&amp; value)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (node-&gt;isLeaf) &#123;</span><br><span class="line">            <span class="built_in">insertIntoLeaf</span>(node, key, value);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="type">int</span> i = <span class="number">0</span>;</span><br><span class="line">            <span class="keyword">while</span> (i &lt; node-&gt;keys.<span class="built_in">size</span>() &amp;&amp; key &gt; node-&gt;keys[i]) &#123;</span><br><span class="line">                i++;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="built_in">insertHelper</span>(node-&gt;children[i], key, value);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">insertIntoLeaf</span><span class="params">(BPlusTreeNode&lt;Key, Value&gt;* node, <span class="type">const</span> Key&amp; key, <span class="type">const</span> Value&amp; value)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">auto</span> it = std::<span class="built_in">lower_bound</span>(node-&gt;keys.<span class="built_in">begin</span>(), node-&gt;keys.<span class="built_in">end</span>(), key);</span><br><span class="line">        <span class="type">int</span> index = it - node-&gt;keys.<span class="built_in">begin</span>();</span><br><span class="line">        node-&gt;keys.<span class="built_in">insert</span>(it, key);</span><br><span class="line">        node-&gt;values.<span class="built_in">insert</span>(node-&gt;values.<span class="built_in">begin</span>() + index, value);</span><br><span class="line">        <span class="keyword">if</span> (node-&gt;keys.<span class="built_in">size</span>() &gt; ORDER - <span class="number">1</span>) &#123;</span><br><span class="line">            <span class="built_in">splitLeaf</span>(node);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">splitLeaf</span><span class="params">(BPlusTreeNode&lt;Key, Value&gt;* node)</span> </span>&#123;</span><br><span class="line">        BPlusTreeNode&lt;Key, Value&gt;* newLeaf = <span class="keyword">new</span> <span class="built_in">BPlusTreeNode</span>&lt;Key, Value&gt;();</span><br><span class="line">        newLeaf-&gt;isLeaf = <span class="literal">true</span>;</span><br><span class="line">        <span class="type">int</span> splitIndex = (ORDER - <span class="number">1</span>) / <span class="number">2</span>;</span><br><span class="line">        newLeaf-&gt;keys.<span class="built_in">assign</span>(node-&gt;keys.<span class="built_in">begin</span>() + splitIndex, node-&gt;keys.<span class="built_in">end</span>());</span><br><span class="line">        newLeaf-&gt;values.<span class="built_in">assign</span>(node-&gt;values.<span class="built_in">begin</span>() + splitIndex, node-&gt;values.<span class="built_in">end</span>());</span><br><span class="line">        node-&gt;keys.<span class="built_in">resize</span>(splitIndex);</span><br><span class="line">        node-&gt;values.<span class="built_in">resize</span>(splitIndex);</span><br><span class="line">        newLeaf-&gt;next = node-&gt;next;</span><br><span class="line">        node-&gt;next = newLeaf;</span><br><span class="line">        <span class="built_in">insertIntoParent</span>(node, newLeaf-&gt;keys[<span class="number">0</span>], newLeaf);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">insertIntoParent</span><span class="params">(BPlusTreeNode&lt;Key, Value&gt;* left, <span class="type">const</span> Key&amp; key, BPlusTreeNode&lt;Key, Value&gt;* right)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (root == left) &#123;</span><br><span class="line">            BPlusTreeNode&lt;Key, Value&gt;* newRoot = <span class="keyword">new</span> <span class="built_in">BPlusTreeNode</span>&lt;Key, Value&gt;();</span><br><span class="line">            newRoot-&gt;keys.<span class="built_in">push_back</span>(key);</span><br><span class="line">            newRoot-&gt;children.<span class="built_in">push_back</span>(left);</span><br><span class="line">            newRoot-&gt;children.<span class="built_in">push_back</span>(right);</span><br><span class="line">            left-&gt;parent = newRoot;</span><br><span class="line">            right-&gt;parent = newRoot;</span><br><span class="line">            root = newRoot;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            BPlusTreeNode&lt;Key, Value&gt;* parent = left-&gt;parent;</span><br><span class="line">            <span class="keyword">auto</span> it = std::<span class="built_in">lower_bound</span>(parent-&gt;keys.<span class="built_in">begin</span>(), parent-&gt;keys.<span class="built_in">end</span>(), key);</span><br><span class="line">            <span class="type">int</span> index = it - parent-&gt;keys.<span class="built_in">begin</span>();</span><br><span class="line">            parent-&gt;keys.<span class="built_in">insert</span>(it, key);</span><br><span class="line">            parent-&gt;children.<span class="built_in">insert</span>(parent-&gt;children.<span class="built_in">begin</span>() + index + <span class="number">1</span>, right);</span><br><span class="line">            right-&gt;parent = parent;</span><br><span class="line">            <span class="keyword">if</span> (parent-&gt;keys.<span class="built_in">size</span>() &gt; ORDER - <span class="number">1</span>) &#123;</span><br><span class="line">                <span class="built_in">splitInternal</span>(parent);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">splitInternal</span><span class="params">(BPlusTreeNode&lt;Key, Value&gt;* node)</span> </span>&#123;</span><br><span class="line">        BPlusTreeNode&lt;Key, Value&gt;* newInternal = <span class="keyword">new</span> <span class="built_in">BPlusTreeNode</span>&lt;Key, Value&gt;();</span><br><span class="line">        <span class="type">int</span> splitIndex = (ORDER - <span class="number">1</span>) / <span class="number">2</span>;</span><br><span class="line">        Key upKey = node-&gt;keys[splitIndex];</span><br><span class="line">        newInternal-&gt;keys.<span class="built_in">assign</span>(node-&gt;keys.<span class="built_in">begin</span>() + splitIndex + <span class="number">1</span>, node-&gt;keys.<span class="built_in">end</span>());</span><br><span class="line">        newInternal-&gt;children.<span class="built_in">assign</span>(node-&gt;children.<span class="built_in">begin</span>() + splitIndex + <span class="number">1</span>, node-&gt;children.<span class="built_in">end</span>());</span><br><span class="line">        node-&gt;keys.<span class="built_in">resize</span>(splitIndex);</span><br><span class="line">        node-&gt;children.<span class="built_in">resize</span>(splitIndex + <span class="number">1</span>);</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">auto</span> child : newInternal-&gt;children) &#123;</span><br><span class="line">            child-&gt;parent = newInternal;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="built_in">insertIntoParent</span>(node, upKey, newInternal);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function">Value <span class="title">searchHelper</span><span class="params">(BPlusTreeNode&lt;Key, Value&gt;* node, <span class="type">const</span> Key&amp; key)</span> <span class="type">const</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (node == <span class="literal">nullptr</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="built_in">Value</span>();  <span class="comment">// 返回默认值表示未找到</span></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="type">int</span> i = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">while</span> (i &lt; node-&gt;keys.<span class="built_in">size</span>() &amp;&amp; key &gt; node-&gt;keys[i]) &#123;</span><br><span class="line">            i++;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (node-&gt;isLeaf) &#123;</span><br><span class="line">            <span class="keyword">if</span> (i &lt; node-&gt;keys.<span class="built_in">size</span>() &amp;&amp; key == node-&gt;keys[i]) &#123;</span><br><span class="line">                <span class="keyword">return</span> node-&gt;values[i];</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="built_in">Value</span>();  <span class="comment">// 返回默认值表示未找到</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="built_in">searchHelper</span>(node-&gt;children[i], key);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">printHelper</span><span class="params">(BPlusTreeNode&lt;Key, Value&gt;* node, <span class="type">int</span> level)</span> <span class="type">const</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (node != <span class="literal">nullptr</span>) &#123;</span><br><span class="line">            std::cout &lt;&lt; <span class="string">&quot;Level &quot;</span> &lt;&lt; level &lt;&lt; <span class="string">&quot;: &quot;</span>;</span><br><span class="line">            <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; node-&gt;keys.<span class="built_in">size</span>(); ++i) &#123;</span><br><span class="line">                std::cout &lt;&lt; node-&gt;keys[i] &lt;&lt; <span class="string">&quot; &quot;</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            std::cout &lt;&lt; std::endl;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (!node-&gt;isLeaf) &#123;</span><br><span class="line">                <span class="keyword">for</span> (<span class="keyword">auto</span> child : node-&gt;children) &#123;</span><br><span class="line">                    <span class="built_in">printHelper</span>(child, level + <span class="number">1</span>);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    BPlusTree&lt;<span class="type">int</span>, std::string&gt; bPlusTree;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 插入示例</span></span><br><span class="line">    bPlusTree.<span class="built_in">insert</span>(<span class="number">10</span>, <span class="string">&quot;Value10&quot;</span>);</span><br><span class="line">    bPlusTree.<span class="built_in">insert</span>(<span class="number">20</span>, <span class="string">&quot;Value20&quot;</span>);</span><br><span class="line">    bPlusTree.<span class="built_in">insert</span>(<span class="number">5</span>, <span class="string">&quot;Value5&quot;</span>);</span><br><span class="line">    bPlusTree.<span class="built_in">insert</span>(<span class="number">6</span>, <span class="string">&quot;Value6&quot;</span>);</span><br><span class="line">    bPlusTree.<span class="built_in">insert</span>(<span class="number">12</span>, <span class="string">&quot;Value12&quot;</span>);</span><br><span class="line">    bPlusTree.<span class="built_in">insert</span>(<span class="number">30</span>, <span class="string">&quot;Value30&quot;</span>);</span><br><span class="line">    bPlusTree.<span class="built_in">insert</span>(<span class="number">7</span>, <span class="string">&quot;Value7&quot;</span>);</span><br><span class="line">    bPlusTree.<span class="built_in">insert</span>(<span class="number">17</span>, <span class="string">&quot;Value17&quot;</span>);</span><br><span class="line">    bPlusTree.<span class="built_in">insert</span>(<span class="number">25</span>, <span class="string">&quot;Value25&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 打印B+树</span></span><br><span class="line">    bPlusTree.<span class="built_in">print</span>();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 搜索示例</span></span><br><span class="line">    <span class="type">int</span> keyToSearch = <span class="number">12</span>;</span><br><span class="line">    std::</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p><a href="mailto:vsimonis2@liberty.edu">vsimonis2@liberty.edu</a></p>
+<p><img src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231228152047.png" alt="image.png|775" /></p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">首页</a></li>
+        
+          <li><a href="/archives/">blog</a></li>
+        
+          <li><a href="/categories/">归档</a></li>
+        
+          <li><a href="/tags/">标签</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#table-index"><span class="toc-number">1.</span> <span class="toc-text"> TABLE INDEX</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#b-tree-family"><span class="toc-number">2.</span> <span class="toc-text"> B-TREE FAMILY</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#btree"><span class="toc-number">2.1.</span> <span class="toc-text"> B+TREE</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#btree-properties"><span class="toc-number">2.2.</span> <span class="toc-text"> B+TREE PROPERTIES</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#btree-example"><span class="toc-number">2.3.</span> <span class="toc-text"> B+TREE EXAMPLE</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#bs-crud"><span class="toc-number">2.4.</span> <span class="toc-text"> B+‘s CRUD</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#b%E6%A0%91%E7%9A%84%E4%B8%80%E4%BA%9B%E5%BA%94%E7%94%A8%E6%89%A9%E5%B1%95"><span class="toc-number">2.5.</span> <span class="toc-text"> B+树的一些应用扩展</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BA%8C%E7%BA%A7%E7%B4%A2%E5%BC%95-%E8%AE%B0%E5%BD%95%E8%BF%81%E7%A7%BB"><span class="toc-number">2.5.1.</span> <span class="toc-text"> 二级索引 &amp;&amp; 记录迁移</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AD%97%E7%AC%A6%E4%B8%B2%E7%B4%A2%E5%BC%95"><span class="toc-number">2.5.2.</span> <span class="toc-text"> 字符串索引</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%89%B9%E9%87%8F%E5%8A%A0%E8%BD%BDb%E6%A0%91%E7%B4%A2%E5%BC%95"><span class="toc-number">2.5.3.</span> <span class="toc-text"> 批量加载B+树索引</span></a></li></ol></li></ol></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://weuijiale.gitee.io/doc_learn/Database/B+%20Tree%20Index/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://weuijiale.gitee.io/doc_learn/Database/B+%20Tree%20Index/&text=B+ Tree Index"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://weuijiale.gitee.io/doc_learn/Database/B+%20Tree%20Index/&title=B+ Tree Index"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://weuijiale.gitee.io/doc_learn/Database/B+%20Tree%20Index/&is_video=false&description=B+ Tree Index"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=B+ Tree Index&body=Check out this article: https://weuijiale.gitee.io/doc_learn/Database/B+%20Tree%20Index/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://weuijiale.gitee.io/doc_learn/Database/B+%20Tree%20Index/&title=B+ Tree Index"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://weuijiale.gitee.io/doc_learn/Database/B+%20Tree%20Index/&title=B+ Tree Index"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://weuijiale.gitee.io/doc_learn/Database/B+%20Tree%20Index/&title=B+ Tree Index"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://weuijiale.gitee.io/doc_learn/Database/B+%20Tree%20Index/&title=B+ Tree Index"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://weuijiale.gitee.io/doc_learn/Database/B+%20Tree%20Index/&name=B+ Tree Index&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://weuijiale.gitee.io/doc_learn/Database/B+%20Tree%20Index/&t=B+ Tree Index"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2016-2024
+    Weijiale
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/archives/">blog</a></li><!--
+     --><!--
+       --><li><a href="/categories/">归档</a></li><!--
+     --><!--
+       --><li><a href="/tags/">标签</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板！\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功！");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>
