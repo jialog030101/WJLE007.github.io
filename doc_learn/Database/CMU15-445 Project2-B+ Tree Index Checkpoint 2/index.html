@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="CHECKPOINT-2  Task #3 - Index Iterator 简单来说就是实现一个迭代器 将所有的叶子节点视为一个链表，要求实现给出的函数。在当前的迭代器中保存所在的pageId和当前的起始位置，然后通过leafpage中的next_page_id来获取下一个叶子节点。 总体上来说难度不是很大，没有什么好说的，就是还是注意要加锁，其中的某一个函数在实现的时候需要考虑跨页的情况，这">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CMU15-445-Project #2 - B+ Tree Index Checkpoint 2">
+<meta property="og:url" content="https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project2-B+%20Tree%20Index%20Checkpoint%202/index.html">
+<meta property="og:site_name" content="WJL">
+<meta property="og:description" content="CHECKPOINT-2  Task #3 - Index Iterator 简单来说就是实现一个迭代器 将所有的叶子节点视为一个链表，要求实现给出的函数。在当前的迭代器中保存所在的pageId和当前的起始位置，然后通过leafpage中的next_page_id来获取下一个叶子节点。 总体上来说难度不是很大，没有什么好说的，就是还是注意要加锁，其中的某一个函数在实现的时候需要考虑跨页的情况，这">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240207192232.png">
+<meta property="og:image" content="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240207192622.png">
+<meta property="og:image" content="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240207193015.png">
+<meta property="og:image" content="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240207222907.png">
+<meta property="og:image" content="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240207223113.png">
+<meta property="og:image" content="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240207225033.png">
+<meta property="og:image" content="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240207225237.png">
+<meta property="og:image" content="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240207225451.png">
+<meta property="og:image" content="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240207232212.png">
+<meta property="og:image" content="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240207232250.png">
+<meta property="article:published_time" content="2024-02-03T16:00:00.000Z">
+<meta property="article:modified_time" content="2024-02-08T09:37:52.482Z">
+<meta property="article:author" content="Weijiale">
+<meta property="article:tag" content="Project">
+<meta property="article:tag" content="CMU15-445">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240207192232.png">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>CMU15-445-Project #2 - B+ Tree Index Checkpoint 2</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 7.0.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="顶部" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/archives/">blog</a></li><!--
+     --><!--
+       --><li><a href="/categories/">归档</a></li><!--
+     --><!--
+       --><li><a href="/tags/">标签</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        
+        <li><a class="icon" aria-label="下一篇" href="/doc_learn/Database/CMU15-445%20Project2-B+%20Tree%20Index%20Checkpoint%201/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="返回顶部" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="分享文章" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project2-B+%20Tree%20Index%20Checkpoint%202/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project2-B+%20Tree%20Index%20Checkpoint%202/&text=CMU15-445-Project #2 - B+ Tree Index Checkpoint 2"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project2-B+%20Tree%20Index%20Checkpoint%202/&title=CMU15-445-Project #2 - B+ Tree Index Checkpoint 2"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project2-B+%20Tree%20Index%20Checkpoint%202/&is_video=false&description=CMU15-445-Project #2 - B+ Tree Index Checkpoint 2"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=CMU15-445-Project #2 - B+ Tree Index Checkpoint 2&body=Check out this article: https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project2-B+%20Tree%20Index%20Checkpoint%202/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project2-B+%20Tree%20Index%20Checkpoint%202/&title=CMU15-445-Project #2 - B+ Tree Index Checkpoint 2"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project2-B+%20Tree%20Index%20Checkpoint%202/&title=CMU15-445-Project #2 - B+ Tree Index Checkpoint 2"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project2-B+%20Tree%20Index%20Checkpoint%202/&title=CMU15-445-Project #2 - B+ Tree Index Checkpoint 2"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project2-B+%20Tree%20Index%20Checkpoint%202/&title=CMU15-445-Project #2 - B+ Tree Index Checkpoint 2"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project2-B+%20Tree%20Index%20Checkpoint%202/&name=CMU15-445-Project #2 - B+ Tree Index Checkpoint 2&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project2-B+%20Tree%20Index%20Checkpoint%202/&t=CMU15-445-Project #2 - B+ Tree Index Checkpoint 2"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#checkpoint-2"><span class="toc-number">1.</span> <span class="toc-text"> CHECKPOINT-2</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#task-3-index-iterator"><span class="toc-number">1.1.</span> <span class="toc-text"> Task #3 - Index Iterator</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#task-4-concurrent-index"><span class="toc-number">1.2.</span> <span class="toc-text"> Task #4 - Concurrent Index</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%85%B7%E4%BD%93%E5%AE%9E%E7%8E%B0"><span class="toc-number">1.2.1.</span> <span class="toc-text"> 具体实现</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#summary"><span class="toc-number">1.3.</span> <span class="toc-text"> Summary</span></a></li></ol></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        CMU15-445-Project #2 - B+ Tree Index Checkpoint 2
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">Weijiale</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2024-02-03T16:00:00.000Z" class="dt-published" itemprop="datePublished">2024-02-04</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fa-solid fa-archive"></i>
+        <a class="category-link" href="/categories/CMU15-445/">CMU15-445</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/CMU15-445/" rel="tag">CMU15-445</a>, <a class="p-category" href="/tags/Project/" rel="tag">Project</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <h2 id="checkpoint-2"><a class="markdownIt-Anchor" href="#checkpoint-2"></a> CHECKPOINT-2</h2>
+<h3 id="task-3-index-iterator"><a class="markdownIt-Anchor" href="#task-3-index-iterator"></a> Task #3 - Index Iterator</h3>
+<p>简单来说就是实现一个迭代器</p>
+<p>将所有的叶子节点视为一个链表，要求实现给出的函数。在当前的迭代器中保存所在的pageId和当前的起始位置，然后通过leafpage中的next_page_id来获取下一个叶子节点。<br />
+总体上来说难度不是很大，没有什么好说的，就是还是注意要加锁，其中的某一个函数在实现的时候需要考虑跨页的情况，这时候就要考虑加锁和去锁的情况了。</p>
+<hr />
+<h3 id="task-4-concurrent-index"><a class="markdownIt-Anchor" href="#task-4-concurrent-index"></a> Task #4 - Concurrent Index</h3>
+<p>这就是要完实现一个多线程的b+树，加锁的实现方式和原理在[[B+ Tree Index#b+ tree latches]]中有比较详细的介绍，这里我简单的解释一下。</p>
+<p>这是整个项目的重点也是难点，考察对b+树整个结构和每个操作涉及到的点，当然可以像之前的项目一样一把大锁报平安，但是对于b+树来说这样会使的性能约等于单线程，每次都需要从根节点进入整个树，但是一把大锁就意味着每次整个树中都只能存在一个线程在操作。。。</p>
+<p>所以我们需要<strong>更细粒度</strong>的锁，于是螃蟹锁🦀应运而生。 ：）rust的吉祥物也是个螃蟹吧。。</p>
+<p><mark>螃蟹锁</mark></p>
+<p>因为其加锁和解锁的过程以及逻辑特别像螃蟹的行走的方式，因此而得名<strong>螃蟹锁</strong>。</p>
+<p><code>读模式</code></p>
+<p>在<strong>读模式</strong>的时候最为形象，当获取到父节点的读锁之后，尝试着获取目标子节点的读锁，当获取到锁之后立马释放父节点的锁<br />
+<img src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240207192232.png" alt="image.png|600" /><br />
+在上图中，一个线程获取A页的锁之后会尝试着获取目标子节点B的锁，当获取B的锁之后就会释放A的锁。如此循环往复，就像螃蟹在走。</p>
+<p><code>写模式</code></p>
+<p>写模式的时候只是锁释放的条件不一样，读模式的时候当获取的下一个页的锁的时候就可以立马释放当前页的锁，但是写模式涉及到<strong>插入</strong>和<strong>删除</strong>，可能整个路径上的页都会受影响。<br />
+<img src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240207192622.png" alt="image.png|600" /><br />
+如上图所示，当获取到B页的锁的时候不能释放A页的锁，因为B有可能会发生合并，于是继续向下获取锁，获取到C页的锁之后发现C页是处于<strong>安全状态</strong>的。所以可以释放C页之上的所有锁。⚠️注意：并不包括C本身。</p>
+<p><code>安全状态</code></p>
+<p>安全状态的这个概念只存在于<strong>写模式</strong>的时候。需要注意的是：在<strong>删除</strong>和<strong>插入</strong>的时候页处于安全状态的<strong>条件</strong>并不一样。</p>
+<p><img src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240207193015.png" alt="image.png|600" /></p>
+<ul>
+<li>在插入的时候：该页不是满的-----》就算发生分裂的情况，到此页也就结束了。</li>
+<li>在删除的时候：大于半数---------》就算删除之后发生合并或者重新分配到此页就结束了。</li>
+</ul>
+<p><code>螃蟹锁的优势在哪里？</code></p>
+<pre><code>⚠️这里的优势是相较于一把大锁而言。
+</code></pre>
+<p>虽然B+树可以做的很高很大，但是无论如何都只有一个入口。如果每次都是一把大锁，那不管什么操作都会先获取根节点并且锁住，那直接就编程单线程的了。</p>
+<p>所以整个的<strong>瓶颈</strong>就是根节点上锁的时间太长了。影响了并发。所以螃蟹锁的优势就在于：</p>
+<ul>
+<li>能够显著的减少根结点上锁的时间，让更多的线程进入B+树进行操作</li>
+</ul>
+<p><code>更优的螃蟹锁执行策略</code></p>
+<p>当前释放的策略仍然拥有很大的优化空间。在原来的策略上写模式的时候会对根节点上写锁，知道找到一个安全节点之后才会释放，这就占用了很长时间，导致效率降低。这种不分青红皂白的直接给各个节点上写锁的行为称之为<strong>悲观锁</strong>。顾名思义，悲观锁表示这种策略对多线程的执行非常的悲观，觉得每个页都会被修改，必须都上锁才安心。但是事实上在实际的应用过程中触发分裂或者合并并不是很频繁。</p>
+<p>所以就诞生了一种更优的加锁策略<strong>乐观锁</strong>，在写模式的时候就大胆的假设从根节点到最后的叶子节点都是安全的，给路径的页都上读锁，最后的叶子节点才上写锁。如果在这个过程中发现了某个节点跟假设的不一样，不是安全的，那么之前的所有锁都释放，再重新按照<strong>悲观锁</strong>的方式进行操作。</p>
+<p>这样做的好处是，在相较于悲观锁乐观锁在一定程度上能改善根节点总是上写锁导致并发时读取效率的降低。</p>
+<p>但是我本人还没有实现乐观锁，修改<code>FindLeafPage()</code>或者添加<code>FindLeafPageHelper()</code>应该都是可以的。</p>
+<hr />
+<h4 id="具体实现"><a class="markdownIt-Anchor" href="#具体实现"></a> 具体实现</h4>
+<p><mark>GetValue（）</mark></p>
+<p><img src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240207222907.png" alt="image.png|600" /><br />
+<img src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240207223113.png" alt="image.png|600" /></p>
+<ul>
+<li>如上如所示，当获取到下一个读锁的时候就释放父节点的读锁，然后接着循环这样的操作</li>
+<li>这样子像螃蟹走路的方式，也是这种加锁策略的由来。</li>
+</ul>
+<p><mark>Insert（）</mark></p>
+<p><img src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240207225033.png" alt="image.png|600" /><br />
+<img src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240207225237.png" alt="image.png|600" /><br />
+<img src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240207225451.png" alt="image.png|600" /></p>
+<ul>
+<li>还有一个图我懒得画了，page4也是不安全的，所以page2、3、4.在这里都不能释放。</li>
+<li>找到一个安全的节点之后如何安全有便捷的释放所有父节点链的锁呢？</li>
+</ul>
+<p><mark>Remove（）</mark></p>
+<p>移除和上图大同小异啦，就是判断安全的条件不一样啦。注意一下就好了</p>
+<p><code>Transaction、事务</code></p>
+<p>这里就用到了我在checkpoint1中提到的这个东西[[CMU15-445 Project2-B+ Tree Index Checkpoint 1#^d53eec|对Transaction的详细介绍]],可以翻看前文。<br />
+它可以跟踪记录某个线程上的锁，并且是按照顺序的。从上到下。便于进行统筹操作。</p>
+<p>由于越往上page越密集，竞争越激烈，在释放锁的时候可以优先释放处于顶部的锁，也算是一个小优化🤣。</p>
+<h3 id="summary"><a class="markdownIt-Anchor" href="#summary"></a> Summary</h3>
+<p>整个checkpoint2想较于checkpoint1来说我觉得需要注意的事情更多。特别是对根节点的加锁时机的把握，很重要的。难度我觉得是有提升的。</p>
+<p>写完这个让我体会最深的是，代码写完整个工作完成百分之20，跑起来并且过本地测试勉强算完成一半，线上测试是真难啊啊啊，每次卡玩都回来一点一点看log👀，眼瞪的比黑猫警长还大。</p>
+<p>最后附上通过截图。<br />
+<img src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240207232212.png" alt="image.png|350" /><br />
+<img src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240207232250.png" alt="image.png|775" /></p>
+<p>rank也比较靠后，等实现乐观锁之后希望不会负优化。</p>
+<p>现在不用担心了，用了一下午乐观锁总是出问题，线上测试a不了。也算是负优化失败了。🤣</p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">首页</a></li>
+        
+          <li><a href="/archives/">blog</a></li>
+        
+          <li><a href="/categories/">归档</a></li>
+        
+          <li><a href="/tags/">标签</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#checkpoint-2"><span class="toc-number">1.</span> <span class="toc-text"> CHECKPOINT-2</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#task-3-index-iterator"><span class="toc-number">1.1.</span> <span class="toc-text"> Task #3 - Index Iterator</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#task-4-concurrent-index"><span class="toc-number">1.2.</span> <span class="toc-text"> Task #4 - Concurrent Index</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%85%B7%E4%BD%93%E5%AE%9E%E7%8E%B0"><span class="toc-number">1.2.1.</span> <span class="toc-text"> 具体实现</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#summary"><span class="toc-number">1.3.</span> <span class="toc-text"> Summary</span></a></li></ol></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project2-B+%20Tree%20Index%20Checkpoint%202/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project2-B+%20Tree%20Index%20Checkpoint%202/&text=CMU15-445-Project #2 - B+ Tree Index Checkpoint 2"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project2-B+%20Tree%20Index%20Checkpoint%202/&title=CMU15-445-Project #2 - B+ Tree Index Checkpoint 2"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project2-B+%20Tree%20Index%20Checkpoint%202/&is_video=false&description=CMU15-445-Project #2 - B+ Tree Index Checkpoint 2"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=CMU15-445-Project #2 - B+ Tree Index Checkpoint 2&body=Check out this article: https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project2-B+%20Tree%20Index%20Checkpoint%202/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project2-B+%20Tree%20Index%20Checkpoint%202/&title=CMU15-445-Project #2 - B+ Tree Index Checkpoint 2"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project2-B+%20Tree%20Index%20Checkpoint%202/&title=CMU15-445-Project #2 - B+ Tree Index Checkpoint 2"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project2-B+%20Tree%20Index%20Checkpoint%202/&title=CMU15-445-Project #2 - B+ Tree Index Checkpoint 2"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project2-B+%20Tree%20Index%20Checkpoint%202/&title=CMU15-445-Project #2 - B+ Tree Index Checkpoint 2"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project2-B+%20Tree%20Index%20Checkpoint%202/&name=CMU15-445-Project #2 - B+ Tree Index Checkpoint 2&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://weuijiale.gitee.io/doc_learn/Database/CMU15-445%20Project2-B+%20Tree%20Index%20Checkpoint%202/&t=CMU15-445-Project #2 - B+ Tree Index Checkpoint 2"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2016-2024
+    Weijiale
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/archives/">blog</a></li><!--
+     --><!--
+       --><li><a href="/categories/">归档</a></li><!--
+     --><!--
+       --><li><a href="/tags/">标签</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板！\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功！");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>
