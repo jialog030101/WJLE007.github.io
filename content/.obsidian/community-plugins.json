@@ -3,7 +3,6 @@
   "mousewheel-image-zoom",
   "obsidian-auto-link-title",
   "obsidian-excalidraw-plugin",
-  "obsidian-git",
   "obsidian-emoji-toolbar",
   "obsidian-icon-folder",
   "dataview",
@@ -14,5 +13,6 @@
   "omnisearch",
   "file-explorer-note-count",
   "obsidian-enhancing-export",
-  "media-extended"
+  "media-extended",
+  "obsidian-git"
 ]

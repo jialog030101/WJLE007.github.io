@@ -145,19 +145,9 @@
               "icon": "lucide-list",
               "title": "xv6环境搭建&&代码导读 的大纲"
             }
-          },
-          {
-            "id": "e673de1ecd613508",
-            "type": "leaf",
-            "state": {
-              "type": "git-view",
-              "state": {},
-              "icon": "lucide-file",
-              "title": "插件不再活动"
-            }
           }
         ],
-        "currentTab": 4
+        "currentTab": 3
       }
     ],
     "direction": "horizontal",
@@ -184,6 +174,8 @@
   },
   "active": "e7a7b303c61786dc",
   "lastOpenFiles": [
+    "posts/OS/虚拟化--进程管理API：fork, execve, exit.md",
+    "essay/拟录取有感.md",
     "Excalidraw/HomePage.md",
     "OS/演讲稿.md",
     "Database/Note/数据库事务.md",
@@ -208,9 +200,7 @@
     "Rust/基本类型.md",
     "Rust/some ideas.md",
     "C++/Effective Modern C++.md",
-    "Introduce.md",
     "OS",
-    "Excalidraw/一些计划吧.md",
     "Excalidraw/未命名.canvas",
     "Excalidraw/软件工程课上题",
     "Excalidraw/六级",
