@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>B&#43; Tree Index | JiaLog</title>
+<meta name="keywords" content="Note">
+<meta name="description" content="TABLE INDEX
+
+A table index is a replica of a subset of a table&rsquo;s attributes that are organized and/or sorted for efficient access using those attributes.The DBMS ensures that the contents of the table and the index are logically synchronized.
+索引让数据在数据库中的查询更加的高效，DBMS负责使索引和实际内容同步。
+
+DBMS的工作是选择最优的索引去执行查询，这就带来一个需要权衡的问题——索引越多查询越高效但是相对的维护成本（Maintenance Overhead）和存储成本（Storage Overhead） 就会相应的提高。
+B-TREE FAMILY
+B-树家族。
+重点了解B&#43;树。
+
+（B树虽然是一个平衡树（balance），但B树的B不是balance的缩写，到底代表什么还存疑）
+B&#43;TREE
+
+B&#43;树是一个自平衡树的数据结构，顺序的存储数据，并且将查询，顺序访问，插入和删除的时间复杂度基本控制在O(log n)。
+
+是二叉搜索树的推广，因为它可以有超过两个的孩子节点。
+它针对系统和存储之间的大块数据读写进行了特别的优化。
+
+B&#43;TREE PROPERTIES
+
+B&#43;树是一个多叉搜索树，有以下特性：
+
+他完美平衡
+除了根节点都至少半满
+k个值会把一个节点分为k&#43;1部分。
+
+B&#43;TREE EXAMPLE
+
+上图是一个小例子，能够发现B&#43;树底层是能够双向访问的，这在多线程的时候有可能会造成死锁问题。这在后面讲解B&#43;树多线程的章节也会对原因进行讲解。">
+<meta name="author" content="Theme PaperMod">
+<link rel="canonical" href="http://localhost:1313/posts/database/note/b&#43;-tree-index/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.6da9a63d25a9608bca2f7f907a030e887a7dd3c3f3918e4cc113129361414bda.css" integrity="sha256-bammPSWpYIvKL3&#43;QegMOiHp908PzkY5MwRMSk2FBS9o=" rel="preload stylesheet" as="style">
+<link rel="icon" href="http://localhost:1313/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://localhost:1313/apple-touch-icon.png">
+<link rel="mask-icon" href="http://localhost:1313/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="http://localhost:1313/posts/database/note/b&#43;-tree-index/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:url" content="http://localhost:1313/posts/database/note/b&#43;-tree-index/">
+  <meta property="og:site_name" content="JiaLog">
+  <meta property="og:title" content="B&#43; Tree Index">
+  <meta property="og:description" content="TABLE INDEX A table index is a replica of a subset of a table’s attributes that are organized and/or sorted for efficient access using those attributes.The DBMS ensures that the contents of the table and the index are logically synchronized.
+索引让数据在数据库中的查询更加的高效，DBMS负责使索引和实际内容同步。
+DBMS的工作是选择最优的索引去执行查询，这就带来一个需要权衡的问题——索引越多查询越高效但是相对的维护成本（Maintenance Overhead）和存储成本（Storage Overhead） 就会相应的提高。
+B-TREE FAMILY B-树家族。
+重点了解B&#43;树。
+（B树虽然是一个平衡树（balance），但B树的B不是balance的缩写，到底代表什么还存疑）
+B&#43;TREE B&#43;树是一个自平衡树的数据结构，顺序的存储数据，并且将查询，顺序访问，插入和删除的时间复杂度基本控制在O(log n)。
+是二叉搜索树的推广，因为它可以有超过两个的孩子节点。 它针对系统和存储之间的大块数据读写进行了特别的优化。 B&#43;TREE PROPERTIES B&#43;树是一个多叉搜索树，有以下特性：
+他完美平衡 除了根节点都至少半满 k个值会把一个节点分为k&#43;1部分。 B&#43;TREE EXAMPLE 上图是一个小例子，能够发现B&#43;树底层是能够双向访问的，这在多线程的时候有可能会造成死锁问题。这在后面讲解B&#43;树多线程的章节也会对原因进行讲解。">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2023-12-07T00:00:00+00:00">
+    <meta property="article:modified_time" content="2023-12-07T00:00:00+00:00">
+    <meta property="article:tag" content="Note">
+      <meta property="og:image" content="http://localhost:1313/images/papermod-cover.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://localhost:1313/images/papermod-cover.png">
+<meta name="twitter:title" content="B&#43; Tree Index">
+<meta name="twitter:description" content="TABLE INDEX
+
+A table index is a replica of a subset of a table&rsquo;s attributes that are organized and/or sorted for efficient access using those attributes.The DBMS ensures that the contents of the table and the index are logically synchronized.
+索引让数据在数据库中的查询更加的高效，DBMS负责使索引和实际内容同步。
+
+DBMS的工作是选择最优的索引去执行查询，这就带来一个需要权衡的问题——索引越多查询越高效但是相对的维护成本（Maintenance Overhead）和存储成本（Storage Overhead） 就会相应的提高。
+B-TREE FAMILY
+B-树家族。
+重点了解B&#43;树。
+
+（B树虽然是一个平衡树（balance），但B树的B不是balance的缩写，到底代表什么还存疑）
+B&#43;TREE
+
+B&#43;树是一个自平衡树的数据结构，顺序的存储数据，并且将查询，顺序访问，插入和删除的时间复杂度基本控制在O(log n)。
+
+是二叉搜索树的推广，因为它可以有超过两个的孩子节点。
+它针对系统和存储之间的大块数据读写进行了特别的优化。
+
+B&#43;TREE PROPERTIES
+
+B&#43;树是一个多叉搜索树，有以下特性：
+
+他完美平衡
+除了根节点都至少半满
+k个值会把一个节点分为k&#43;1部分。
+
+B&#43;TREE EXAMPLE
+
+上图是一个小例子，能够发现B&#43;树底层是能够双向访问的，这在多线程的时候有可能会造成死锁问题。这在后面讲解B&#43;树多线程的章节也会对原因进行讲解。">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "http://localhost:1313/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "B+ Tree Index",
+      "item": "http://localhost:1313/posts/database/note/b+-tree-index/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "B+ Tree Index",
+  "name": "B\u002b Tree Index",
+  "description": "TABLE INDEX A table index is a replica of a subset of a table\u0026rsquo;s attributes that are organized and/or sorted for efficient access using those attributes.The DBMS ensures that the contents of the table and the index are logically synchronized.\n索引让数据在数据库中的查询更加的高效，DBMS负责使索引和实际内容同步。\nDBMS的工作是选择最优的索引去执行查询，这就带来一个需要权衡的问题——索引越多查询越高效但是相对的维护成本（Maintenance Overhead）和存储成本（Storage Overhead） 就会相应的提高。\nB-TREE FAMILY B-树家族。\n重点了解B+树。\n（B树虽然是一个平衡树（balance），但B树的B不是balance的缩写，到底代表什么还存疑）\nB+TREE B+树是一个自平衡树的数据结构，顺序的存储数据，并且将查询，顺序访问，插入和删除的时间复杂度基本控制在O(log n)。\n是二叉搜索树的推广，因为它可以有超过两个的孩子节点。 它针对系统和存储之间的大块数据读写进行了特别的优化。 B+TREE PROPERTIES B+树是一个多叉搜索树，有以下特性：\n他完美平衡 除了根节点都至少半满 k个值会把一个节点分为k+1部分。 B+TREE EXAMPLE 上图是一个小例子，能够发现B+树底层是能够双向访问的，这在多线程的时候有可能会造成死锁问题。这在后面讲解B+树多线程的章节也会对原因进行讲解。\n",
+  "keywords": [
+    "Note"
+  ],
+  "articleBody": "TABLE INDEX A table index is a replica of a subset of a table’s attributes that are organized and/or sorted for efficient access using those attributes.The DBMS ensures that the contents of the table and the index are logically synchronized.\n索引让数据在数据库中的查询更加的高效，DBMS负责使索引和实际内容同步。\nDBMS的工作是选择最优的索引去执行查询，这就带来一个需要权衡的问题——索引越多查询越高效但是相对的维护成本（Maintenance Overhead）和存储成本（Storage Overhead） 就会相应的提高。\nB-TREE FAMILY B-树家族。\n重点了解B+树。\n（B树虽然是一个平衡树（balance），但B树的B不是balance的缩写，到底代表什么还存疑）\nB+TREE B+树是一个自平衡树的数据结构，顺序的存储数据，并且将查询，顺序访问，插入和删除的时间复杂度基本控制在O(log n)。\n是二叉搜索树的推广，因为它可以有超过两个的孩子节点。 它针对系统和存储之间的大块数据读写进行了特别的优化。 B+TREE PROPERTIES B+树是一个多叉搜索树，有以下特性：\n他完美平衡 除了根节点都至少半满 k个值会把一个节点分为k+1部分。 B+TREE EXAMPLE 上图是一个小例子，能够发现B+树底层是能够双向访问的，这在多线程的时候有可能会造成死锁问题。这在后面讲解B+树多线程的章节也会对原因进行讲解。\nB+‘s CRUD 可以说B+树的增删改查的特性和它的组织形式是密不可分的。每次做改动之后都要符合他的结构特性，所以也没什么好说的。\nB+树的一些应用扩展 二级索引 \u0026\u0026 记录迁移 如果二级索引的叶子节点直接指向的是对应数据的指针，那么在发生增删的时候结构发生变化二级索引就需要进行重构，这不仅是一项开销非常大的方法，而且还难以保证数据的同步。\n解决办法: 辅助索引的叶子节点存主键的值列表，这种关系的固定的不会改变的，一两个数据的增删不会造成整个树的重构。\n这就避免了由于重构导致变化而二级索引需要跟着重构的带来的开销。现需要在辅助索引上查到需要的主键列表然后再去主键索引上去查找对应的数据。\n这样虽然降低了查询时候的一点效率，但是跟频繁的重构比起来还是难以感知的😃。\n字符串索引 尽力一个B+树的字符串索引有两个问题：\n字符串一般都是变长的，这很难解决 因为字符串可能会很长，所以扇的出度会降低，相应的树高会变高。 对应的解决办法有以下两点：\n灵活的出度。每个扇的出度并不是简单固定的，根据这个扇的字符串所用的空间进行灵活的调整。 前缀压缩。只用存储到不一样的第一位，能够分辨就够了。 例如，如果我们有一个名称索引，那么非叶节点上的键值可以是名称的前缀；如果它分离的两个子树中最接近的值分别是“Silas”和“Silver”，那么在非叶节点存储“Silb”而不是完整的“Silberschatz”就足够了。这就是前缀压缩\n批量加载B+树索引 前面我们知道B+树的插入操作开销非常的大，一定程度上这个插入的开销和树的高度是成正比的。所以树的高度一般最多被控制在5，对于大型项目也是这样的。\n正因为如此，加入现在有100万条数据需要插入，每条数据光是I/O都需要很长的时间，更不用说插入之后B+树重构的时间。\n现在有一种优化的方法，将需要插入的大量数据进行排序后按照B+树的方法构建索引后将这颗构建的树merge到原来的B+树中，这样做有以下几个好处：\n在多线程方面具有优势 在构建的时候会产生更少的I/O. 叶子节点会按顺序进行排序。 下面是一个用chatgpt写出来的一个b+树的小demo，用来窥探一下具体实现是很有帮助的。\n#include #include #include const int ORDER = 3; // B+树的阶数 // B+树节点 template \u003ctypename Key, typename Value\u003e struct BPlusTreeNode { bool isLeaf; std::vector\u003cKey\u003e keys; std::vector\u003cValue\u003e values; BPlusTreeNode* parent; BPlusTreeNode* next; // 用于叶子节点的连接 }; // B+树 template \u003ctypename Key, typename Value\u003e class BPlusTree { public: BPlusTree() : root(nullptr) {} void insert(const Key\u0026 key, const Value\u0026 value) { if (root == nullptr) { root = new BPlusTreeNode\u003cKey, Value\u003e(); root-\u003eisLeaf = true; root-\u003ekeys.push_back(key); root-\u003evalues.push_back(value); } else { insertHelper(root, key, value); } } Value search(const Key\u0026 key) const { return searchHelper(root, key); } void print() const { printHelper(root, 0); } private: BPlusTreeNode\u003cKey, Value\u003e* root; void insertHelper(BPlusTreeNode\u003cKey, Value\u003e* node, const Key\u0026 key, const Value\u0026 value) { if (node-\u003eisLeaf) { insertIntoLeaf(node, key, value); } else { int i = 0; while (i \u003c node-\u003ekeys.size() \u0026\u0026 key \u003e node-\u003ekeys[i]) { i++; } insertHelper(node-\u003echildren[i], key, value); } } void insertIntoLeaf(BPlusTreeNode\u003cKey, Value\u003e* node, const Key\u0026 key, const Value\u0026 value) { auto it = std::lower_bound(node-\u003ekeys.begin(), node-\u003ekeys.end(), key); int index = it - node-\u003ekeys.begin(); node-\u003ekeys.insert(it, key); node-\u003evalues.insert(node-\u003evalues.begin() + index, value); if (node-\u003ekeys.size() \u003e ORDER - 1) { splitLeaf(node); } } void splitLeaf(BPlusTreeNode\u003cKey, Value\u003e* node) { BPlusTreeNode\u003cKey, Value\u003e* newLeaf = new BPlusTreeNode\u003cKey, Value\u003e(); newLeaf-\u003eisLeaf = true; int splitIndex = (ORDER - 1) / 2; newLeaf-\u003ekeys.assign(node-\u003ekeys.begin() + splitIndex, node-\u003ekeys.end()); newLeaf-\u003evalues.assign(node-\u003evalues.begin() + splitIndex, node-\u003evalues.end()); node-\u003ekeys.resize(splitIndex); node-\u003evalues.resize(splitIndex); newLeaf-\u003enext = node-\u003enext; node-\u003enext = newLeaf; insertIntoParent(node, newLeaf-\u003ekeys[0], newLeaf); } void insertIntoParent(BPlusTreeNode\u003cKey, Value\u003e* left, const Key\u0026 key, BPlusTreeNode\u003cKey, Value\u003e* right) { if (root == left) { BPlusTreeNode\u003cKey, Value\u003e* newRoot = new BPlusTreeNode\u003cKey, Value\u003e(); newRoot-\u003ekeys.push_back(key); newRoot-\u003echildren.push_back(left); newRoot-\u003echildren.push_back(right); left-\u003eparent = newRoot; right-\u003eparent = newRoot; root = newRoot; } else { BPlusTreeNode\u003cKey, Value\u003e* parent = left-\u003eparent; auto it = std::lower_bound(parent-\u003ekeys.begin(), parent-\u003ekeys.end(), key); int index = it - parent-\u003ekeys.begin(); parent-\u003ekeys.insert(it, key); parent-\u003echildren.insert(parent-\u003echildren.begin() + index + 1, right); right-\u003eparent = parent; if (parent-\u003ekeys.size() \u003e ORDER - 1) { splitInternal(parent); } } } void splitInternal(BPlusTreeNode\u003cKey, Value\u003e* node) { BPlusTreeNode\u003cKey, Value\u003e* newInternal = new BPlusTreeNode\u003cKey, Value\u003e(); int splitIndex = (ORDER - 1) / 2; Key upKey = node-\u003ekeys[splitIndex]; newInternal-\u003ekeys.assign(node-\u003ekeys.begin() + splitIndex + 1, node-\u003ekeys.end()); newInternal-\u003echildren.assign(node-\u003echildren.begin() + splitIndex + 1, node-\u003echildren.end()); node-\u003ekeys.resize(splitIndex); node-\u003echildren.resize(splitIndex + 1); for (auto child : newInternal-\u003echildren) { child-\u003eparent = newInternal; } insertIntoParent(node, upKey, newInternal); } Value searchHelper(BPlusTreeNode\u003cKey, Value\u003e* node, const Key\u0026 key) const { if (node == nullptr) { return Value(); // 返回默认值表示未找到 } int i = 0; while (i \u003c node-\u003ekeys.size() \u0026\u0026 key \u003e node-\u003ekeys[i]) { i++; } if (node-\u003eisLeaf) { if (i \u003c node-\u003ekeys.size() \u0026\u0026 key == node-\u003ekeys[i]) { return node-\u003evalues[i]; } else { return Value(); // 返回默认值表示未找到 } } else { return searchHelper(node-\u003echildren[i], key); } } void printHelper(BPlusTreeNode\u003cKey, Value\u003e* node, int level) const { if (node != nullptr) { std::cout \u003c\u003c \"Level \" \u003c\u003c level \u003c\u003c \": \"; for (int i = 0; i \u003c node-\u003ekeys.size(); ++i) { std::cout \u003c\u003c node-\u003ekeys[i] \u003c\u003c \" \"; } std::cout \u003c\u003c std::endl; if (!node-\u003eisLeaf) { for (auto child : node-\u003echildren) { printHelper(child, level + 1); } } } } }; int main() { BPlusTree\u003cint, std::string\u003e bPlusTree; // 插入示例 bPlusTree.insert(10, \"Value10\"); bPlusTree.insert(20, \"Value20\"); bPlusTree.insert(5, \"Value5\"); bPlusTree.insert(6, \"Value6\"); bPlusTree.insert(12, \"Value12\"); bPlusTree.insert(30, \"Value30\"); bPlusTree.insert(7, \"Value7\"); bPlusTree.insert(17, \"Value17\"); bPlusTree.insert(25, \"Value25\"); // 打印B+树 bPlusTree.print(); // 搜索示例 int keyToSearch = 12; std:: 多线程的B+树 Locks\u0026\u0026Latches ==两者区别==\n个人认为是存在的维度不太一样。locks适用于宏观方面的，latches则是细致入微的。 （剩下的还待总结、、、体会确实没有那么的深刻😀），不过可以参考chatgpt说的。 ==读模式和写模式==\n读模式比较随意，因为不涉及修改所以谁读都无所谓，只是在读的时候不能修改 写模式因为涉及到修改，所以只有唯一的一个线程能够进行写。 这张图可以解释latch的正常运行的逻辑。 Latches的实现 ==方法一==\n这三种“mutex”有何区别。\n==方法二==\n允许多线程读，读的时候如果有写🔒需要让写锁等待，之后要用公平的算法平衡，防止某个线程饿死。 可以基于自旋锁实现。 Latches的应用 ==hash table latches== 因为哈希表的搜索方向是朝向同一个方向，在搜索的时候只涉及到一个数据页或行 不会发生搜索冲突的现象，因此不可能发生死锁 在resize哈希表的时候在header page上🔒一下，就能保证整个hash表的写锁。 ==实现==\n在每个页或者每一行上加上这种细粒度的锁自然是有助于效率的提升 在搜寻到下一页的时候上一页处于什么状态已经没有任何关系了，所以可以放心的释放锁 这是另一种粒度更细的锁，在每一行数据上加锁，搜索到下一行就给上一行解锁。 b+ tree latches ==螃蟹锁==\n在读的时候：当获取到下一个page的读锁之后就可以释放当前page的读锁。 在写的时候：一直递归向下获取写锁，直到碰到一个page是处于安全状态的，就可以释放所有父节点的写锁。（悲观锁） 在写的时候：先假设一路上的节点都是处于安全状态的，如果发现有不安全的那么就推到按照悲观锁的方法再来一遍。 ",
+  "wordCount" : "642",
+  "inLanguage": "en",
+  "image": "http://localhost:1313/images/papermod-cover.png","datePublished": "2023-12-07T00:00:00Z",
+  "dateModified": "2023-12-07T00:00:00Z",
+  "author":{
+    "@type": "Person",
+    "name": "Theme PaperMod"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "http://localhost:1313/posts/database/note/b+-tree-index/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "JiaLog",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "http://localhost:1313/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="http://localhost:1313/" accesskey="h" title="JiaLog (Alt + H)">JiaLog</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="http://localhost:1313/" title="Home">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/posts/" title="Blog">
+                    <span>Blog</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/essay/" title="Essay">
+                    <span>Essay</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/archives" title="Archive">
+                    <span>Archive</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/search/" title="Search (Alt &#43; /)" accesskey=/>
+                    <span>Search</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/tags/" title="Tags">
+                    <span>Tags</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="http://localhost:1313/">Home</a>&nbsp;»&nbsp;<a href="http://localhost:1313/posts/">Posts</a></div>
+    <h1 class="post-title entry-hint-parent">
+      B&#43; Tree Index
+    </h1>
+    <div class="post-meta"><span title='2023-12-07 00:00:00 +0000 UTC'>December 7, 2023</span>&nbsp;·&nbsp;4 min&nbsp;·&nbsp;Theme PaperMod&nbsp;|&nbsp;<a href="https://github.com/adityatelange/hugo-PaperMod/tree/exampleSite/content/posts/Database/Note/B&#43;%20Tree%20Index.md" rel="noopener noreferrer" target="_blank">Suggest Changes</a>
+
+</div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#table-index" aria-label="TABLE INDEX">TABLE INDEX</a></li>
+                <li>
+                    <a href="#b-tree-family" aria-label="B-TREE FAMILY">B-TREE FAMILY</a><ul>
+                        
+                <li>
+                    <a href="#btree" aria-label="B&#43;TREE">B+TREE</a></li>
+                <li>
+                    <a href="#btree-properties" aria-label="B&#43;TREE PROPERTIES">B+TREE PROPERTIES</a></li>
+                <li>
+                    <a href="#btree-example" aria-label="B&#43;TREE EXAMPLE">B+TREE EXAMPLE</a></li>
+                <li>
+                    <a href="#bs-crud" aria-label="B&#43;‘s CRUD">B+‘s CRUD</a></li>
+                <li>
+                    <a href="#b%e6%a0%91%e7%9a%84%e4%b8%80%e4%ba%9b%e5%ba%94%e7%94%a8%e6%89%a9%e5%b1%95" aria-label="B&#43;树的一些应用扩展">B+树的一些应用扩展</a><ul>
+                        
+                <li>
+                    <a href="#%e4%ba%8c%e7%ba%a7%e7%b4%a2%e5%bc%95--%e8%ae%b0%e5%bd%95%e8%bf%81%e7%a7%bb" aria-label="二级索引 &amp;&amp; 记录迁移">二级索引 &amp;&amp; 记录迁移</a></li>
+                <li>
+                    <a href="#%e5%ad%97%e7%ac%a6%e4%b8%b2%e7%b4%a2%e5%bc%95" aria-label="字符串索引">字符串索引</a></li>
+                <li>
+                    <a href="#%e6%89%b9%e9%87%8f%e5%8a%a0%e8%bd%bdb%e6%a0%91%e7%b4%a2%e5%bc%95" aria-label="批量加载B&#43;树索引">批量加载B+树索引</a></li></ul>
+                </li></ul>
+                </li>
+                <li>
+                    <a href="#%e5%a4%9a%e7%ba%bf%e7%a8%8b%e7%9a%84b%e6%a0%91" aria-label="多线程的B&#43;树">多线程的B+树</a><ul>
+                        
+                <li>
+                    <a href="#lockslatches" aria-label="Locks&amp;&amp;Latches">Locks&amp;&amp;Latches</a></li>
+                <li>
+                    <a href="#latches%e7%9a%84%e5%ae%9e%e7%8e%b0" aria-label="Latches的实现">Latches的实现</a></li>
+                <li>
+                    <a href="#latches%e7%9a%84%e5%ba%94%e7%94%a8" aria-label="Latches的应用">Latches的应用</a><ul>
+                        
+                <li>
+                    <a href="#hash-table-latches" aria-label="==hash table latches==">==hash table latches==</a></li>
+                <li>
+                    <a href="#b-tree-latches" aria-label="b&#43; tree latches">b+ tree latches</a>
+                </li>
+            </ul>
+            </li>
+            </ul>
+            </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><h2 id="table-index">TABLE INDEX<a hidden class="anchor" aria-hidden="true" href="#table-index">#</a></h2>
+<blockquote>
+<p>A table index is a replica of a subset of a table&rsquo;s attributes that are organized and/or sorted for efficient access using those attributes.The DBMS ensures that the contents of the table and the index are logically synchronized.</p></blockquote>
+<p><strong>索引</strong>让数据在数据库中的查询更加的高效，DBMS负责使索引和实际内容<strong>同步</strong>。</p>
+<p><img alt="image.png|575" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231208203437.png"></p>
+<p>DBMS的工作是选择最优的索引去执行查询，这就带来一个需要权衡的问题——索引越多查询越高效但是相对的<strong>维护成本</strong>（Maintenance Overhead）和<strong>存储成本</strong>（Storage Overhead） 就会相应的提高。</p>
+<h2 id="b-tree-family">B-TREE FAMILY<a hidden class="anchor" aria-hidden="true" href="#b-tree-family">#</a></h2>
+<p>B-树家族。</p>
+<p>重点了解B+树。</p>
+<p><img alt="image.png|600" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231208214614.png"></p>
+<p>（B树虽然是一个平衡树（balance），但B树的B不是balance的缩写，到底代表什么还存疑）</p>
+<h3 id="btree">B+TREE<a hidden class="anchor" aria-hidden="true" href="#btree">#</a></h3>
+<p><img alt="image.png|600" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231208215020.png"></p>
+<p>B+树是一个自平衡树的数据结构，<strong>顺序的</strong>存储数据，并且将查询，顺序访问，插入和删除的时间复杂度基本控制在<strong>O(log n)</strong>。</p>
+<ul>
+<li>是二叉搜索树的推广，因为它可以有超过两个的孩子节点。</li>
+<li>它针对系统和存储之间的大块数据读写进行了特别的优化。</li>
+</ul>
+<h3 id="btree-properties">B+TREE PROPERTIES<a hidden class="anchor" aria-hidden="true" href="#btree-properties">#</a></h3>
+<p><img alt="image.png|550" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231208220751.png"></p>
+<p>B+树是一个多叉搜索树，有以下特性：</p>
+<ul>
+<li>他完美平衡</li>
+<li>除了根节点都至少半满</li>
+<li>k个值会把一个节点分为k+1部分。</li>
+</ul>
+<h3 id="btree-example">B+TREE EXAMPLE<a hidden class="anchor" aria-hidden="true" href="#btree-example">#</a></h3>
+<p><img alt="image.png|675" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231208223923.png"></p>
+<p>上图是一个小例子，能够发现B+树底层是能够双向访问的，这在<strong>多线程</strong>的时候有可能会造成<strong>死锁</strong>问题。这在后面讲解B+树多线程的章节也会对原因进行讲解。</p>
+<h3 id="bs-crud">B+‘s CRUD<a hidden class="anchor" aria-hidden="true" href="#bs-crud">#</a></h3>
+<p>可以说B+树的增删改查的特性和它的组织形式是密不可分的。每次做改动之后都要符合他的结构特性，所以也没什么好说的。</p>
+<h3 id="b树的一些应用扩展">B+树的一些应用扩展<a hidden class="anchor" aria-hidden="true" href="#b树的一些应用扩展">#</a></h3>
+<h4 id="二级索引--记录迁移">二级索引 &amp;&amp; 记录迁移<a hidden class="anchor" aria-hidden="true" href="#二级索引--记录迁移">#</a></h4>
+<p>如果二级索引的叶子节点直接指向的是对应数据的指针，那么在发生增删的时候结构发生变化二级索引就需要进行重构，这不仅是一项开销非常大的方法，而且还难以保证数据的同步。</p>
+<p><code>解决办法</code>:
+辅助索引的叶子节点存主键的值列表，这种关系的固定的不会改变的，一两个数据的增删不会造成整个树的重构。</p>
+<p>这就避免了由于重构导致变化而二级索引需要跟着重构的带来的开销。现需要在辅助索引上查到需要的主键列表然后再去主键索引上去查找对应的数据。</p>
+<p>这样虽然降低了查询时候的一点效率，但是跟频繁的重构比起来还是难以感知的😃。</p>
+<h4 id="字符串索引">字符串索引<a hidden class="anchor" aria-hidden="true" href="#字符串索引">#</a></h4>
+<p>尽力一个B+树的字符串索引有<code>两个问题</code>：</p>
+<ul>
+<li>字符串一般都是变长的，这很难解决</li>
+<li>因为字符串可能会很长，所以扇的<strong>出度</strong>会降低，相应的<strong>树高会变高</strong>。</li>
+</ul>
+<p>对应的解决办法有以下两点：</p>
+<ol>
+<li>灵活的出度。每个扇的出度并不是简单固定的，根据这个扇的字符串所用的空间进行灵活的调整。</li>
+<li>前缀压缩。只用存储到不一样的第一位，能够分辨就够了。</li>
+</ol>
+<p>例如，如果我们有一个名称索引，那么非叶节点上的键值可以是名称的前缀；如果它分离的两个子树中最接近的值分别是“Silas”和“Silver”，那么在非叶节点存储“Silb”而不是完整的“Silberschatz”就足够了。这就是<strong>前缀压缩</strong></p>
+<h4 id="批量加载b树索引">批量加载B+树索引<a hidden class="anchor" aria-hidden="true" href="#批量加载b树索引">#</a></h4>
+<p>前面我们知道B+树的插入操作开销非常的大，一定程度上这个插入的开销和树的高度是成正比的。所以树的高度一般最多被控制在5，对于大型项目也是这样的。</p>
+<p>正因为如此，加入现在有100万条数据需要插入，每条数据光是I/O都需要很长的时间，更不用说插入之后B+树重构的时间。</p>
+<p>现在有一种优化的方法，将需要插入的大量数据进行排序后按照B+树的方法构建索引后将这颗构建的树merge到原来的B+树中，这样做有以下几个好处：</p>
+<ul>
+<li>在多线程方面具有优势</li>
+<li>在构建的时候会产生更少的I/O.</li>
+<li>叶子节点会按顺序进行排序。</li>
+</ul>
+<p>下面是一个用chatgpt写出来的一个b+树的小demo，用来窥探一下具体实现是很有帮助的。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;iostream&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;vector&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;algorithm&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="k">const</span> <span class="kt">int</span> <span class="n">ORDER</span> <span class="o">=</span> <span class="mi">3</span><span class="p">;</span>  <span class="c1">// B+树的阶数
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl"><span class="c1">// B+树节点
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">Key</span><span class="p">,</span> <span class="k">typename</span> <span class="n">Value</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="k">struct</span> <span class="nc">BPlusTreeNode</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">bool</span> <span class="n">isLeaf</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">Key</span><span class="o">&gt;</span> <span class="n">keys</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">Value</span><span class="o">&gt;</span> <span class="n">values</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">BPlusTreeNode</span><span class="o">*</span> <span class="n">parent</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">BPlusTreeNode</span><span class="o">*</span> <span class="n">next</span><span class="p">;</span>  <span class="c1">// 用于叶子节点的连接
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// B+树
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">Key</span><span class="p">,</span> <span class="k">typename</span> <span class="n">Value</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">BPlusTree</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="k">public</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">    <span class="n">BPlusTree</span><span class="p">()</span> <span class="o">:</span> <span class="n">root</span><span class="p">(</span><span class="k">nullptr</span><span class="p">)</span> <span class="p">{}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kt">void</span> <span class="nf">insert</span><span class="p">(</span><span class="k">const</span> <span class="n">Key</span><span class="o">&amp;</span> <span class="n">key</span><span class="p">,</span> <span class="k">const</span> <span class="n">Value</span><span class="o">&amp;</span> <span class="n">value</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">root</span> <span class="o">==</span> <span class="k">nullptr</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">root</span> <span class="o">=</span> <span class="k">new</span> <span class="n">BPlusTreeNode</span><span class="o">&lt;</span><span class="n">Key</span><span class="p">,</span> <span class="n">Value</span><span class="o">&gt;</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">            <span class="n">root</span><span class="o">-&gt;</span><span class="n">isLeaf</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="n">root</span><span class="o">-&gt;</span><span class="n">keys</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">key</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="n">root</span><span class="o">-&gt;</span><span class="n">values</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">value</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">insertHelper</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">Value</span> <span class="nf">search</span><span class="p">(</span><span class="k">const</span> <span class="n">Key</span><span class="o">&amp;</span> <span class="n">key</span><span class="p">)</span> <span class="k">const</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">searchHelper</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">key</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kt">void</span> <span class="nf">print</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">printHelper</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">private</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">    <span class="n">BPlusTreeNode</span><span class="o">&lt;</span><span class="n">Key</span><span class="p">,</span> <span class="n">Value</span><span class="o">&gt;*</span> <span class="n">root</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kt">void</span> <span class="nf">insertHelper</span><span class="p">(</span><span class="n">BPlusTreeNode</span><span class="o">&lt;</span><span class="n">Key</span><span class="p">,</span> <span class="n">Value</span><span class="o">&gt;*</span> <span class="n">node</span><span class="p">,</span> <span class="k">const</span> <span class="n">Key</span><span class="o">&amp;</span> <span class="n">key</span><span class="p">,</span> <span class="k">const</span> <span class="n">Value</span><span class="o">&amp;</span> <span class="n">value</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">node</span><span class="o">-&gt;</span><span class="n">isLeaf</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">insertIntoLeaf</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="k">while</span> <span class="p">(</span><span class="n">i</span> <span class="o">&lt;</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">keys</span><span class="p">.</span><span class="n">size</span><span class="p">()</span> <span class="o">&amp;&amp;</span> <span class="n">key</span> <span class="o">&gt;</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">keys</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="n">i</span><span class="o">++</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">            <span class="n">insertHelper</span><span class="p">(</span><span class="n">node</span><span class="o">-&gt;</span><span class="n">children</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kt">void</span> <span class="nf">insertIntoLeaf</span><span class="p">(</span><span class="n">BPlusTreeNode</span><span class="o">&lt;</span><span class="n">Key</span><span class="p">,</span> <span class="n">Value</span><span class="o">&gt;*</span> <span class="n">node</span><span class="p">,</span> <span class="k">const</span> <span class="n">Key</span><span class="o">&amp;</span> <span class="n">key</span><span class="p">,</span> <span class="k">const</span> <span class="n">Value</span><span class="o">&amp;</span> <span class="n">value</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">auto</span> <span class="n">it</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">lower_bound</span><span class="p">(</span><span class="n">node</span><span class="o">-&gt;</span><span class="n">keys</span><span class="p">.</span><span class="n">begin</span><span class="p">(),</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">keys</span><span class="p">.</span><span class="n">end</span><span class="p">(),</span> <span class="n">key</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">int</span> <span class="n">index</span> <span class="o">=</span> <span class="n">it</span> <span class="o">-</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">keys</span><span class="p">.</span><span class="n">begin</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">        <span class="n">node</span><span class="o">-&gt;</span><span class="n">keys</span><span class="p">.</span><span class="n">insert</span><span class="p">(</span><span class="n">it</span><span class="p">,</span> <span class="n">key</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">node</span><span class="o">-&gt;</span><span class="n">values</span><span class="p">.</span><span class="n">insert</span><span class="p">(</span><span class="n">node</span><span class="o">-&gt;</span><span class="n">values</span><span class="p">.</span><span class="n">begin</span><span class="p">()</span> <span class="o">+</span> <span class="n">index</span><span class="p">,</span> <span class="n">value</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">node</span><span class="o">-&gt;</span><span class="n">keys</span><span class="p">.</span><span class="n">size</span><span class="p">()</span> <span class="o">&gt;</span> <span class="n">ORDER</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">splitLeaf</span><span class="p">(</span><span class="n">node</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kt">void</span> <span class="nf">splitLeaf</span><span class="p">(</span><span class="n">BPlusTreeNode</span><span class="o">&lt;</span><span class="n">Key</span><span class="p">,</span> <span class="n">Value</span><span class="o">&gt;*</span> <span class="n">node</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">BPlusTreeNode</span><span class="o">&lt;</span><span class="n">Key</span><span class="p">,</span> <span class="n">Value</span><span class="o">&gt;*</span> <span class="n">newLeaf</span> <span class="o">=</span> <span class="k">new</span> <span class="n">BPlusTreeNode</span><span class="o">&lt;</span><span class="n">Key</span><span class="p">,</span> <span class="n">Value</span><span class="o">&gt;</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">        <span class="n">newLeaf</span><span class="o">-&gt;</span><span class="n">isLeaf</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">int</span> <span class="n">splitIndex</span> <span class="o">=</span> <span class="p">(</span><span class="n">ORDER</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">newLeaf</span><span class="o">-&gt;</span><span class="n">keys</span><span class="p">.</span><span class="n">assign</span><span class="p">(</span><span class="n">node</span><span class="o">-&gt;</span><span class="n">keys</span><span class="p">.</span><span class="n">begin</span><span class="p">()</span> <span class="o">+</span> <span class="n">splitIndex</span><span class="p">,</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">keys</span><span class="p">.</span><span class="n">end</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">        <span class="n">newLeaf</span><span class="o">-&gt;</span><span class="n">values</span><span class="p">.</span><span class="n">assign</span><span class="p">(</span><span class="n">node</span><span class="o">-&gt;</span><span class="n">values</span><span class="p">.</span><span class="n">begin</span><span class="p">()</span> <span class="o">+</span> <span class="n">splitIndex</span><span class="p">,</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">values</span><span class="p">.</span><span class="n">end</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">        <span class="n">node</span><span class="o">-&gt;</span><span class="n">keys</span><span class="p">.</span><span class="n">resize</span><span class="p">(</span><span class="n">splitIndex</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">node</span><span class="o">-&gt;</span><span class="n">values</span><span class="p">.</span><span class="n">resize</span><span class="p">(</span><span class="n">splitIndex</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">newLeaf</span><span class="o">-&gt;</span><span class="n">next</span> <span class="o">=</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">next</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">node</span><span class="o">-&gt;</span><span class="n">next</span> <span class="o">=</span> <span class="n">newLeaf</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">insertIntoParent</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">newLeaf</span><span class="o">-&gt;</span><span class="n">keys</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">newLeaf</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kt">void</span> <span class="nf">insertIntoParent</span><span class="p">(</span><span class="n">BPlusTreeNode</span><span class="o">&lt;</span><span class="n">Key</span><span class="p">,</span> <span class="n">Value</span><span class="o">&gt;*</span> <span class="n">left</span><span class="p">,</span> <span class="k">const</span> <span class="n">Key</span><span class="o">&amp;</span> <span class="n">key</span><span class="p">,</span> <span class="n">BPlusTreeNode</span><span class="o">&lt;</span><span class="n">Key</span><span class="p">,</span> <span class="n">Value</span><span class="o">&gt;*</span> <span class="n">right</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">root</span> <span class="o">==</span> <span class="n">left</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">BPlusTreeNode</span><span class="o">&lt;</span><span class="n">Key</span><span class="p">,</span> <span class="n">Value</span><span class="o">&gt;*</span> <span class="n">newRoot</span> <span class="o">=</span> <span class="k">new</span> <span class="n">BPlusTreeNode</span><span class="o">&lt;</span><span class="n">Key</span><span class="p">,</span> <span class="n">Value</span><span class="o">&gt;</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">            <span class="n">newRoot</span><span class="o">-&gt;</span><span class="n">keys</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">key</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="n">newRoot</span><span class="o">-&gt;</span><span class="n">children</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">left</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="n">newRoot</span><span class="o">-&gt;</span><span class="n">children</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">right</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="n">left</span><span class="o">-&gt;</span><span class="n">parent</span> <span class="o">=</span> <span class="n">newRoot</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="n">right</span><span class="o">-&gt;</span><span class="n">parent</span> <span class="o">=</span> <span class="n">newRoot</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="n">root</span> <span class="o">=</span> <span class="n">newRoot</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">BPlusTreeNode</span><span class="o">&lt;</span><span class="n">Key</span><span class="p">,</span> <span class="n">Value</span><span class="o">&gt;*</span> <span class="n">parent</span> <span class="o">=</span> <span class="n">left</span><span class="o">-&gt;</span><span class="n">parent</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="k">auto</span> <span class="n">it</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">lower_bound</span><span class="p">(</span><span class="n">parent</span><span class="o">-&gt;</span><span class="n">keys</span><span class="p">.</span><span class="n">begin</span><span class="p">(),</span> <span class="n">parent</span><span class="o">-&gt;</span><span class="n">keys</span><span class="p">.</span><span class="n">end</span><span class="p">(),</span> <span class="n">key</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="kt">int</span> <span class="n">index</span> <span class="o">=</span> <span class="n">it</span> <span class="o">-</span> <span class="n">parent</span><span class="o">-&gt;</span><span class="n">keys</span><span class="p">.</span><span class="n">begin</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">            <span class="n">parent</span><span class="o">-&gt;</span><span class="n">keys</span><span class="p">.</span><span class="n">insert</span><span class="p">(</span><span class="n">it</span><span class="p">,</span> <span class="n">key</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="n">parent</span><span class="o">-&gt;</span><span class="n">children</span><span class="p">.</span><span class="n">insert</span><span class="p">(</span><span class="n">parent</span><span class="o">-&gt;</span><span class="n">children</span><span class="p">.</span><span class="n">begin</span><span class="p">()</span> <span class="o">+</span> <span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">right</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="n">right</span><span class="o">-&gt;</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="n">parent</span><span class="o">-&gt;</span><span class="n">keys</span><span class="p">.</span><span class="n">size</span><span class="p">()</span> <span class="o">&gt;</span> <span class="n">ORDER</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="n">splitInternal</span><span class="p">(</span><span class="n">parent</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kt">void</span> <span class="nf">splitInternal</span><span class="p">(</span><span class="n">BPlusTreeNode</span><span class="o">&lt;</span><span class="n">Key</span><span class="p">,</span> <span class="n">Value</span><span class="o">&gt;*</span> <span class="n">node</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">BPlusTreeNode</span><span class="o">&lt;</span><span class="n">Key</span><span class="p">,</span> <span class="n">Value</span><span class="o">&gt;*</span> <span class="n">newInternal</span> <span class="o">=</span> <span class="k">new</span> <span class="n">BPlusTreeNode</span><span class="o">&lt;</span><span class="n">Key</span><span class="p">,</span> <span class="n">Value</span><span class="o">&gt;</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">int</span> <span class="n">splitIndex</span> <span class="o">=</span> <span class="p">(</span><span class="n">ORDER</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">Key</span> <span class="n">upKey</span> <span class="o">=</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">keys</span><span class="p">[</span><span class="n">splitIndex</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">        <span class="n">newInternal</span><span class="o">-&gt;</span><span class="n">keys</span><span class="p">.</span><span class="n">assign</span><span class="p">(</span><span class="n">node</span><span class="o">-&gt;</span><span class="n">keys</span><span class="p">.</span><span class="n">begin</span><span class="p">()</span> <span class="o">+</span> <span class="n">splitIndex</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">keys</span><span class="p">.</span><span class="n">end</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">        <span class="n">newInternal</span><span class="o">-&gt;</span><span class="n">children</span><span class="p">.</span><span class="n">assign</span><span class="p">(</span><span class="n">node</span><span class="o">-&gt;</span><span class="n">children</span><span class="p">.</span><span class="n">begin</span><span class="p">()</span> <span class="o">+</span> <span class="n">splitIndex</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">children</span><span class="p">.</span><span class="n">end</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">        <span class="n">node</span><span class="o">-&gt;</span><span class="n">keys</span><span class="p">.</span><span class="n">resize</span><span class="p">(</span><span class="n">splitIndex</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">node</span><span class="o">-&gt;</span><span class="n">children</span><span class="p">.</span><span class="n">resize</span><span class="p">(</span><span class="n">splitIndex</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="nl">child</span> <span class="p">:</span> <span class="n">newInternal</span><span class="o">-&gt;</span><span class="n">children</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">child</span><span class="o">-&gt;</span><span class="n">parent</span> <span class="o">=</span> <span class="n">newInternal</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="n">insertIntoParent</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">upKey</span><span class="p">,</span> <span class="n">newInternal</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">Value</span> <span class="nf">searchHelper</span><span class="p">(</span><span class="n">BPlusTreeNode</span><span class="o">&lt;</span><span class="n">Key</span><span class="p">,</span> <span class="n">Value</span><span class="o">&gt;*</span> <span class="n">node</span><span class="p">,</span> <span class="k">const</span> <span class="n">Key</span><span class="o">&amp;</span> <span class="n">key</span><span class="p">)</span> <span class="k">const</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">node</span> <span class="o">==</span> <span class="k">nullptr</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="n">Value</span><span class="p">();</span>  <span class="c1">// 返回默认值表示未找到
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">while</span> <span class="p">(</span><span class="n">i</span> <span class="o">&lt;</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">keys</span><span class="p">.</span><span class="n">size</span><span class="p">()</span> <span class="o">&amp;&amp;</span> <span class="n">key</span> <span class="o">&gt;</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">keys</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">i</span><span class="o">++</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">node</span><span class="o">-&gt;</span><span class="n">isLeaf</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">&lt;</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">keys</span><span class="p">.</span><span class="n">size</span><span class="p">()</span> <span class="o">&amp;&amp;</span> <span class="n">key</span> <span class="o">==</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">keys</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="k">return</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">values</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="k">return</span> <span class="n">Value</span><span class="p">();</span>  <span class="c1">// 返回默认值表示未找到
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="n">searchHelper</span><span class="p">(</span><span class="n">node</span><span class="o">-&gt;</span><span class="n">children</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">key</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kt">void</span> <span class="nf">printHelper</span><span class="p">(</span><span class="n">BPlusTreeNode</span><span class="o">&lt;</span><span class="n">Key</span><span class="p">,</span> <span class="n">Value</span><span class="o">&gt;*</span> <span class="n">node</span><span class="p">,</span> <span class="kt">int</span> <span class="n">level</span><span class="p">)</span> <span class="k">const</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">node</span> <span class="o">!=</span> <span class="k">nullptr</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;Level &#34;</span> <span class="o">&lt;&lt;</span> <span class="n">level</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;: &#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">keys</span><span class="p">.</span><span class="n">size</span><span class="p">();</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">keys</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="s">&#34; &#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">            <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">node</span><span class="o">-&gt;</span><span class="n">isLeaf</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="nl">child</span> <span class="p">:</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">children</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                    <span class="n">printHelper</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="n">level</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                <span class="p">}</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">BPlusTree</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span> <span class="n">bPlusTree</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// 插入示例
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">bPlusTree</span><span class="p">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="s">&#34;Value10&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">bPlusTree</span><span class="p">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="s">&#34;Value20&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">bPlusTree</span><span class="p">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="s">&#34;Value5&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">bPlusTree</span><span class="p">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="s">&#34;Value6&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">bPlusTree</span><span class="p">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="s">&#34;Value12&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">bPlusTree</span><span class="p">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">30</span><span class="p">,</span> <span class="s">&#34;Value30&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">bPlusTree</span><span class="p">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="s">&#34;Value7&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">bPlusTree</span><span class="p">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">17</span><span class="p">,</span> <span class="s">&#34;Value17&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">bPlusTree</span><span class="p">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">25</span><span class="p">,</span> <span class="s">&#34;Value25&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// 打印B+树
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">bPlusTree</span><span class="p">.</span><span class="n">print</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// 搜索示例
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">int</span> <span class="n">keyToSearch</span> <span class="o">=</span> <span class="mi">12</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">std</span><span class="o">::</span>
+</span></span></code></pre></div><h2 id="多线程的b树">多线程的B+树<a hidden class="anchor" aria-hidden="true" href="#多线程的b树">#</a></h2>
+<h3 id="lockslatches">Locks&amp;&amp;Latches<a hidden class="anchor" aria-hidden="true" href="#lockslatches">#</a></h3>
+<p>==两者区别==</p>
+<p><img alt="image.png|600" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240204134637.png"></p>
+<ul>
+<li>个人认为是存在的维度不太一样。locks适用于宏观方面的，latches则是细致入微的。</li>
+<li>（剩下的还待总结、、、体会确实没有那么的深刻😀），不过可以参考chatgpt说的。</li>
+</ul>
+<p><img alt="image.png|600" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240204135411.png"></p>
+<p>==读模式和写模式==</p>
+<p><img alt="image.png|525" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240204140633.png"></p>
+<ul>
+<li>读模式比较随意，因为不涉及修改所以谁读都无所谓，只是在读的时候不能修改</li>
+<li>写模式因为涉及到修改，所以只有唯一的一个线程能够进行写。
+<img alt="image.png|250" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240204140934.png">
+这张图可以解释latch的正常运行的逻辑。</li>
+</ul>
+<h3 id="latches的实现">Latches的实现<a hidden class="anchor" aria-hidden="true" href="#latches的实现">#</a></h3>
+<p>==方法一==</p>
+<p><img alt="image.png|500" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240204141710.png"></p>
+<p><img alt="image.png|600" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240204142618.png">
+这三种“mutex”有何区别。</p>
+<p><img alt="image.png|600" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240204142847.png"></p>
+<p>==方法二==</p>
+<p><img alt="image.png|600" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240204143715.png"></p>
+<ul>
+<li>允许多线程读，读的时候如果有写🔒需要让写锁等待，之后要用公平的算法平衡，防止某个线程饿死。</li>
+<li>可以基于自旋锁实现。</li>
+</ul>
+<h3 id="latches的应用">Latches的应用<a hidden class="anchor" aria-hidden="true" href="#latches的应用">#</a></h3>
+<h4 id="hash-table-latches">==hash table latches==<a hidden class="anchor" aria-hidden="true" href="#hash-table-latches">#</a></h4>
+<p><img alt="image.png|600" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240204144244.png"></p>
+<ul>
+<li>因为哈希表的搜索方向是朝向同一个方向，在搜索的时候只涉及到一个数据页或行</li>
+<li>不会发生搜索冲突的现象，因此不可能发生死锁</li>
+<li>在resize哈希表的时候在header page上🔒一下，就能保证整个hash表的写锁。</li>
+</ul>
+<p>==实现==</p>
+<p><img alt="image.png|600" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240204144830.png"></p>
+<ul>
+<li>在每个页或者每一行上加上这种细粒度的锁自然是有助于效率的提升</li>
+</ul>
+<p><img alt="image.png|600" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240204145920.png"></p>
+<ul>
+<li>在搜寻到下一页的时候上一页处于什么状态已经没有任何关系了，所以可以放心的释放锁</li>
+</ul>
+<p><img alt="image.png|600" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240204150518.png"></p>
+<ul>
+<li>这是另一种粒度更细的锁，在每一行数据上加锁，搜索到下一行就给上一行解锁。</li>
+</ul>
+<h4 id="b-tree-latches">b+ tree latches<a hidden class="anchor" aria-hidden="true" href="#b-tree-latches">#</a></h4>
+<p>==螃蟹锁==</p>
+<p><img alt="image.png|600" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240204222625.png">
+<img alt="image.png|600" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240204222639.png">
+<img alt="image.png|600" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240204222719.png"></p>
+<ul>
+<li>在读的时候：当获取到下一个page的读锁之后就可以释放当前page的读锁。</li>
+<li>在写的时候：一直递归向下获取写锁，直到碰到一个page是处于安全状态的，就可以释放所有父节点的写锁。（悲观锁）</li>
+<li>在写的时候：先假设一路上的节点都是处于安全状态的，如果发现有不安全的那么就推到按照悲观锁的方法再来一遍。</li>
+</ul>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="http://localhost:1313/tags/note/">Note</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="http://localhost:1313/posts/database/project/cmu15-445-project1-buffer-pool-manager/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>CMU15-445- Project #1 - Buffer Pool Manager</span>
+  </a>
+  <a class="next" href="http://localhost:1313/posts/database/project/cmu15-445-project-0---c&#43;&#43;-primer/">
+    <span class="title">Next »</span>
+    <br>
+    <span>CMU15-445- Project #0 - C&#43;&#43; Primer</span>
+  </a>
+</nav>
+
+
+<ul class="share-buttons">
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share B&#43; Tree Index on x"
+            href="https://x.com/intent/tweet/?text=B%2b%20Tree%20Index&amp;url=http%3a%2f%2flocalhost%3a1313%2fposts%2fdatabase%2fnote%2fb%2b-tree-index%2f&amp;hashtags=Note">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M512 62.554 L 512 449.446 C 512 483.97 483.97 512 449.446 512 L 62.554 512 C 28.03 512 0 483.97 0 449.446 L 0 62.554 C 0 28.03 28.029 0 62.554 0 L 449.446 0 C 483.971 0 512 28.03 512 62.554 Z M 269.951 190.75 L 182.567 75.216 L 56 75.216 L 207.216 272.95 L 63.9 436.783 L 125.266 436.783 L 235.9 310.383 L 332.567 436.783 L 456 436.783 L 298.367 228.367 L 432.367 75.216 L 371.033 75.216 Z M 127.633 110 L 164.101 110 L 383.481 400.065 L 349.5 400.065 Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share B&#43; Tree Index on linkedin"
+            href="https://www.linkedin.com/shareArticle?mini=true&amp;url=http%3a%2f%2flocalhost%3a1313%2fposts%2fdatabase%2fnote%2fb%2b-tree-index%2f&amp;title=B%2b%20Tree%20Index&amp;summary=B%2b%20Tree%20Index&amp;source=http%3a%2f%2flocalhost%3a1313%2fposts%2fdatabase%2fnote%2fb%2b-tree-index%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-288.985,423.278l0,-225.717l-75.04,0l0,225.717l75.04,0Zm270.539,0l0,-129.439c0,-69.333 -37.018,-101.586 -86.381,-101.586c-39.804,0 -57.634,21.891 -67.617,37.266l0,-31.958l-75.021,0c0.995,21.181 0,225.717 0,225.717l75.02,0l0,-126.056c0,-6.748 0.486,-13.492 2.474,-18.315c5.414,-13.475 17.767,-27.434 38.494,-27.434c27.135,0 38.007,20.707 38.007,51.037l0,120.768l75.024,0Zm-307.552,-334.556c-25.674,0 -42.448,16.879 -42.448,39.002c0,21.658 16.264,39.002 41.455,39.002l0.484,0c26.165,0 42.452,-17.344 42.452,-39.002c-0.485,-22.092 -16.241,-38.954 -41.943,-39.002Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share B&#43; Tree Index on reddit"
+            href="https://reddit.com/submit?url=http%3a%2f%2flocalhost%3a1313%2fposts%2fdatabase%2fnote%2fb%2b-tree-index%2f&title=B%2b%20Tree%20Index">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-3.446,265.638c0,-22.964 -18.616,-41.58 -41.58,-41.58c-11.211,0 -21.361,4.457 -28.841,11.666c-28.424,-20.508 -67.586,-33.757 -111.204,-35.278l18.941,-89.121l61.884,13.157c0.756,15.734 13.642,28.29 29.56,28.29c16.407,0 29.706,-13.299 29.706,-29.701c0,-16.403 -13.299,-29.702 -29.706,-29.702c-11.666,0 -21.657,6.792 -26.515,16.578l-69.105,-14.69c-1.922,-0.418 -3.939,-0.042 -5.585,1.036c-1.658,1.073 -2.811,2.761 -3.224,4.686l-21.152,99.438c-44.258,1.228 -84.046,14.494 -112.837,35.232c-7.468,-7.164 -17.589,-11.591 -28.757,-11.591c-22.965,0 -41.585,18.616 -41.585,41.58c0,16.896 10.095,31.41 24.568,37.918c-0.639,4.135 -0.99,8.328 -0.99,12.576c0,63.977 74.469,115.836 166.33,115.836c91.861,0 166.334,-51.859 166.334,-115.836c0,-4.218 -0.347,-8.387 -0.977,-12.493c14.564,-6.47 24.735,-21.034 24.735,-38.001Zm-119.474,108.193c-20.27,20.241 -59.115,21.816 -70.534,21.816c-11.428,0 -50.277,-1.575 -70.522,-21.82c-3.007,-3.008 -3.007,-7.882 0,-10.889c3.003,-2.999 7.882,-3.003 10.885,0c12.777,12.781 40.11,17.317 59.637,17.317c19.522,0 46.86,-4.536 59.657,-17.321c3.016,-2.999 7.886,-2.995 10.885,0.008c3.008,3.011 3.003,7.882 -0.008,10.889Zm-5.23,-48.781c-16.373,0 -29.701,-13.324 -29.701,-29.698c0,-16.381 13.328,-29.714 29.701,-29.714c16.378,0 29.706,13.333 29.706,29.714c0,16.374 -13.328,29.698 -29.706,29.698Zm-160.386,-29.702c0,-16.381 13.328,-29.71 29.714,-29.71c16.369,0 29.689,13.329 29.689,29.71c0,16.373 -13.32,29.693 -29.689,29.693c-16.386,0 -29.714,-13.32 -29.714,-29.693Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share B&#43; Tree Index on facebook"
+            href="https://facebook.com/sharer/sharer.php?u=http%3a%2f%2flocalhost%3a1313%2fposts%2fdatabase%2fnote%2fb%2b-tree-index%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-106.468,0l0,-192.915l66.6,0l12.672,-82.621l-79.272,0l0,-53.617c0,-22.603 11.073,-44.636 46.58,-44.636l36.042,0l0,-70.34c0,0 -32.71,-5.582 -63.982,-5.582c-65.288,0 -107.96,39.569 -107.96,111.204l0,62.971l-72.573,0l0,82.621l72.573,0l0,192.915l-191.104,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share B&#43; Tree Index on whatsapp"
+            href="https://api.whatsapp.com/send?text=B%2b%20Tree%20Index%20-%20http%3a%2f%2flocalhost%3a1313%2fposts%2fdatabase%2fnote%2fb%2b-tree-index%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-58.673,127.703c-33.842,-33.881 -78.847,-52.548 -126.798,-52.568c-98.799,0 -179.21,80.405 -179.249,179.234c-0.013,31.593 8.241,62.428 23.927,89.612l-25.429,92.884l95.021,-24.925c26.181,14.28 55.659,21.807 85.658,21.816l0.074,0c98.789,0 179.206,-80.413 179.247,-179.243c0.018,-47.895 -18.61,-92.93 -52.451,-126.81Zm-126.797,275.782l-0.06,0c-26.734,-0.01 -52.954,-7.193 -75.828,-20.767l-5.441,-3.229l-56.386,14.792l15.05,-54.977l-3.542,-5.637c-14.913,-23.72 -22.791,-51.136 -22.779,-79.287c0.033,-82.142 66.867,-148.971 149.046,-148.971c39.793,0.014 77.199,15.531 105.329,43.692c28.128,28.16 43.609,65.592 43.594,105.4c-0.034,82.149 -66.866,148.983 -148.983,148.984Zm81.721,-111.581c-4.479,-2.242 -26.499,-13.075 -30.604,-14.571c-4.105,-1.495 -7.091,-2.241 -10.077,2.241c-2.986,4.483 -11.569,14.572 -14.182,17.562c-2.612,2.988 -5.225,3.364 -9.703,1.12c-4.479,-2.241 -18.91,-6.97 -36.017,-22.23c-13.314,-11.876 -22.304,-26.542 -24.916,-31.026c-2.612,-4.484 -0.279,-6.908 1.963,-9.14c2.016,-2.007 4.48,-5.232 6.719,-7.847c2.24,-2.615 2.986,-4.484 4.479,-7.472c1.493,-2.99 0.747,-5.604 -0.374,-7.846c-1.119,-2.241 -10.077,-24.288 -13.809,-33.256c-3.635,-8.733 -7.327,-7.55 -10.077,-7.688c-2.609,-0.13 -5.598,-0.158 -8.583,-0.158c-2.986,0 -7.839,1.121 -11.944,5.604c-4.105,4.484 -15.675,15.32 -15.675,37.364c0,22.046 16.048,43.342 18.287,46.332c2.24,2.99 31.582,48.227 76.511,67.627c10.685,4.615 19.028,7.371 25.533,9.434c10.728,3.41 20.492,2.929 28.209,1.775c8.605,-1.285 26.499,-10.833 30.231,-21.295c3.732,-10.464 3.732,-19.431 2.612,-21.298c-1.119,-1.869 -4.105,-2.99 -8.583,-5.232Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share B&#43; Tree Index on telegram"
+            href="https://telegram.me/share/url?text=B%2b%20Tree%20Index&amp;url=http%3a%2f%2flocalhost%3a1313%2fposts%2fdatabase%2fnote%2fb%2b-tree-index%2f">
+            <svg version="1.1" xml:space="preserve" viewBox="2 2 28 28" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M26.49,29.86H5.5a3.37,3.37,0,0,1-2.47-1,3.35,3.35,0,0,1-1-2.47V5.48A3.36,3.36,0,0,1,3,3,3.37,3.37,0,0,1,5.5,2h21A3.38,3.38,0,0,1,29,3a3.36,3.36,0,0,1,1,2.46V26.37a3.35,3.35,0,0,1-1,2.47A3.38,3.38,0,0,1,26.49,29.86Zm-5.38-6.71a.79.79,0,0,0,.85-.66L24.73,9.24a.55.55,0,0,0-.18-.46.62.62,0,0,0-.41-.17q-.08,0-16.53,6.11a.59.59,0,0,0-.41.59.57.57,0,0,0,.43.52l4,1.24,1.61,4.83a.62.62,0,0,0,.63.43.56.56,0,0,0,.4-.17L16.54,20l4.09,3A.9.9,0,0,0,21.11,23.15ZM13.8,20.71l-1.21-4q8.72-5.55,8.78-5.55c.15,0,.23,0,.23.16a.18.18,0,0,1,0,.06s-2.51,2.3-7.52,6.8Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share B&#43; Tree Index on ycombinator"
+            href="https://news.ycombinator.com/submitlink?t=B%2b%20Tree%20Index&u=http%3a%2f%2flocalhost%3a1313%2fposts%2fdatabase%2fnote%2fb%2b-tree-index%2f">
+            <svg version="1.1" xml:space="preserve" width="30px" height="30px" viewBox="0 0 512 512" fill="currentColor"
+                xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape">
+                <path
+                    d="M449.446 0C483.971 0 512 28.03 512 62.554L512 449.446C512 483.97 483.97 512 449.446 512L62.554 512C28.03 512 0 483.97 0 449.446L0 62.554C0 28.03 28.029 0 62.554 0L449.446 0ZM183.8767 87.9921H121.8427L230.6673 292.4508V424.0079H281.3328V292.4508L390.1575 87.9921H328.1233L256 238.2489z" />
+            </svg>
+        </a>
+    </li>
+</ul>
+
+  </footer><script src="https://giscus.app/client.js"
+        data-repo="WJLE007/comment"
+        data-repo-id="R_kgDOOTuC9Q"
+        data-category="General"
+        data-category-id="DIC_kwDOOTuC9c4Cow7G"
+        data-mapping="pathname"
+        data-strict="0"
+        data-reactions-enabled="1"
+        data-emit-metadata="0"
+        data-input-position="bottom"
+        data-theme="preferred_color_scheme"
+        data-lang="zh-CN"
+        crossorigin="anonymous"
+        async>
+</script>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>© <a href="https://jialog.top">JiaLog</a> 豫ICP备2024077894号-1 苏公网安备32031202000962号 32031202000962</span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Bustub架构简单分析 | JiaLog</title>
+<meta name="keywords" content="Note, CMU15-445">
+<meta name="description" content="写在前面
+在这篇文章中我们先抛开SQL在bustub的中的历程，直接快进到最后开始执行的阶段，这篇文章只关注设计上的细节。
+至于如何理顺这些细节在[[CMU15-445 Project3 - Query Execution]]文章中会有详细的介绍，这里就不再赘述。😃
+架构总览
+
+上图中catalog其实不是特别准确，按照我的理解应该是下面这种情况👇。通过一个table_id双向映射表的名字和实体table。
+
+接下来就按照从上到下的顺序依次介绍各个部分的结构。
+Catalog
+下面这个图是是整个catalog关于table的。👇这里引出了TableInfo.
+
+Catalog中不仅仅包含table的信息还储存了index的信息。这里引出了IndexInfo,但是后边用的不是很多。
+
+接下来看TableInfo的组成。（TableInfo的定义就在Catalog.h文件中）
+TableInfo
+
+
+name_:就是表的名字
+table_: 是一个每个节点都是tablepage的双向链表
+oid_: 顾名思义就是表的id
+Schema_：其实到现在我都没有很弄懂这个是干什么的东西，但是chat给出了答案。
+
+什么是Schema
+
+按照我的理解应该是一个类似于表头的包含各种配置信息的一个抽象集合。现在就看看源码。👇
+
+
+在bustub中schema的信息似乎没有包含很多，就是对每一个列的数据类型约束进行了记录。以及对所有的列进行一个汇总，方便获取到每一个列。
+
+
+==Column==
+实际上每个列的实现实体是Column，在这个实体中包含列名，数据类型，长度等基本信息。
+
+⚠️值得注意的是column对于varchar单独做了处理🙂,变长数组终究还是不一样啊。
+
+TableHeap
+实质上就是配合TablePage里面的信息构成的双向链表，我觉得这个设计真的非常的巧妙。只用了基本的pre_page_id 和next_page_id这两个变量就把双向链表给建立起来而且耦合度非常的低。
+
+
+first_page_id_: 就是第一个pageid
+bufferpool：所有的page都需要从bufferpool中去取。
+
+TablePage的结构
+
+
+ok看到这里有疑问了？ 那么多的信息都存在那里， 这继承的加上初始化的也不够啊。
+答案在这里👇
+
+通过偏移量直接在page的剩余空间里去定义各种变量。
+==通过InsertTuple（）函数了解详细结构==
+直接看源代码：
+ if (tuple.size_ &#43; 32 &gt; BUSTUB_PAGE_SIZE) { 
+  // larger than one page size
+    txn-&gt;SetState(TransactionState::ABORTED);
+    return false;
+  }
+  auto cur_page = static_cast&lt;TablePage *&gt;(buffer_pool_manager_-&gt;FetchPage(first_page_id_));
+  if (cur_page == nullptr) {
+    txn-&gt;SetState(TransactionState::ABORTED);
+    return false;
+  }
+
+这主要是判断一些前置条件的合法性
+
+为什么要用tuple的大小&#43;32进行比较呢？ 文末给出答案
+
+
+在第一页中进行插入，如果没有足够的空间就开一个新页然后插进去
+⚠️需要注意的是，在离开第一页的时候仍然要持有写锁，因为还要写next_page_id变量.
+
+💡跟随代码跳转到TablePage::InserTuple().">
+<meta name="author" content="Theme PaperMod">
+<link rel="canonical" href="http://localhost:1313/posts/database/note/bustub%E6%89%A7%E8%A1%8C%E5%99%A8%E6%9E%B6%E6%9E%84%E7%AE%80%E5%8D%95%E5%88%86%E6%9E%90/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.6da9a63d25a9608bca2f7f907a030e887a7dd3c3f3918e4cc113129361414bda.css" integrity="sha256-bammPSWpYIvKL3&#43;QegMOiHp908PzkY5MwRMSk2FBS9o=" rel="preload stylesheet" as="style">
+<link rel="icon" href="http://localhost:1313/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://localhost:1313/apple-touch-icon.png">
+<link rel="mask-icon" href="http://localhost:1313/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="http://localhost:1313/posts/database/note/bustub%E6%89%A7%E8%A1%8C%E5%99%A8%E6%9E%B6%E6%9E%84%E7%AE%80%E5%8D%95%E5%88%86%E6%9E%90/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:url" content="http://localhost:1313/posts/database/note/bustub%E6%89%A7%E8%A1%8C%E5%99%A8%E6%9E%B6%E6%9E%84%E7%AE%80%E5%8D%95%E5%88%86%E6%9E%90/">
+  <meta property="og:site_name" content="JiaLog">
+  <meta property="og:title" content="Bustub架构简单分析">
+  <meta property="og:description" content="写在前面 在这篇文章中我们先抛开SQL在bustub的中的历程，直接快进到最后开始执行的阶段，这篇文章只关注设计上的细节。
+至于如何理顺这些细节在[[CMU15-445 Project3 - Query Execution]]文章中会有详细的介绍，这里就不再赘述。😃
+架构总览 上图中catalog其实不是特别准确，按照我的理解应该是下面这种情况👇。通过一个table_id双向映射表的名字和实体table。 接下来就按照从上到下的顺序依次介绍各个部分的结构。
+Catalog 下面这个图是是整个catalog关于table的。👇这里引出了TableInfo. Catalog中不仅仅包含table的信息还储存了index的信息。这里引出了IndexInfo,但是后边用的不是很多。 接下来看TableInfo的组成。（TableInfo的定义就在Catalog.h文件中）
+TableInfo name_:就是表的名字 table_: 是一个每个节点都是tablepage的双向链表 oid_: 顾名思义就是表的id Schema_：其实到现在我都没有很弄懂这个是干什么的东西，但是chat给出了答案。 什么是Schema 按照我的理解应该是一个类似于表头的包含各种配置信息的一个抽象集合。现在就看看源码。👇 在bustub中schema的信息似乎没有包含很多，就是对每一个列的数据类型约束进行了记录。以及对所有的列进行一个汇总，方便获取到每一个列。 ==Column==
+实际上每个列的实现实体是Column，在这个实体中包含列名，数据类型，长度等基本信息。 ⚠️值得注意的是column对于varchar单独做了处理🙂,变长数组终究还是不一样啊。 TableHeap 实质上就是配合TablePage里面的信息构成的双向链表，我觉得这个设计真的非常的巧妙。只用了基本的pre_page_id 和next_page_id这两个变量就把双向链表给建立起来而且耦合度非常的低。
+first_page_id_: 就是第一个pageid bufferpool：所有的page都需要从bufferpool中去取。 TablePage的结构 ok看到这里有疑问了？ 那么多的信息都存在那里， 这继承的加上初始化的也不够啊。 答案在这里👇 通过偏移量直接在page的剩余空间里去定义各种变量。
+==通过InsertTuple（）函数了解详细结构==
+直接看源代码：
+if (tuple.size_ &#43; 32 &gt; BUSTUB_PAGE_SIZE) { // larger than one page size txn-&gt;SetState(TransactionState::ABORTED); return false; } auto cur_page = static_cast&lt;TablePage *&gt;(buffer_pool_manager_-&gt;FetchPage(first_page_id_)); if (cur_page == nullptr) { txn-&gt;SetState(TransactionState::ABORTED); return false; } 这主要是判断一些前置条件的合法性 为什么要用tuple的大小&#43;32进行比较呢？ 文末给出答案
+在第一页中进行插入，如果没有足够的空间就开一个新页然后插进去 ⚠️需要注意的是，在离开第一页的时候仍然要持有写锁，因为还要写next_page_id变量. 💡跟随代码跳转到TablePage::InserTuple().">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2024-02-21T00:00:00+00:00">
+    <meta property="article:modified_time" content="2024-02-21T00:00:00+00:00">
+    <meta property="article:tag" content="Note">
+    <meta property="article:tag" content="CMU15-445">
+      <meta property="og:image" content="http://localhost:1313/images/papermod-cover.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://localhost:1313/images/papermod-cover.png">
+<meta name="twitter:title" content="Bustub架构简单分析">
+<meta name="twitter:description" content="写在前面
+在这篇文章中我们先抛开SQL在bustub的中的历程，直接快进到最后开始执行的阶段，这篇文章只关注设计上的细节。
+至于如何理顺这些细节在[[CMU15-445 Project3 - Query Execution]]文章中会有详细的介绍，这里就不再赘述。😃
+架构总览
+
+上图中catalog其实不是特别准确，按照我的理解应该是下面这种情况👇。通过一个table_id双向映射表的名字和实体table。
+
+接下来就按照从上到下的顺序依次介绍各个部分的结构。
+Catalog
+下面这个图是是整个catalog关于table的。👇这里引出了TableInfo.
+
+Catalog中不仅仅包含table的信息还储存了index的信息。这里引出了IndexInfo,但是后边用的不是很多。
+
+接下来看TableInfo的组成。（TableInfo的定义就在Catalog.h文件中）
+TableInfo
+
+
+name_:就是表的名字
+table_: 是一个每个节点都是tablepage的双向链表
+oid_: 顾名思义就是表的id
+Schema_：其实到现在我都没有很弄懂这个是干什么的东西，但是chat给出了答案。
+
+什么是Schema
+
+按照我的理解应该是一个类似于表头的包含各种配置信息的一个抽象集合。现在就看看源码。👇
+
+
+在bustub中schema的信息似乎没有包含很多，就是对每一个列的数据类型约束进行了记录。以及对所有的列进行一个汇总，方便获取到每一个列。
+
+
+==Column==
+实际上每个列的实现实体是Column，在这个实体中包含列名，数据类型，长度等基本信息。
+
+⚠️值得注意的是column对于varchar单独做了处理🙂,变长数组终究还是不一样啊。
+
+TableHeap
+实质上就是配合TablePage里面的信息构成的双向链表，我觉得这个设计真的非常的巧妙。只用了基本的pre_page_id 和next_page_id这两个变量就把双向链表给建立起来而且耦合度非常的低。
+
+
+first_page_id_: 就是第一个pageid
+bufferpool：所有的page都需要从bufferpool中去取。
+
+TablePage的结构
+
+
+ok看到这里有疑问了？ 那么多的信息都存在那里， 这继承的加上初始化的也不够啊。
+答案在这里👇
+
+通过偏移量直接在page的剩余空间里去定义各种变量。
+==通过InsertTuple（）函数了解详细结构==
+直接看源代码：
+ if (tuple.size_ &#43; 32 &gt; BUSTUB_PAGE_SIZE) { 
+  // larger than one page size
+    txn-&gt;SetState(TransactionState::ABORTED);
+    return false;
+  }
+  auto cur_page = static_cast&lt;TablePage *&gt;(buffer_pool_manager_-&gt;FetchPage(first_page_id_));
+  if (cur_page == nullptr) {
+    txn-&gt;SetState(TransactionState::ABORTED);
+    return false;
+  }
+
+这主要是判断一些前置条件的合法性
+
+为什么要用tuple的大小&#43;32进行比较呢？ 文末给出答案
+
+
+在第一页中进行插入，如果没有足够的空间就开一个新页然后插进去
+⚠️需要注意的是，在离开第一页的时候仍然要持有写锁，因为还要写next_page_id变量.
+
+💡跟随代码跳转到TablePage::InserTuple().">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "http://localhost:1313/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Bustub架构简单分析",
+      "item": "http://localhost:1313/posts/database/note/bustub%E6%89%A7%E8%A1%8C%E5%99%A8%E6%9E%B6%E6%9E%84%E7%AE%80%E5%8D%95%E5%88%86%E6%9E%90/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Bustub架构简单分析",
+  "name": "Bustub架构简单分析",
+  "description": "写在前面 在这篇文章中我们先抛开SQL在bustub的中的历程，直接快进到最后开始执行的阶段，这篇文章只关注设计上的细节。\n至于如何理顺这些细节在[[CMU15-445 Project3 - Query Execution]]文章中会有详细的介绍，这里就不再赘述。😃\n架构总览 上图中catalog其实不是特别准确，按照我的理解应该是下面这种情况👇。通过一个table_id双向映射表的名字和实体table。 接下来就按照从上到下的顺序依次介绍各个部分的结构。\nCatalog 下面这个图是是整个catalog关于table的。👇这里引出了TableInfo. Catalog中不仅仅包含table的信息还储存了index的信息。这里引出了IndexInfo,但是后边用的不是很多。 接下来看TableInfo的组成。（TableInfo的定义就在Catalog.h文件中）\nTableInfo name_:就是表的名字 table_: 是一个每个节点都是tablepage的双向链表 oid_: 顾名思义就是表的id Schema_：其实到现在我都没有很弄懂这个是干什么的东西，但是chat给出了答案。 什么是Schema 按照我的理解应该是一个类似于表头的包含各种配置信息的一个抽象集合。现在就看看源码。👇 在bustub中schema的信息似乎没有包含很多，就是对每一个列的数据类型约束进行了记录。以及对所有的列进行一个汇总，方便获取到每一个列。 ==Column==\n实际上每个列的实现实体是Column，在这个实体中包含列名，数据类型，长度等基本信息。 ⚠️值得注意的是column对于varchar单独做了处理🙂,变长数组终究还是不一样啊。 TableHeap 实质上就是配合TablePage里面的信息构成的双向链表，我觉得这个设计真的非常的巧妙。只用了基本的pre_page_id 和next_page_id这两个变量就把双向链表给建立起来而且耦合度非常的低。\nfirst_page_id_: 就是第一个pageid bufferpool：所有的page都需要从bufferpool中去取。 TablePage的结构 ok看到这里有疑问了？ 那么多的信息都存在那里， 这继承的加上初始化的也不够啊。 答案在这里👇 通过偏移量直接在page的剩余空间里去定义各种变量。\n==通过InsertTuple（）函数了解详细结构==\n直接看源代码：\nif (tuple.size_ + 32 \u0026gt; BUSTUB_PAGE_SIZE) { // larger than one page size txn-\u0026gt;SetState(TransactionState::ABORTED); return false; } auto cur_page = static_cast\u0026lt;TablePage *\u0026gt;(buffer_pool_manager_-\u0026gt;FetchPage(first_page_id_)); if (cur_page == nullptr) { txn-\u0026gt;SetState(TransactionState::ABORTED); return false; } 这主要是判断一些前置条件的合法性 为什么要用tuple的大小+32进行比较呢？ 文末给出答案\n在第一页中进行插入，如果没有足够的空间就开一个新页然后插进去 ⚠️需要注意的是，在离开第一页的时候仍然要持有写锁，因为还要写next_page_id变量. 💡跟随代码跳转到TablePage::InserTuple().\n",
+  "keywords": [
+    "Note", "CMU15-445"
+  ],
+  "articleBody": "写在前面 在这篇文章中我们先抛开SQL在bustub的中的历程，直接快进到最后开始执行的阶段，这篇文章只关注设计上的细节。\n至于如何理顺这些细节在[[CMU15-445 Project3 - Query Execution]]文章中会有详细的介绍，这里就不再赘述。😃\n架构总览 上图中catalog其实不是特别准确，按照我的理解应该是下面这种情况👇。通过一个table_id双向映射表的名字和实体table。 接下来就按照从上到下的顺序依次介绍各个部分的结构。\nCatalog 下面这个图是是整个catalog关于table的。👇这里引出了TableInfo. Catalog中不仅仅包含table的信息还储存了index的信息。这里引出了IndexInfo,但是后边用的不是很多。 接下来看TableInfo的组成。（TableInfo的定义就在Catalog.h文件中）\nTableInfo name_:就是表的名字 table_: 是一个每个节点都是tablepage的双向链表 oid_: 顾名思义就是表的id Schema_：其实到现在我都没有很弄懂这个是干什么的东西，但是chat给出了答案。 什么是Schema 按照我的理解应该是一个类似于表头的包含各种配置信息的一个抽象集合。现在就看看源码。👇 在bustub中schema的信息似乎没有包含很多，就是对每一个列的数据类型约束进行了记录。以及对所有的列进行一个汇总，方便获取到每一个列。 ==Column==\n实际上每个列的实现实体是Column，在这个实体中包含列名，数据类型，长度等基本信息。 ⚠️值得注意的是column对于varchar单独做了处理🙂,变长数组终究还是不一样啊。 TableHeap 实质上就是配合TablePage里面的信息构成的双向链表，我觉得这个设计真的非常的巧妙。只用了基本的pre_page_id 和next_page_id这两个变量就把双向链表给建立起来而且耦合度非常的低。\nfirst_page_id_: 就是第一个pageid bufferpool：所有的page都需要从bufferpool中去取。 TablePage的结构 ok看到这里有疑问了？ 那么多的信息都存在那里， 这继承的加上初始化的也不够啊。 答案在这里👇 通过偏移量直接在page的剩余空间里去定义各种变量。\n==通过InsertTuple（）函数了解详细结构==\n直接看源代码：\nif (tuple.size_ + 32 \u003e BUSTUB_PAGE_SIZE) { // larger than one page size txn-\u003eSetState(TransactionState::ABORTED); return false; } auto cur_page = static_cast\u003cTablePage *\u003e(buffer_pool_manager_-\u003eFetchPage(first_page_id_)); if (cur_page == nullptr) { txn-\u003eSetState(TransactionState::ABORTED); return false; } 这主要是判断一些前置条件的合法性 为什么要用tuple的大小+32进行比较呢？ 文末给出答案\n在第一页中进行插入，如果没有足够的空间就开一个新页然后插进去 ⚠️需要注意的是，在离开第一页的时候仍然要持有写锁，因为还要写next_page_id变量. 💡跟随代码跳转到TablePage::InserTuple().\nauto TablePage::InsertTuple(const Tuple \u0026tuple, RID * rid, Transaction * txn, LockManager * lock_manager,LogManager * log_manager) -\u003e bool{} 👆是函数的定义。\n开始主要还是判断空间是否够，不够的话直接返回插入失败。 剩下的情况就是空间足够可以进行插入操作然后返回成功。 然后就是对内部的一个变量的改变。主要是数量的改变和指针指向的改变 数量自然是加一，指向空位置的指针也要往回走这个tuple.size()的大小。 💡返回失败之后那自然就要找下一个page，那么就会出现两种情况。\n下一个有page那就直接取然后插入 下一个没page那就new一个page然后初始化 看到这其实整个bustub的架构已经差不多清晰了\nTuples 每一次插入的最小单元tuple到底是什么东西呢？\n这个可以简单的理解为表中的一行。 👇是tuple初始化的过程， 💡 ==RID== 由一个slot_num_和page_id_组成。相当于一个坐标，快速定位在page中的位置。 目前就这么多，剩下的细节等待以后再补充吧。\n复杂算子的结构 task1中基本上所有的算子实现都已经给出了，而且整体结构也都比较简单直白。 接下来主要梳理一下task2的算子结构，🙃。\n不记录一下感觉源码直接从大脑溜走了，一点也记不住。\nAggregation \u0026 Join Executors Aggregation 这个算子相对来说就是比较复杂的一个东西了，我现在其实还不是很明白这到底是是个什么东西。 这个算子的一个特别之处就是：Aggregation 是 pipeline breaker。也就是说，Aggregation 算子会打破 iteration model 的规则。原因是，在 Aggregation 的 Init() 函数中，我们就要将所有结果全部计算出来。原因很简单，比如下面这条 sql：\nSELECT t.x, max(t.y) FROM t GROUP BY t.x; SimpleAggregationHashTable,在这个hash表中维护的key和value分别是AggregateKey,AggregaValue. 其实到这里就已经能大致猜到这两个类型是什么东西。但是为了一探究竟我们还是看到底。\n==AggregaKey==\n从这里我们可以得到两个信息，\n类型是std::vector 看注释的的话这个字段就是group by的字段。 ==AggregaValue==\n得到的信息和上面的类似\n类型是std::vector 这个字段是 value 则是需要 aggregate 的字段的数组。 InsertCombine()\n上边的CombinAggregateValues()是需要自己进行实现的。但是根据留出来的空大致也能猜出来是根据不同的聚合类型把新插入的数据按照给定的规则进行更新. InsertCombin():如果原来的hash表中没有给定的规则，那就创建一个新的记录。如果有的话就调用上述的函数，讲哈希表中已经存在的按照既定规则出来的值进行更新。 为什么在插入的过程中需要更新呢？ 原因也是非常简单了—\u003e 加入规则是找一个最大的数，这个时候进来的这个数比表中原来的最大的数大，那自然就需要进行改变。\n所以上述的这个函数实现我想大致思路已经出来了，把每一个新的进来的数据和原来的里面存的数据进行比较，按照规则判定是否需要更新。\n==举个例子==\nSELECT min(t.z), max(t.z), sum(t.z) , count(t.z) FROM t GROUP BY t.x, t.y; 在这个上述过程中函数中每个变量对应的是什么？\nAggregateKey 上文提到是group的字段 在这个sql中对应的自然就是「 t.x ，t.y」 AggregateValue 对应的是四个类型 「t.z t.z t.z t.z 」 AggregationType 对应的规则为 「min ，max ，sum ，count」\n通过相对位置来确定对应的规则和值。\nNestedLoopJoin 在chatGPT中对这个循环嵌套给出了如下的解释。但是想实现好确并不容易。\nAndy 在 Lecture 里也详细地量化地对比了各种 Join 的 costs，有兴趣可以看看。\nrisinglight/src/executor/nested_loop_join.rs at main · risinglightdb/risinglight · GitHub\n参照上述的join实现比较的优雅。这也是Bustub的作者参与的一个开源项目，参考原作者的实现我想会有意想不到的奇效。\n==思路整理==\n第一版\n按照课上讲的思路，就是两个循环直接进行嵌套发现有一样的就直接返回\nwhile(leftchild-\u003enext(lefttuple)){ for(auto rightchild : righttuple){ if(leftchild==rightchild){ *tuple = ...; return true; } } } 但是按照上述的思路我们会发现一个很致命的问题，如果右边的tuple里面有重复的值与左面的值匹配的话上述代码只会匹配第一个相等的tuple然后就返回了。\n👇举个例子\nt1.x | t2.x ----- 1 | 0 2 | 1 \u003c--- 3 | 1 4 | 2 按照正确的应该t1.x的1和 t2.x 中的两个1进行匹配 但是上述代码的逻辑只会匹配到箭头指的地方然后就返回了。\n+32去比较的原因是父类page和tablepage的head一共需要预留32b的位置。\n",
+  "wordCount" : "256",
+  "inLanguage": "en",
+  "image": "http://localhost:1313/images/papermod-cover.png","datePublished": "2024-02-21T00:00:00Z",
+  "dateModified": "2024-02-21T00:00:00Z",
+  "author":{
+    "@type": "Person",
+    "name": "Theme PaperMod"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "http://localhost:1313/posts/database/note/bustub%E6%89%A7%E8%A1%8C%E5%99%A8%E6%9E%B6%E6%9E%84%E7%AE%80%E5%8D%95%E5%88%86%E6%9E%90/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "JiaLog",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "http://localhost:1313/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="http://localhost:1313/" accesskey="h" title="JiaLog (Alt + H)">JiaLog</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="http://localhost:1313/" title="Home">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/posts/" title="Blog">
+                    <span>Blog</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/essay/" title="Essay">
+                    <span>Essay</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/archives" title="Archive">
+                    <span>Archive</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/search/" title="Search (Alt &#43; /)" accesskey=/>
+                    <span>Search</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/tags/" title="Tags">
+                    <span>Tags</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="http://localhost:1313/">Home</a>&nbsp;»&nbsp;<a href="http://localhost:1313/posts/">Posts</a></div>
+    <h1 class="post-title entry-hint-parent">
+      Bustub架构简单分析
+    </h1>
+    <div class="post-meta"><span title='2024-02-21 00:00:00 +0000 UTC'>February 21, 2024</span>&nbsp;·&nbsp;2 min&nbsp;·&nbsp;Theme PaperMod&nbsp;|&nbsp;<a href="https://github.com/adityatelange/hugo-PaperMod/tree/exampleSite/content/posts/Database/Note/Bustub%e6%89%a7%e8%a1%8c%e5%99%a8%e6%9e%b6%e6%9e%84%e7%ae%80%e5%8d%95%e5%88%86%e6%9e%90.md" rel="noopener noreferrer" target="_blank">Suggest Changes</a>
+
+</div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#%e5%86%99%e5%9c%a8%e5%89%8d%e9%9d%a2" aria-label="写在前面">写在前面</a></li>
+                <li>
+                    <a href="#%e6%9e%b6%e6%9e%84%e6%80%bb%e8%a7%88" aria-label="架构总览">架构总览</a></li>
+                <li>
+                    <a href="#catalog" aria-label="Catalog">Catalog</a></li>
+                <li>
+                    <a href="#tableinfo" aria-label="TableInfo">TableInfo</a><ul>
+                        
+                <li>
+                    <a href="#%e4%bb%80%e4%b9%88%e6%98%afschema" aria-label="什么是Schema">什么是Schema</a></li></ul>
+                </li>
+                <li>
+                    <a href="#tableheap" aria-label="TableHeap">TableHeap</a><ul>
+                        
+                <li>
+                    <a href="#tablepage%e7%9a%84%e7%bb%93%e6%9e%84" aria-label="TablePage的结构">TablePage的结构</a></li></ul>
+                </li>
+                <li>
+                    <a href="#tuples" aria-label="Tuples">Tuples</a></li>
+                <li>
+                    <a href="#%e5%a4%8d%e6%9d%82%e7%ae%97%e5%ad%90%e7%9a%84%e7%bb%93%e6%9e%84" aria-label="复杂算子的结构">复杂算子的结构</a><ul>
+                        
+                <li>
+                    <a href="#aggregation--join-executors" aria-label="Aggregation &amp; Join Executors">Aggregation &amp; Join Executors</a><ul>
+                        
+                <li>
+                    <a href="#aggregation" aria-label="Aggregation">Aggregation</a></li>
+                <li>
+                    <a href="#nestedloopjoin" aria-label="NestedLoopJoin">NestedLoopJoin</a>
+                </li>
+            </ul>
+            </li>
+            </ul>
+            </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><h2 id="写在前面">写在前面<a hidden class="anchor" aria-hidden="true" href="#写在前面">#</a></h2>
+<p>在这篇文章中我们先抛开SQL在bustub的中的历程，直接快进到最后开始执行的阶段，这篇文章只关注设计上的细节。</p>
+<p>至于如何理顺这些细节在[[CMU15-445 Project3 - Query Execution]]文章中会有详细的介绍，这里就不再赘述。😃</p>
+<h2 id="架构总览">架构总览<a hidden class="anchor" aria-hidden="true" href="#架构总览">#</a></h2>
+<p><img alt="image.png|600" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240221212132.png"></p>
+<p>上图中catalog其实不是特别准确，按照我的理解应该是下面这种情况👇。通过一个table_id双向映射表的名字和实体table。
+<img alt="image.png|600" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240221212842.png"></p>
+<p>接下来就按照从上到下的顺序依次介绍各个部分的结构。</p>
+<h2 id="catalog">Catalog<a hidden class="anchor" aria-hidden="true" href="#catalog">#</a></h2>
+<p>下面这个图是是整个catalog关于table的。👇这里引出了<code>TableInfo</code>.
+<img alt="image.png|600" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240221221311.png"></p>
+<p>Catalog中不仅仅包含table的信息还储存了index的信息。这里引出了<code>IndexInfo</code>,但是后边用的不是很多。
+<img alt="image.png|600" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240221222700.png"></p>
+<p>接下来看<code>TableInfo</code>的组成。（TableInfo的定义就在Catalog.h文件中）</p>
+<h2 id="tableinfo">TableInfo<a hidden class="anchor" aria-hidden="true" href="#tableinfo">#</a></h2>
+<p><img alt="主要成员变量|600" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240221223744.png"></p>
+<ul>
+<li>name_:就是表的名字</li>
+<li>table_: 是一个每个节点都是tablepage的双向链表</li>
+<li>oid_: 顾名思义就是表的id</li>
+<li>Schema_：其实到现在我都没有很弄懂这个是干什么的东西，但是chat给出了答案。</li>
+</ul>
+<h3 id="什么是schema">什么是Schema<a hidden class="anchor" aria-hidden="true" href="#什么是schema">#</a></h3>
+<p><img alt="image.png|600" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240221224249.png">
+按照我的理解应该是一个类似于表头的包含各种配置信息的一个抽象集合。现在就看看源码。👇
+<img alt="image.png|600" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240221225429.png"></p>
+<ul>
+<li>在bustub中schema的信息似乎没有包含很多，就是对每一个列的数据类型约束进行了记录。以及对所有的列进行一个汇总，方便获取到每一个列。
+<img alt="image.png|600" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240221225647.png"></li>
+</ul>
+<p>==Column==</p>
+<p>实际上每个列的实现实体是<code>Column</code>，在这个实体中包含<strong>列名，数据类型，长度</strong>等基本信息。
+<img alt="image.png|600" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240221230318.png"></p>
+<p>⚠️值得注意的是column对于<code>varchar</code>单独做了处理🙂,变长数组终究还是不一样啊。
+<img alt="image.png|600" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240221231559.png"></p>
+<h2 id="tableheap">TableHeap<a hidden class="anchor" aria-hidden="true" href="#tableheap">#</a></h2>
+<p>实质上就是配合<code>TablePage</code>里面的信息构成的双向链表，我觉得这个设计真的非常的巧妙。只用了基本的<code>pre_page_id</code> 和<code>next_page_id</code>这两个变量就把双向链表给建立起来而且耦合度非常的低。</p>
+<p><img alt="image.png|600" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240221233636.png"></p>
+<ul>
+<li>first_page_id_: 就是第一个pageid</li>
+<li>bufferpool：所有的page都需要从bufferpool中去取。</li>
+</ul>
+<h3 id="tablepage的结构">TablePage的结构<a hidden class="anchor" aria-hidden="true" href="#tablepage的结构">#</a></h3>
+<p><img alt="image.png|600" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240222001937.png"></p>
+<p><img alt="image.png|600" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240222001143.png"></p>
+<p>ok看到这里有疑问了？ 那么多的信息都存在那里， 这继承的加上初始化的也不够啊。
+答案在这里👇
+<img alt="image.png|600" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240222001417.png"></p>
+<p>通过<code>偏移量</code>直接在page的剩余空间里去定义各种变量。</p>
+<p>==通过InsertTuple（）函数了解详细结构==</p>
+<p>直接看源代码：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"> <span class="k">if</span> <span class="p">(</span><span class="n">tuple</span><span class="p">.</span><span class="n">size_</span> <span class="o">+</span> <span class="mi">32</span> <span class="o">&gt;</span> <span class="n">BUSTUB_PAGE_SIZE</span><span class="p">)</span> <span class="p">{</span> 
+</span></span><span class="line"><span class="cl">  <span class="c1">// larger than one page size
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">txn</span><span class="o">-&gt;</span><span class="n">SetState</span><span class="p">(</span><span class="n">TransactionState</span><span class="o">::</span><span class="n">ABORTED</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="nb">false</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="k">auto</span> <span class="n">cur_page</span> <span class="o">=</span> <span class="k">static_cast</span><span class="o">&lt;</span><span class="n">TablePage</span> <span class="o">*&gt;</span><span class="p">(</span><span class="n">buffer_pool_manager_</span><span class="o">-&gt;</span><span class="n">FetchPage</span><span class="p">(</span><span class="n">first_page_id_</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="n">cur_page</span> <span class="o">==</span> <span class="k">nullptr</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">txn</span><span class="o">-&gt;</span><span class="n">SetState</span><span class="p">(</span><span class="n">TransactionState</span><span class="o">::</span><span class="n">ABORTED</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="nb">false</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span></code></pre></div><ul>
+<li>这主要是判断一些前置条件的合法性</li>
+</ul>
+<p><em>为什么要用tuple的大小+32进行比较呢？</em> 文末给出答案</p>
+<p><img alt="image.png|800" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240222002633.png"></p>
+<ul>
+<li>在第一页中进行插入，如果没有足够的空间就开一个新页然后插进去</li>
+<li>⚠️需要注意的是，在离开第一页的时候<strong>仍然要持有写锁</strong>，因为还要写<code>next_page_id</code>变量.</li>
+</ul>
+<p>💡跟随代码跳转到<code>TablePage::InserTuple()</code>.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">auto</span> <span class="n">TablePage</span><span class="o">::</span><span class="n">InsertTuple</span><span class="p">(</span><span class="k">const</span> <span class="n">Tuple</span> <span class="o">&amp;</span><span class="n">tuple</span><span class="p">,</span> <span class="n">RID</span> <span class="o">*</span> <span class="n">rid</span><span class="p">,</span> <span class="n">Transaction</span> <span class="o">*</span> <span class="n">txn</span><span class="p">,</span> <span class="n">LockManager</span> <span class="o">*</span> <span class="n">lock_manager</span><span class="p">,</span><span class="n">LogManager</span> <span class="o">*</span> <span class="n">log_manager</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">bool</span><span class="p">{}</span>
+</span></span></code></pre></div><p>👆是函数的定义。</p>
+<p><img alt="image.png|725" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240222003627.png"></p>
+<ul>
+<li>开始主要还是判断空间是否够，不够的话直接返回插入失败。</li>
+<li>剩下的情况就是空间足够可以进行插入操作然后返回成功。</li>
+</ul>
+<p><img alt="image.png|600" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240222004046.png"></p>
+<ul>
+<li>然后就是对内部的一个变量的改变。主要是数量的改变和指针指向的改变</li>
+<li>数量自然是加一，指向空位置的指针也要往回走这个tuple.size()的大小。</li>
+</ul>
+<p>💡返回失败之后那自然就要找下一个page，那么就会出现两种情况。</p>
+<ul>
+<li>下一个有page那就直接取然后插入</li>
+<li>下一个没page那就new一个page然后初始化</li>
+</ul>
+<p><img alt="image.png|600" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240222011534.png"></p>
+<p><img alt="image.png|650" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240222011735.png"></p>
+<p>看到这其实整个bustub的架构已经差不多清晰了</p>
+<h2 id="tuples">Tuples<a hidden class="anchor" aria-hidden="true" href="#tuples">#</a></h2>
+<p>每一次插入的最小单元<code>tuple</code>到底是什么东西呢？</p>
+<p><img alt="image.png|650" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240222015143.png"></p>
+<p><img alt="image.png|650" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240222014021.png">
+这个可以简单的理解为表中的一行。
+👇是tuple初始化的过程，
+<img alt="image.png|650" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240222015023.png"></p>
+<p>💡 ==RID==
+<img alt="image.png|650" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240222015237.png"></p>
+<ul>
+<li>由一个slot_num_和page_id_组成。相当于一个坐标，快速定位在page中的位置。</li>
+</ul>
+<p>目前就这么多，剩下的细节等待以后再补充吧。</p>
+<h2 id="复杂算子的结构">复杂算子的结构<a hidden class="anchor" aria-hidden="true" href="#复杂算子的结构">#</a></h2>
+<p>task1中基本上所有的算子实现都已经给出了，而且整体结构也都比较简单直白。
+接下来主要梳理一下task2的算子结构，🙃。</p>
+<p>不记录一下感觉源码直接从大脑溜走了，一点也记不住。</p>
+<h3 id="aggregation--join-executors">Aggregation &amp; Join Executors<a hidden class="anchor" aria-hidden="true" href="#aggregation--join-executors">#</a></h3>
+<h4 id="aggregation">Aggregation<a hidden class="anchor" aria-hidden="true" href="#aggregation">#</a></h4>
+<p>这个算子相对来说就是比较复杂的一个东西了，我现在其实还不是很明白这到底是是个什么东西。
+<img alt="image.png|675" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240225213804.png">
+这个算子的一个特别之处就是：Aggregation 是 pipeline breaker。也就是说，Aggregation 算子会打破 iteration model 的规则。原因是，在 Aggregation 的 <code>Init()</code> 函数中，我们就要将所有结果全部计算出来。原因很简单，比如下面这条 sql：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="n">t</span><span class="p">.</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="k">max</span><span class="p">(</span><span class="n">t</span><span class="p">.</span><span class="n">y</span><span class="p">)</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">t</span><span class="w"> </span><span class="k">GROUP</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">t</span><span class="p">.</span><span class="n">x</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></div><p><code>SimpleAggregationHashTable</code>,在这个hash表中维护的key和value分别是<code>AggregateKey</code>,<code>AggregaValue</code>.
+<img alt="image.png|675" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240225223229.png">
+其实到这里就已经能大致猜到这两个类型是什么东西。但是为了一探究竟我们还是看到底。</p>
+<p>==AggregaKey==</p>
+<p><img alt="image.png|675" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240225223840.png">
+从这里我们可以得到两个信息，</p>
+<ul>
+<li>类型是<code>std::vector&lt;Value&gt;</code></li>
+<li>看注释的的话这个字段就是<code>group by</code>的字段。</li>
+</ul>
+<p>==AggregaValue==</p>
+<p><img alt="image.png|675" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240225224847.png">
+得到的信息和上面的类似</p>
+<ul>
+<li>类型是<code>std::vector&lt;Value&gt;</code></li>
+<li>这个字段是 value 则是需要 aggregate 的字段的数组。</li>
+</ul>
+<p><code>InsertCombine()</code></p>
+<p><img alt="image.png|675" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240225232225.png"></p>
+<ul>
+<li>上边的<code>CombinAggregateValues()</code>是需要自己进行实现的。但是根据留出来的空大致也能猜出来是根据不同的聚合类型把新插入的数据按照给定的规则进行<code>更新</code>.</li>
+<li><code>InsertCombin()</code>:如果原来的hash表中没有给定的规则，那就创建一个新的记录。如果有的话就调用上述的函数，讲哈希表中已经存在的按照既定规则出来的值进行更新。</li>
+</ul>
+<p>为什么在插入的过程中需要<code>更新</code>呢？ 原因也是非常简单了&mdash;&gt; 加入规则是找一个最大的数，这个时候进来的这个数比表中原来的最大的数大，那自然就需要进行改变。</p>
+<p>所以上述的这个函数实现我想大致思路已经出来了，把每一个新的进来的数据和原来的里面存的数据进行比较，按照规则判定是否需要更新。</p>
+<hr>
+<p>==举个例子==</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="k">min</span><span class="p">(</span><span class="n">t</span><span class="p">.</span><span class="n">z</span><span class="p">),</span><span class="w"> </span><span class="k">max</span><span class="p">(</span><span class="n">t</span><span class="p">.</span><span class="n">z</span><span class="p">),</span><span class="w"> </span><span class="k">sum</span><span class="p">(</span><span class="n">t</span><span class="p">.</span><span class="n">z</span><span class="p">)</span><span class="w"> </span><span class="p">,</span><span class="w"> </span><span class="k">count</span><span class="p">(</span><span class="n">t</span><span class="p">.</span><span class="n">z</span><span class="p">)</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">t</span><span class="w"> </span><span class="k">GROUP</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">t</span><span class="p">.</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">t</span><span class="p">.</span><span class="n">y</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></div><p>在这个上述过程中函数中每个变量对应的是什么？</p>
+<p><code>AggregateKey</code>  上文提到是group的字段 在这个sql中对应的自然就是<code>「 t.x ，t.y」</code>
+<code>AggregateValue</code>  对应的是四个类型 <code>「t.z t.z t.z t.z 」</code>
+<code>AggregationType</code>  对应的规则为 <code>「min ，max ，sum ，count」</code></p>
+<p>通过相对位置来确定对应的规则和值。</p>
+<h4 id="nestedloopjoin">NestedLoopJoin<a hidden class="anchor" aria-hidden="true" href="#nestedloopjoin">#</a></h4>
+<p>在chatGPT中对这个循环嵌套给出了如下的解释。但是想实现好确并不容易。</p>
+<p><img alt="Clip_2024-03-10_19-05-10.png|675" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/Clip_2024-03-10_19-05-10.png"></p>
+<p>Andy 在 Lecture 里也详细地量化地对比了各种 Join 的 costs，有兴趣可以看看。</p>
+<p><a href="https://github.com/risinglightdb/risinglight/blob/main/src/executor/nested_loop_join.rs">risinglight/src/executor/nested_loop_join.rs at main · risinglightdb/risinglight · GitHub</a></p>
+<p>参照上述的join实现比较的优雅。这也是Bustub的作者参与的一个开源项目，参考原作者的实现我想会有意想不到的奇效。</p>
+<p>==思路整理==</p>
+<p><code>第一版</code></p>
+<p>按照课上讲的思路，就是两个循环直接进行嵌套发现有一样的就直接返回</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">while</span><span class="p">(</span><span class="n">leftchild</span><span class="o">-&gt;</span><span class="n">next</span><span class="p">(</span><span class="n">lefttuple</span><span class="p">)){</span>
+</span></span><span class="line"><span class="cl"><span class="k">for</span><span class="p">(</span><span class="k">auto</span> <span class="nl">rightchild</span> <span class="p">:</span> <span class="n">righttuple</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">   <span class="k">if</span><span class="p">(</span><span class="n">leftchild</span><span class="o">==</span><span class="n">rightchild</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">   <span class="o">*</span><span class="n">tuple</span> <span class="o">=</span> <span class="p">...;</span>
+</span></span><span class="line"><span class="cl">   <span class="k">return</span> <span class="nb">true</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">   <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>但是按照上述的思路我们会发现一个很致命的问题，如果右边的tuple里面有重复的值与左面的值匹配的话上述代码只会匹配<code>第一个</code>相等的tuple然后就返回了。</p>
+<p>👇举个例子</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-txt" data-lang="txt"><span class="line"><span class="cl"> t1.x | t2.x
+</span></span><span class="line"><span class="cl">	-----
+</span></span><span class="line"><span class="cl">	1 | 0
+</span></span><span class="line"><span class="cl">	2 | 1 &lt;---
+</span></span><span class="line"><span class="cl">	3 | 1
+</span></span><span class="line"><span class="cl">	4 | 2
+</span></span></code></pre></div><p>按照正确的应该t1.x的1和 t2.x 中的两个1进行匹配
+但是上述代码的逻辑只会匹配到箭头指的地方然后就返回了。</p>
+<hr>
+<p>+32去比较的原因是父类page和tablepage的head一共需要预留32b的位置。</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="http://localhost:1313/tags/note/">Note</a></li>
+      <li><a href="http://localhost:1313/tags/cmu15-445/">CMU15-445</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="http://localhost:1313/posts/database/note/cmu15-445%E6%80%BB%E7%BB%93/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>CMU15-445总结</span>
+  </a>
+  <a class="next" href="http://localhost:1313/posts/database/note/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%BA%8B%E5%8A%A1/">
+    <span class="title">Next »</span>
+    <br>
+    <span>数据库事务</span>
+  </a>
+</nav>
+
+
+<ul class="share-buttons">
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share Bustub架构简单分析 on x"
+            href="https://x.com/intent/tweet/?text=Bustub%e6%9e%b6%e6%9e%84%e7%ae%80%e5%8d%95%e5%88%86%e6%9e%90&amp;url=http%3a%2f%2flocalhost%3a1313%2fposts%2fdatabase%2fnote%2fbustub%25E6%2589%25A7%25E8%25A1%258C%25E5%2599%25A8%25E6%259E%25B6%25E6%259E%2584%25E7%25AE%2580%25E5%258D%2595%25E5%2588%2586%25E6%259E%2590%2f&amp;hashtags=Note%2cCMU15-445">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M512 62.554 L 512 449.446 C 512 483.97 483.97 512 449.446 512 L 62.554 512 C 28.03 512 0 483.97 0 449.446 L 0 62.554 C 0 28.03 28.029 0 62.554 0 L 449.446 0 C 483.971 0 512 28.03 512 62.554 Z M 269.951 190.75 L 182.567 75.216 L 56 75.216 L 207.216 272.95 L 63.9 436.783 L 125.266 436.783 L 235.9 310.383 L 332.567 436.783 L 456 436.783 L 298.367 228.367 L 432.367 75.216 L 371.033 75.216 Z M 127.633 110 L 164.101 110 L 383.481 400.065 L 349.5 400.065 Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share Bustub架构简单分析 on linkedin"
+            href="https://www.linkedin.com/shareArticle?mini=true&amp;url=http%3a%2f%2flocalhost%3a1313%2fposts%2fdatabase%2fnote%2fbustub%25E6%2589%25A7%25E8%25A1%258C%25E5%2599%25A8%25E6%259E%25B6%25E6%259E%2584%25E7%25AE%2580%25E5%258D%2595%25E5%2588%2586%25E6%259E%2590%2f&amp;title=Bustub%e6%9e%b6%e6%9e%84%e7%ae%80%e5%8d%95%e5%88%86%e6%9e%90&amp;summary=Bustub%e6%9e%b6%e6%9e%84%e7%ae%80%e5%8d%95%e5%88%86%e6%9e%90&amp;source=http%3a%2f%2flocalhost%3a1313%2fposts%2fdatabase%2fnote%2fbustub%25E6%2589%25A7%25E8%25A1%258C%25E5%2599%25A8%25E6%259E%25B6%25E6%259E%2584%25E7%25AE%2580%25E5%258D%2595%25E5%2588%2586%25E6%259E%2590%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-288.985,423.278l0,-225.717l-75.04,0l0,225.717l75.04,0Zm270.539,0l0,-129.439c0,-69.333 -37.018,-101.586 -86.381,-101.586c-39.804,0 -57.634,21.891 -67.617,37.266l0,-31.958l-75.021,0c0.995,21.181 0,225.717 0,225.717l75.02,0l0,-126.056c0,-6.748 0.486,-13.492 2.474,-18.315c5.414,-13.475 17.767,-27.434 38.494,-27.434c27.135,0 38.007,20.707 38.007,51.037l0,120.768l75.024,0Zm-307.552,-334.556c-25.674,0 -42.448,16.879 -42.448,39.002c0,21.658 16.264,39.002 41.455,39.002l0.484,0c26.165,0 42.452,-17.344 42.452,-39.002c-0.485,-22.092 -16.241,-38.954 -41.943,-39.002Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share Bustub架构简单分析 on reddit"
+            href="https://reddit.com/submit?url=http%3a%2f%2flocalhost%3a1313%2fposts%2fdatabase%2fnote%2fbustub%25E6%2589%25A7%25E8%25A1%258C%25E5%2599%25A8%25E6%259E%25B6%25E6%259E%2584%25E7%25AE%2580%25E5%258D%2595%25E5%2588%2586%25E6%259E%2590%2f&title=Bustub%e6%9e%b6%e6%9e%84%e7%ae%80%e5%8d%95%e5%88%86%e6%9e%90">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-3.446,265.638c0,-22.964 -18.616,-41.58 -41.58,-41.58c-11.211,0 -21.361,4.457 -28.841,11.666c-28.424,-20.508 -67.586,-33.757 -111.204,-35.278l18.941,-89.121l61.884,13.157c0.756,15.734 13.642,28.29 29.56,28.29c16.407,0 29.706,-13.299 29.706,-29.701c0,-16.403 -13.299,-29.702 -29.706,-29.702c-11.666,0 -21.657,6.792 -26.515,16.578l-69.105,-14.69c-1.922,-0.418 -3.939,-0.042 -5.585,1.036c-1.658,1.073 -2.811,2.761 -3.224,4.686l-21.152,99.438c-44.258,1.228 -84.046,14.494 -112.837,35.232c-7.468,-7.164 -17.589,-11.591 -28.757,-11.591c-22.965,0 -41.585,18.616 -41.585,41.58c0,16.896 10.095,31.41 24.568,37.918c-0.639,4.135 -0.99,8.328 -0.99,12.576c0,63.977 74.469,115.836 166.33,115.836c91.861,0 166.334,-51.859 166.334,-115.836c0,-4.218 -0.347,-8.387 -0.977,-12.493c14.564,-6.47 24.735,-21.034 24.735,-38.001Zm-119.474,108.193c-20.27,20.241 -59.115,21.816 -70.534,21.816c-11.428,0 -50.277,-1.575 -70.522,-21.82c-3.007,-3.008 -3.007,-7.882 0,-10.889c3.003,-2.999 7.882,-3.003 10.885,0c12.777,12.781 40.11,17.317 59.637,17.317c19.522,0 46.86,-4.536 59.657,-17.321c3.016,-2.999 7.886,-2.995 10.885,0.008c3.008,3.011 3.003,7.882 -0.008,10.889Zm-5.23,-48.781c-16.373,0 -29.701,-13.324 -29.701,-29.698c0,-16.381 13.328,-29.714 29.701,-29.714c16.378,0 29.706,13.333 29.706,29.714c0,16.374 -13.328,29.698 -29.706,29.698Zm-160.386,-29.702c0,-16.381 13.328,-29.71 29.714,-29.71c16.369,0 29.689,13.329 29.689,29.71c0,16.373 -13.32,29.693 -29.689,29.693c-16.386,0 -29.714,-13.32 -29.714,-29.693Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share Bustub架构简单分析 on facebook"
+            href="https://facebook.com/sharer/sharer.php?u=http%3a%2f%2flocalhost%3a1313%2fposts%2fdatabase%2fnote%2fbustub%25E6%2589%25A7%25E8%25A1%258C%25E5%2599%25A8%25E6%259E%25B6%25E6%259E%2584%25E7%25AE%2580%25E5%258D%2595%25E5%2588%2586%25E6%259E%2590%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-106.468,0l0,-192.915l66.6,0l12.672,-82.621l-79.272,0l0,-53.617c0,-22.603 11.073,-44.636 46.58,-44.636l36.042,0l0,-70.34c0,0 -32.71,-5.582 -63.982,-5.582c-65.288,0 -107.96,39.569 -107.96,111.204l0,62.971l-72.573,0l0,82.621l72.573,0l0,192.915l-191.104,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share Bustub架构简单分析 on whatsapp"
+            href="https://api.whatsapp.com/send?text=Bustub%e6%9e%b6%e6%9e%84%e7%ae%80%e5%8d%95%e5%88%86%e6%9e%90%20-%20http%3a%2f%2flocalhost%3a1313%2fposts%2fdatabase%2fnote%2fbustub%25E6%2589%25A7%25E8%25A1%258C%25E5%2599%25A8%25E6%259E%25B6%25E6%259E%2584%25E7%25AE%2580%25E5%258D%2595%25E5%2588%2586%25E6%259E%2590%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-58.673,127.703c-33.842,-33.881 -78.847,-52.548 -126.798,-52.568c-98.799,0 -179.21,80.405 -179.249,179.234c-0.013,31.593 8.241,62.428 23.927,89.612l-25.429,92.884l95.021,-24.925c26.181,14.28 55.659,21.807 85.658,21.816l0.074,0c98.789,0 179.206,-80.413 179.247,-179.243c0.018,-47.895 -18.61,-92.93 -52.451,-126.81Zm-126.797,275.782l-0.06,0c-26.734,-0.01 -52.954,-7.193 -75.828,-20.767l-5.441,-3.229l-56.386,14.792l15.05,-54.977l-3.542,-5.637c-14.913,-23.72 -22.791,-51.136 -22.779,-79.287c0.033,-82.142 66.867,-148.971 149.046,-148.971c39.793,0.014 77.199,15.531 105.329,43.692c28.128,28.16 43.609,65.592 43.594,105.4c-0.034,82.149 -66.866,148.983 -148.983,148.984Zm81.721,-111.581c-4.479,-2.242 -26.499,-13.075 -30.604,-14.571c-4.105,-1.495 -7.091,-2.241 -10.077,2.241c-2.986,4.483 -11.569,14.572 -14.182,17.562c-2.612,2.988 -5.225,3.364 -9.703,1.12c-4.479,-2.241 -18.91,-6.97 -36.017,-22.23c-13.314,-11.876 -22.304,-26.542 -24.916,-31.026c-2.612,-4.484 -0.279,-6.908 1.963,-9.14c2.016,-2.007 4.48,-5.232 6.719,-7.847c2.24,-2.615 2.986,-4.484 4.479,-7.472c1.493,-2.99 0.747,-5.604 -0.374,-7.846c-1.119,-2.241 -10.077,-24.288 -13.809,-33.256c-3.635,-8.733 -7.327,-7.55 -10.077,-7.688c-2.609,-0.13 -5.598,-0.158 -8.583,-0.158c-2.986,0 -7.839,1.121 -11.944,5.604c-4.105,4.484 -15.675,15.32 -15.675,37.364c0,22.046 16.048,43.342 18.287,46.332c2.24,2.99 31.582,48.227 76.511,67.627c10.685,4.615 19.028,7.371 25.533,9.434c10.728,3.41 20.492,2.929 28.209,1.775c8.605,-1.285 26.499,-10.833 30.231,-21.295c3.732,-10.464 3.732,-19.431 2.612,-21.298c-1.119,-1.869 -4.105,-2.99 -8.583,-5.232Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share Bustub架构简单分析 on telegram"
+            href="https://telegram.me/share/url?text=Bustub%e6%9e%b6%e6%9e%84%e7%ae%80%e5%8d%95%e5%88%86%e6%9e%90&amp;url=http%3a%2f%2flocalhost%3a1313%2fposts%2fdatabase%2fnote%2fbustub%25E6%2589%25A7%25E8%25A1%258C%25E5%2599%25A8%25E6%259E%25B6%25E6%259E%2584%25E7%25AE%2580%25E5%258D%2595%25E5%2588%2586%25E6%259E%2590%2f">
+            <svg version="1.1" xml:space="preserve" viewBox="2 2 28 28" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M26.49,29.86H5.5a3.37,3.37,0,0,1-2.47-1,3.35,3.35,0,0,1-1-2.47V5.48A3.36,3.36,0,0,1,3,3,3.37,3.37,0,0,1,5.5,2h21A3.38,3.38,0,0,1,29,3a3.36,3.36,0,0,1,1,2.46V26.37a3.35,3.35,0,0,1-1,2.47A3.38,3.38,0,0,1,26.49,29.86Zm-5.38-6.71a.79.79,0,0,0,.85-.66L24.73,9.24a.55.55,0,0,0-.18-.46.62.62,0,0,0-.41-.17q-.08,0-16.53,6.11a.59.59,0,0,0-.41.59.57.57,0,0,0,.43.52l4,1.24,1.61,4.83a.62.62,0,0,0,.63.43.56.56,0,0,0,.4-.17L16.54,20l4.09,3A.9.9,0,0,0,21.11,23.15ZM13.8,20.71l-1.21-4q8.72-5.55,8.78-5.55c.15,0,.23,0,.23.16a.18.18,0,0,1,0,.06s-2.51,2.3-7.52,6.8Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share Bustub架构简单分析 on ycombinator"
+            href="https://news.ycombinator.com/submitlink?t=Bustub%e6%9e%b6%e6%9e%84%e7%ae%80%e5%8d%95%e5%88%86%e6%9e%90&u=http%3a%2f%2flocalhost%3a1313%2fposts%2fdatabase%2fnote%2fbustub%25E6%2589%25A7%25E8%25A1%258C%25E5%2599%25A8%25E6%259E%25B6%25E6%259E%2584%25E7%25AE%2580%25E5%258D%2595%25E5%2588%2586%25E6%259E%2590%2f">
+            <svg version="1.1" xml:space="preserve" width="30px" height="30px" viewBox="0 0 512 512" fill="currentColor"
+                xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape">
+                <path
+                    d="M449.446 0C483.971 0 512 28.03 512 62.554L512 449.446C512 483.97 483.97 512 449.446 512L62.554 512C28.03 512 0 483.97 0 449.446L0 62.554C0 28.03 28.029 0 62.554 0L449.446 0ZM183.8767 87.9921H121.8427L230.6673 292.4508V424.0079H281.3328V292.4508L390.1575 87.9921H328.1233L256 238.2489z" />
+            </svg>
+        </a>
+    </li>
+</ul>
+
+  </footer><script src="https://giscus.app/client.js"
+        data-repo="WJLE007/comment"
+        data-repo-id="R_kgDOOTuC9Q"
+        data-category="General"
+        data-category-id="DIC_kwDOOTuC9c4Cow7G"
+        data-mapping="pathname"
+        data-strict="0"
+        data-reactions-enabled="1"
+        data-emit-metadata="0"
+        data-input-position="bottom"
+        data-theme="preferred_color_scheme"
+        data-lang="zh-CN"
+        crossorigin="anonymous"
+        async>
+</script>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>© <a href="https://jialog.top">JiaLog</a> 豫ICP备2024077894号-1 苏公网安备32031202000962号 32031202000962</span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

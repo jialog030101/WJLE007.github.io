@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>CMU15-445- Project #1 - Buffer Pool Manager | JiaLog</title>
+<meta name="keywords" content="Project, CMU15-445">
+<meta name="description" content="环境搭建
+按照P0的指导中进行环境的搭建，由于我本人现在时WIN平台，课程没有提供一键配置环境的脚本，所以我选择云服务器进行环境的构建，很稳。
+但是我的云服务器配置只有2核2G在编译的时候会爆内存。这里还有个故事，在爆内存之后我已经意识到这个问题，我给阿里云客服提了个工单试图能白嫖一些配置，客服还是很有水平的，直接就分析出来我是内存爆了导致的，但是直接建议我加钱升级配置，不告诉我设置swap分区，有点不厚道了。
+话说回来，设置完swap分区之后就没有再出现过爆内存的现象。用VScode的远程开发，体验还是很不错的。
+Overview
+p1主要是内存管理部分的内容，这门课程的课本和录制视频还是很有必要看一下的。
+主要的任务是以下三个部分：
+
+可扩展的哈希表
+LRU-K的淘汰策略的视线
+Buffer Pool的一个实例
+
+在开始梳理项目之前我想要先解释清楚一下三个任务之间的关系，以及各个部分的负责。
+frame更像是一个载体，而page是其中的内容。打个比方来说，一个仓库（buffer pool）只有100辆货车（frame），而货物（page）成千上万种，每次都是仓库告诉货车需要什么货物然后由货车带着货物来到仓库，而可扩展的哈希表就是登记货车和货物的对应关系。因为只有100辆货车，当每辆车都是满的时候（没有闲置的车辆free_list不为空）就需要根据task2的LRU-K算法挑选出一个符合要求的货车清空后去装载指定的货物。
+而task3就是负责整个的管理和交互。
+大概解释了一下，可能比方不是很恰当，做的时候一定要多看文档和注释，因为漏看注释给我带来了极大的痛苦。
+Task #1 -ExtendibleHashTable
+相关函数
+
+Find(K,V): 查询一个Key是否存在，如果存在则将其V指针指向相关的值，返回true，否则返回false
+Insert(K,V): 插入一个（K，V），如果插入失败需要进行一下步骤的重试：
+
+插入失败肯定是桶满了，但是桶满了分为两种不同的情况。
+一种是global深度和桶的local深度不相同的时候，需要对桶进行重新的分配。
+当两个深度相同的时候说明桶是真的满了，需要对哈希表进行扩展
+
+
+Remove(K): 在哈希表中移除对应的（K，V）对，但是需要进行哈希表缩小的操作。
+IndexOf(K):  当前global深度下的映射规则。
+
+项目架构
+首先要清楚这个是自己动手实现一个可扩展哈希表用于保存frame和page的映射关系的。我觉得首先要明白frame和page之间的关系。不清楚的可以回看上文的解释。
+Bucket 存储桶
+在可可以扩展的哈希表种引入和Bucket的概念，用于解决哈希冲突的问题，每一个Bucket的大小都是固定的，当一个Bucket满了的时候就需要进行哈希表的扩展。
+
+Bucket的组成
+
+
+depth_：表示本地深度的一个标识，用于识别当前的深度是否和全局深度相同。要特别注意这个变量。
+list_：发生哈希冲突时保存多个（K，V）映射的双向链表。
+size：为了保证效率，list的长度不能无限延伸，所以达到一定长度的时候要进行哈希表的扩展。
+
+可扩展的哈希表结构
+
+
+Bucket_size:用于限制每个bucket的list的长度
+dir_:用于哈西运算后保存映射关系。
+global_depth_:全局深度，在插入的时候根据全局深度和局部深度来确定这个桶是否要进行重新的分配。
+num_buckets:用于统计现在一共有多少bucket。
+
+ReHash的过程详解
+
+1.hash的规则是什么样的
+template &lt;typename K, typename V&gt;
+
+auto ExtendibleHashTable&lt;K, V&gt;::IndexOf(const K &amp;key) -&gt; size_t {
+  int mask = (1 &lt;&lt; global_depth_) - 1;
+  return std::hash&lt;K&gt;()(key) &amp; mask;
+
+}
+上述函数就是该哈希表的映射规则，总的来说就是取hash函数值的低global_depth位
+假如现在global_depth_的值为3。
+那么 1 &lt;&lt; global_depth_的值就是8转换为二进制就是 1000 。mask=8-1=7，转换为二进制就是 111.
+mask 的作用就是取一个位数和global_depth_一样的全1的二进制数，为了取低global_depth_位做铺垫。
+现在假如key的值进行完hash之后是 10110100011010 和 mask进行进行 &amp; 的操作之后就变成了 010 （低3位）">
+<meta name="author" content="Theme PaperMod">
+<link rel="canonical" href="http://localhost:1313/posts/database/project/cmu15-445-project1-buffer-pool-manager/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.6da9a63d25a9608bca2f7f907a030e887a7dd3c3f3918e4cc113129361414bda.css" integrity="sha256-bammPSWpYIvKL3&#43;QegMOiHp908PzkY5MwRMSk2FBS9o=" rel="preload stylesheet" as="style">
+<link rel="icon" href="http://localhost:1313/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://localhost:1313/apple-touch-icon.png">
+<link rel="mask-icon" href="http://localhost:1313/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="http://localhost:1313/posts/database/project/cmu15-445-project1-buffer-pool-manager/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:url" content="http://localhost:1313/posts/database/project/cmu15-445-project1-buffer-pool-manager/">
+  <meta property="og:site_name" content="JiaLog">
+  <meta property="og:title" content="CMU15-445- Project #1 - Buffer Pool Manager">
+  <meta property="og:description" content="环境搭建 按照P0的指导中进行环境的搭建，由于我本人现在时WIN平台，课程没有提供一键配置环境的脚本，所以我选择云服务器进行环境的构建，很稳。
+但是我的云服务器配置只有2核2G在编译的时候会爆内存。这里还有个故事，在爆内存之后我已经意识到这个问题，我给阿里云客服提了个工单试图能白嫖一些配置，客服还是很有水平的，直接就分析出来我是内存爆了导致的，但是直接建议我加钱升级配置，不告诉我设置swap分区，有点不厚道了。
+话说回来，设置完swap分区之后就没有再出现过爆内存的现象。用VScode的远程开发，体验还是很不错的。
+Overview p1主要是内存管理部分的内容，这门课程的课本和录制视频还是很有必要看一下的。
+主要的任务是以下三个部分：
+可扩展的哈希表 LRU-K的淘汰策略的视线 Buffer Pool的一个实例 在开始梳理项目之前我想要先解释清楚一下三个任务之间的关系，以及各个部分的负责。
+frame更像是一个载体，而page是其中的内容。打个比方来说，一个仓库（buffer pool）只有100辆货车（frame），而货物（page）成千上万种，每次都是仓库告诉货车需要什么货物然后由货车带着货物来到仓库，而可扩展的哈希表就是登记货车和货物的对应关系。因为只有100辆货车，当每辆车都是满的时候（没有闲置的车辆free_list不为空）就需要根据task2的LRU-K算法挑选出一个符合要求的货车清空后去装载指定的货物。 而task3就是负责整个的管理和交互。
+大概解释了一下，可能比方不是很恰当，做的时候一定要多看文档和注释，因为漏看注释给我带来了极大的痛苦。
+Task #1 -ExtendibleHashTable 相关函数 Find(K,V): 查询一个Key是否存在，如果存在则将其V指针指向相关的值，返回true，否则返回false Insert(K,V): 插入一个（K，V），如果插入失败需要进行一下步骤的重试： 插入失败肯定是桶满了，但是桶满了分为两种不同的情况。 一种是global深度和桶的local深度不相同的时候，需要对桶进行重新的分配。 当两个深度相同的时候说明桶是真的满了，需要对哈希表进行扩展 Remove(K): 在哈希表中移除对应的（K，V）对，但是需要进行哈希表缩小的操作。 IndexOf(K): 当前global深度下的映射规则。 项目架构 首先要清楚这个是自己动手实现一个可扩展哈希表用于保存frame和page的映射关系的。我觉得首先要明白frame和page之间的关系。不清楚的可以回看上文的解释。
+Bucket 存储桶 在可可以扩展的哈希表种引入和Bucket的概念，用于解决哈希冲突的问题，每一个Bucket的大小都是固定的，当一个Bucket满了的时候就需要进行哈希表的扩展。
+Bucket的组成 depth_：表示本地深度的一个标识，用于识别当前的深度是否和全局深度相同。要特别注意这个变量。 list_：发生哈希冲突时保存多个（K，V）映射的双向链表。 size：为了保证效率，list的长度不能无限延伸，所以达到一定长度的时候要进行哈希表的扩展。 可扩展的哈希表结构 Bucket_size:用于限制每个bucket的list的长度 dir_:用于哈西运算后保存映射关系。 global_depth_:全局深度，在插入的时候根据全局深度和局部深度来确定这个桶是否要进行重新的分配。 num_buckets:用于统计现在一共有多少bucket。 ReHash的过程详解 1.hash的规则是什么样的
+template &lt;typename K, typename V&gt; auto ExtendibleHashTable&lt;K, V&gt;::IndexOf(const K &amp;key) -&gt; size_t { int mask = (1 &lt;&lt; global_depth_) - 1; return std::hash&lt;K&gt;()(key) &amp; mask; } 上述函数就是该哈希表的映射规则，总的来说就是取hash函数值的低global_depth位
+假如现在global_depth_的值为3。 那么 1 &lt;&lt; global_depth_的值就是8转换为二进制就是 1000 。mask=8-1=7，转换为二进制就是 111.
+mask 的作用就是取一个位数和global_depth_一样的全1的二进制数，为了取低global_depth_位做铺垫。
+现在假如key的值进行完hash之后是 10110100011010 和 mask进行进行 &amp; 的操作之后就变成了 010 （低3位）">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2023-12-08T00:00:00+00:00">
+    <meta property="article:modified_time" content="2023-12-08T00:00:00+00:00">
+    <meta property="article:tag" content="Project">
+    <meta property="article:tag" content="CMU15-445">
+      <meta property="og:image" content="http://localhost:1313/images/papermod-cover.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://localhost:1313/images/papermod-cover.png">
+<meta name="twitter:title" content="CMU15-445- Project #1 - Buffer Pool Manager">
+<meta name="twitter:description" content="环境搭建
+按照P0的指导中进行环境的搭建，由于我本人现在时WIN平台，课程没有提供一键配置环境的脚本，所以我选择云服务器进行环境的构建，很稳。
+但是我的云服务器配置只有2核2G在编译的时候会爆内存。这里还有个故事，在爆内存之后我已经意识到这个问题，我给阿里云客服提了个工单试图能白嫖一些配置，客服还是很有水平的，直接就分析出来我是内存爆了导致的，但是直接建议我加钱升级配置，不告诉我设置swap分区，有点不厚道了。
+话说回来，设置完swap分区之后就没有再出现过爆内存的现象。用VScode的远程开发，体验还是很不错的。
+Overview
+p1主要是内存管理部分的内容，这门课程的课本和录制视频还是很有必要看一下的。
+主要的任务是以下三个部分：
+
+可扩展的哈希表
+LRU-K的淘汰策略的视线
+Buffer Pool的一个实例
+
+在开始梳理项目之前我想要先解释清楚一下三个任务之间的关系，以及各个部分的负责。
+frame更像是一个载体，而page是其中的内容。打个比方来说，一个仓库（buffer pool）只有100辆货车（frame），而货物（page）成千上万种，每次都是仓库告诉货车需要什么货物然后由货车带着货物来到仓库，而可扩展的哈希表就是登记货车和货物的对应关系。因为只有100辆货车，当每辆车都是满的时候（没有闲置的车辆free_list不为空）就需要根据task2的LRU-K算法挑选出一个符合要求的货车清空后去装载指定的货物。
+而task3就是负责整个的管理和交互。
+大概解释了一下，可能比方不是很恰当，做的时候一定要多看文档和注释，因为漏看注释给我带来了极大的痛苦。
+Task #1 -ExtendibleHashTable
+相关函数
+
+Find(K,V): 查询一个Key是否存在，如果存在则将其V指针指向相关的值，返回true，否则返回false
+Insert(K,V): 插入一个（K，V），如果插入失败需要进行一下步骤的重试：
+
+插入失败肯定是桶满了，但是桶满了分为两种不同的情况。
+一种是global深度和桶的local深度不相同的时候，需要对桶进行重新的分配。
+当两个深度相同的时候说明桶是真的满了，需要对哈希表进行扩展
+
+
+Remove(K): 在哈希表中移除对应的（K，V）对，但是需要进行哈希表缩小的操作。
+IndexOf(K):  当前global深度下的映射规则。
+
+项目架构
+首先要清楚这个是自己动手实现一个可扩展哈希表用于保存frame和page的映射关系的。我觉得首先要明白frame和page之间的关系。不清楚的可以回看上文的解释。
+Bucket 存储桶
+在可可以扩展的哈希表种引入和Bucket的概念，用于解决哈希冲突的问题，每一个Bucket的大小都是固定的，当一个Bucket满了的时候就需要进行哈希表的扩展。
+
+Bucket的组成
+
+
+depth_：表示本地深度的一个标识，用于识别当前的深度是否和全局深度相同。要特别注意这个变量。
+list_：发生哈希冲突时保存多个（K，V）映射的双向链表。
+size：为了保证效率，list的长度不能无限延伸，所以达到一定长度的时候要进行哈希表的扩展。
+
+可扩展的哈希表结构
+
+
+Bucket_size:用于限制每个bucket的list的长度
+dir_:用于哈西运算后保存映射关系。
+global_depth_:全局深度，在插入的时候根据全局深度和局部深度来确定这个桶是否要进行重新的分配。
+num_buckets:用于统计现在一共有多少bucket。
+
+ReHash的过程详解
+
+1.hash的规则是什么样的
+template &lt;typename K, typename V&gt;
+
+auto ExtendibleHashTable&lt;K, V&gt;::IndexOf(const K &amp;key) -&gt; size_t {
+  int mask = (1 &lt;&lt; global_depth_) - 1;
+  return std::hash&lt;K&gt;()(key) &amp; mask;
+
+}
+上述函数就是该哈希表的映射规则，总的来说就是取hash函数值的低global_depth位
+假如现在global_depth_的值为3。
+那么 1 &lt;&lt; global_depth_的值就是8转换为二进制就是 1000 。mask=8-1=7，转换为二进制就是 111.
+mask 的作用就是取一个位数和global_depth_一样的全1的二进制数，为了取低global_depth_位做铺垫。
+现在假如key的值进行完hash之后是 10110100011010 和 mask进行进行 &amp; 的操作之后就变成了 010 （低3位）">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "http://localhost:1313/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "CMU15-445- Project #1 - Buffer Pool Manager",
+      "item": "http://localhost:1313/posts/database/project/cmu15-445-project1-buffer-pool-manager/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "CMU15-445- Project #1 - Buffer Pool Manager",
+  "name": "CMU15-445- Project #1 - Buffer Pool Manager",
+  "description": "环境搭建 按照P0的指导中进行环境的搭建，由于我本人现在时WIN平台，课程没有提供一键配置环境的脚本，所以我选择云服务器进行环境的构建，很稳。\n但是我的云服务器配置只有2核2G在编译的时候会爆内存。这里还有个故事，在爆内存之后我已经意识到这个问题，我给阿里云客服提了个工单试图能白嫖一些配置，客服还是很有水平的，直接就分析出来我是内存爆了导致的，但是直接建议我加钱升级配置，不告诉我设置swap分区，有点不厚道了。\n话说回来，设置完swap分区之后就没有再出现过爆内存的现象。用VScode的远程开发，体验还是很不错的。\nOverview p1主要是内存管理部分的内容，这门课程的课本和录制视频还是很有必要看一下的。\n主要的任务是以下三个部分：\n可扩展的哈希表 LRU-K的淘汰策略的视线 Buffer Pool的一个实例 在开始梳理项目之前我想要先解释清楚一下三个任务之间的关系，以及各个部分的负责。\nframe更像是一个载体，而page是其中的内容。打个比方来说，一个仓库（buffer pool）只有100辆货车（frame），而货物（page）成千上万种，每次都是仓库告诉货车需要什么货物然后由货车带着货物来到仓库，而可扩展的哈希表就是登记货车和货物的对应关系。因为只有100辆货车，当每辆车都是满的时候（没有闲置的车辆free_list不为空）就需要根据task2的LRU-K算法挑选出一个符合要求的货车清空后去装载指定的货物。 而task3就是负责整个的管理和交互。\n大概解释了一下，可能比方不是很恰当，做的时候一定要多看文档和注释，因为漏看注释给我带来了极大的痛苦。\nTask #1 -ExtendibleHashTable 相关函数 Find(K,V): 查询一个Key是否存在，如果存在则将其V指针指向相关的值，返回true，否则返回false Insert(K,V): 插入一个（K，V），如果插入失败需要进行一下步骤的重试： 插入失败肯定是桶满了，但是桶满了分为两种不同的情况。 一种是global深度和桶的local深度不相同的时候，需要对桶进行重新的分配。 当两个深度相同的时候说明桶是真的满了，需要对哈希表进行扩展 Remove(K): 在哈希表中移除对应的（K，V）对，但是需要进行哈希表缩小的操作。 IndexOf(K): 当前global深度下的映射规则。 项目架构 首先要清楚这个是自己动手实现一个可扩展哈希表用于保存frame和page的映射关系的。我觉得首先要明白frame和page之间的关系。不清楚的可以回看上文的解释。\nBucket 存储桶 在可可以扩展的哈希表种引入和Bucket的概念，用于解决哈希冲突的问题，每一个Bucket的大小都是固定的，当一个Bucket满了的时候就需要进行哈希表的扩展。\nBucket的组成 depth_：表示本地深度的一个标识，用于识别当前的深度是否和全局深度相同。要特别注意这个变量。 list_：发生哈希冲突时保存多个（K，V）映射的双向链表。 size：为了保证效率，list的长度不能无限延伸，所以达到一定长度的时候要进行哈希表的扩展。 可扩展的哈希表结构 Bucket_size:用于限制每个bucket的list的长度 dir_:用于哈西运算后保存映射关系。 global_depth_:全局深度，在插入的时候根据全局深度和局部深度来确定这个桶是否要进行重新的分配。 num_buckets:用于统计现在一共有多少bucket。 ReHash的过程详解 1.hash的规则是什么样的\ntemplate \u0026lt;typename K, typename V\u0026gt; auto ExtendibleHashTable\u0026lt;K, V\u0026gt;::IndexOf(const K \u0026amp;key) -\u0026gt; size_t { int mask = (1 \u0026lt;\u0026lt; global_depth_) - 1; return std::hash\u0026lt;K\u0026gt;()(key) \u0026amp; mask; } 上述函数就是该哈希表的映射规则，总的来说就是取hash函数值的低global_depth位\n假如现在global_depth_的值为3。 那么 1 \u0026lt;\u0026lt; global_depth_的值就是8转换为二进制就是 1000 。mask=8-1=7，转换为二进制就是 111.\nmask 的作用就是取一个位数和global_depth_一样的全1的二进制数，为了取低global_depth_位做铺垫。\n现在假如key的值进行完hash之后是 10110100011010 和 mask进行进行 \u0026amp; 的操作之后就变成了 010 （低3位）\n",
+  "keywords": [
+    "Project", "CMU15-445"
+  ],
+  "articleBody": "环境搭建 按照P0的指导中进行环境的搭建，由于我本人现在时WIN平台，课程没有提供一键配置环境的脚本，所以我选择云服务器进行环境的构建，很稳。\n但是我的云服务器配置只有2核2G在编译的时候会爆内存。这里还有个故事，在爆内存之后我已经意识到这个问题，我给阿里云客服提了个工单试图能白嫖一些配置，客服还是很有水平的，直接就分析出来我是内存爆了导致的，但是直接建议我加钱升级配置，不告诉我设置swap分区，有点不厚道了。\n话说回来，设置完swap分区之后就没有再出现过爆内存的现象。用VScode的远程开发，体验还是很不错的。\nOverview p1主要是内存管理部分的内容，这门课程的课本和录制视频还是很有必要看一下的。\n主要的任务是以下三个部分：\n可扩展的哈希表 LRU-K的淘汰策略的视线 Buffer Pool的一个实例 在开始梳理项目之前我想要先解释清楚一下三个任务之间的关系，以及各个部分的负责。\nframe更像是一个载体，而page是其中的内容。打个比方来说，一个仓库（buffer pool）只有100辆货车（frame），而货物（page）成千上万种，每次都是仓库告诉货车需要什么货物然后由货车带着货物来到仓库，而可扩展的哈希表就是登记货车和货物的对应关系。因为只有100辆货车，当每辆车都是满的时候（没有闲置的车辆free_list不为空）就需要根据task2的LRU-K算法挑选出一个符合要求的货车清空后去装载指定的货物。 而task3就是负责整个的管理和交互。\n大概解释了一下，可能比方不是很恰当，做的时候一定要多看文档和注释，因为漏看注释给我带来了极大的痛苦。\nTask #1 -ExtendibleHashTable 相关函数 Find(K,V): 查询一个Key是否存在，如果存在则将其V指针指向相关的值，返回true，否则返回false Insert(K,V): 插入一个（K，V），如果插入失败需要进行一下步骤的重试： 插入失败肯定是桶满了，但是桶满了分为两种不同的情况。 一种是global深度和桶的local深度不相同的时候，需要对桶进行重新的分配。 当两个深度相同的时候说明桶是真的满了，需要对哈希表进行扩展 Remove(K): 在哈希表中移除对应的（K，V）对，但是需要进行哈希表缩小的操作。 IndexOf(K): 当前global深度下的映射规则。 项目架构 首先要清楚这个是自己动手实现一个可扩展哈希表用于保存frame和page的映射关系的。我觉得首先要明白frame和page之间的关系。不清楚的可以回看上文的解释。\nBucket 存储桶 在可可以扩展的哈希表种引入和Bucket的概念，用于解决哈希冲突的问题，每一个Bucket的大小都是固定的，当一个Bucket满了的时候就需要进行哈希表的扩展。\nBucket的组成 depth_：表示本地深度的一个标识，用于识别当前的深度是否和全局深度相同。要特别注意这个变量。 list_：发生哈希冲突时保存多个（K，V）映射的双向链表。 size：为了保证效率，list的长度不能无限延伸，所以达到一定长度的时候要进行哈希表的扩展。 可扩展的哈希表结构 Bucket_size:用于限制每个bucket的list的长度 dir_:用于哈西运算后保存映射关系。 global_depth_:全局深度，在插入的时候根据全局深度和局部深度来确定这个桶是否要进行重新的分配。 num_buckets:用于统计现在一共有多少bucket。 ReHash的过程详解 1.hash的规则是什么样的\ntemplate \u003ctypename K, typename V\u003e auto ExtendibleHashTable\u003cK, V\u003e::IndexOf(const K \u0026key) -\u003e size_t { int mask = (1 \u003c\u003c global_depth_) - 1; return std::hash\u003cK\u003e()(key) \u0026 mask; } 上述函数就是该哈希表的映射规则，总的来说就是取hash函数值的低global_depth位\n假如现在global_depth_的值为3。 那么 1 \u003c\u003c global_depth_的值就是8转换为二进制就是 1000 。mask=8-1=7，转换为二进制就是 111.\nmask 的作用就是取一个位数和global_depth_一样的全1的二进制数，为了取低global_depth_位做铺垫。\n现在假如key的值进行完hash之后是 10110100011010 和 mask进行进行 \u0026 的操作之后就变成了 010 （低3位）\n刚开始的时候我看这个函数设计左移操作和\u0026操作很复杂的样子，我就没怎么在意，不是很懂这个函数在干什么。但是现在想来 mask 应该是掩码的意思，所以和计网里掩码的作用是一样的，都是取二进制数位的作用。\n这个函数没搞懂真的给我带来很大的困扰，一直搞不懂到底是怎么映射的。\n2.什么时候进行ReHash，以及详细过程。\n当一个桶内的list长度达到规定上限的时候进行Rehash。\n但不是立刻将所有桶内的映射关系都立刻进行重新分配。因为当哈希表比较大的时候这样会带来瞬时的高负载，给机器带来不必要的负担。\n那么什么时候对扩展哈希表后的桶内的（k,v）进行重新的映射呢？\n可以认为是什么时候用上了什么时候再进行重新的映射。这里就提现了局部深度和全局深度的作用。如果我们将每一次哈希表的扩展都立即为一次版本的迭代的话。那么局部深度和全局深度就分别代表了桶所处的版本和现在的最近版本。这样就能实现对哈希表的线性时间扩展。\n我们可以想象这样一个过程，现在全局版本为V3（global_depth_=3）而某个桶的局部版本为V2（local_depth_=2）. 这时候我们刚好需要向这个桶中插入一个数据，这时候发现不仅这个桶满了而且还落后版本，我们首先要做的就是更新桶的版本，把桶里面不符合新的映射规则（比原来多一位）的给送到新桶里。\n这里有一个小坑：哈希表扩展后，取哈希的规则随之而改变，所以当要Find一个page的时候就有可能会映射到新的位置上，但是原来的桶内在没插满之前是不会进行重新分配的这时该如何保证能找到这个数据呢？\n下面用一个例子解释一下这个过程。 假设现在取低 1 位 也就是global=1，假设现在来了一个101需要插入而刚好满了需要进行扩容操作。 这里也给了上边那个小坑的答案，就是在扩展哈希表的时候后面新扩展出来的仍然指向原来的桶。\n插入101之后原来 1 对应的桶被重新分配 分别对应01 和 11而原来的 0 对应的桶因为还没有需要插入的数据所以不进行重新分配。当需要的时候再进行重新的分配。\n这样就保证了扩展是线性的，不会每一次扩展的时候负载激增。 可以理解为“懒扩展”。\n具体代码实现 因为教授的要求不能放出全部的源代码所以我只给出关键部分\ntemplate \u003ctypename K, typename V\u003e auto ExtendibleHashTable\u003cK, V\u003e::RedistributeBucket(std::shared_ptr\u003cBucket\u003e bucket) -\u003e void { bucket-\u003eIncrementDepth(); size_t deepth = bucket-\u003eGetDepth(); num_buckets_++; std::shared_ptr\u003cBucket\u003e new_bucket = std::make_shared\u003cBucket\u003e(bucket_size_, deepth); size_t pre_hash_sign = std::hash\u003cK\u003e()((bucket-\u003eGetItems().begin())-\u003efirst) \u0026 ((1 \u003c\u003c (deepth - 1)) - 1); // 遍历原来的bucket进行符合要求就是新老哈希值不一样的就放进新桶里 for (auto i = bucket-\u003eGetItems().begin(); i != bucket-\u003eGetItems().end();) { size_t temp_hash_sign = std::hash\u003cK\u003e()(i-\u003efirst) \u0026 ((1 \u003c\u003c (deepth)) - 1); if (pre_hash_sign != temp_hash_sign) { new_bucket-\u003eInsert(i-\u003efirst, i-\u003esecond); bucket-\u003eGetItems().erase(i++); } else { i++; } } // 就该把新桶放在后边那新位置 // size_t new_hash_sign= std::hash()((new_bucket-\u003eGetItems().begin())-\u003efirst) \u0026 ((1 \u003c\u003c (deepth)) -1 ); for (size_t i = 0; i \u003c dir_.size(); i++) { if ((i \u0026 ((1 \u003c\u003c (deepth)) - 1)) != pre_hash_sign \u0026\u0026 (i \u0026 ((1 \u003c\u003c (deepth - 1)) - 1)) == pre_hash_sign) { dir_[i] = new_bucket; } } } template \u003ctypename K, typename V\u003e void ExtendibleHashTable\u003cK, V\u003e::Insert(const K \u0026key, const V \u0026value) { // UNREACHABLE(\"not implemented\"); std::scoped_lock\u003cstd::mutex\u003e lock(latch_); while (true) { size_t index = IndexOf(key); if (dir_[index]-\u003eInsert(key, value)) { break; } // 判断当前bucket的depth和全局depth 如果相同就进行哈希表的扩容操作，如果不相同就进行桶的重新分配 // 这样做的一个好处就是时间复杂度是线性的，不会遇到桶满的时候就负载激增，导致效率下降。 if (GetLocalDepthInternal(index) != GetGlobalDepthInternal()) { RedistributeBucket(dir_[index]); } else { global_depth_++; size_t size = dir_.size(); // 这里就是在扩展后将指针指向对应的老桶就是扩展前的桶。 for (size_t i = 0; i \u003c size; i++) { dir_.emplace_back(dir_[i]); } } } } Task #2 LRU-K LRU-K Replacer Design LRU-K Replacer 用于存储 buffer pool 中 page 被引用的记录，并根据引用记录来选出在 buffer pool 满时需要被驱逐的 page。\nLRU 应该都比较熟悉了，LRU-K 则是一个小小的变种,出现的目的是为了在一定程度上解决缓存污染的问题，有兴趣的可以读一下有关论文，有很详细的介绍。 cs.cmu.edu/~natassa/courses/15-721/papers/p297-o_neil.pdf\n在普通的 LRU 中，我们仅需记录 page 最近一次被引用的时间，在驱逐时，选择最近一次引用时间最早的 page。\n在 LRU-K 中，我们需要记录 page 最近 K 次被引用的时间。假如 list 中所有 page 都被引用了大于等于 K 次，则比较最近第 K 次被引用的时间，驱逐最早的。假如 list 中存在引用次数少于 K 次的 page，则将这些 page 挑选出来，用普通的 LRU 来比较这些 page 第一次被引用的时间，驱逐最早的。\n所有的page大概能够分为两类：\n达到k次的，那么则选择distance最大的进行淘汰 没有达到k次的，就根据普通的LRU进行淘汰 具体实现不是很难，按照给的注释一步步写就好了 刚开始我建议先去力扣（LeetCode）官网 - 全球极客挚爱的技术成长平台写一下这个LRU，实现的思路不能说差不多也能说是差不多。\n对于数据结构的组织我推荐2023fall封装好的这个，我自己做的是2022fall没有这个封装，需要自己设计，给出了一个推荐的方案，对于一个项目的起步还是非常友好的。\nclass LRUKNode { private: std::list\u003csize_t\u003e history_; size_t k_; frame_id_t fid_; bool is_evictable_{false}; }; std::unordered_map\u003cframe_id_t, LRUKNode\u003e node_store_; 只有一个需要注意的点：在SetEvictable 这个函数中只有发生改变才修改curr_size_（可驱逐的个数）这个变量。\nTask# 3-Buffer Pool Manager 这个我认为最主要的就是要厘清各个函数之间的关系\n/** Array of buffer pool pages. */ Page *pages_; /** Page table for keeping track of buffer pool pages. */ ExtendibleHashTable\u003cpage_id_t, frame_id_t\u003e *page_table_; /** Replacer to find unpinned pages for replacement. */ LRUKReplacer *replacer_; /** List of free frames that don't have any pages on them. */ std::list\u003cframe_id_t\u003e free_list_; 上述的定义要和初始化函数结合在一起看\n// we allocate a consecutive memory space for the buffer pool pages_ = new Page[pool_size_]; page_table_ = new ExtendibleHashTable\u003cpage_id_t, frame_id_t\u003e(bucket_size_); replacer_ = new LRUKReplacer(pool_size, replacer_k); // Initially, every page is in the free list. for (size_t i = 0; i \u003c pool_size_; ++i) { free_list_.emplace_back(static_cast\u003cint\u003e(i)); } 结合注释不难发现他们之间的关系\npages_:Array of buffer pool pages 。buffer pool的一个数组。他的下标就是frame_id。 page_table_:记录page和frame之间的映射关系。 replacer_: 记录访问历史，在free_list中没有空闲frame可以承载page的时候进行驱逐。 free_list:表示有无空闲的frame可供使用 上图引用自：BusTub Lab1 Buffer Pool Manager | Fischer.space\n这个图很好的解释了三者之间的关系以及各部分所负责的东西。\n接下来梳理一下task3中比较重要的部分\nNewPgImp()和FetchPgImp() 两个函数有很大一部分都是相同的 重点也是这相同的一部分\n先来看NewPgImp() 的要求：\nCreate a new page in the buffer pool. Set page_id to the new page’s id, or nullptr if all frames are currently in use and not evictable (in another word, pinned)\n就是新建一个页，但是新建页的过程非常的有讲究：\n首先需要找到一个空闲的frame_承载这个page，优先从free_list中找frame 如果free_list中不存在的话，就需要在replacer_中用驱逐函数将一个frame上的page数据清空，清空在table里的映射关系。用来承载新建的page。 在驱逐的时候如果原来的页是脏的要先吧脏页写回磁盘，防止数据的丢失 之后就是页的初始化操作，注意要顾及到每一个变量。 将新的映射关系写入table，新的访问历史放入replacer\nFetchPgImp() 的流程大致相同：\n只是第一步先去table里找有无这个page存在，如果没有就类似于NewPgImp() 先找一个frame，然后通过disk_manager_将磁盘的数据读入新页。之后建立新的关系。\nUnpinPgImp（page_id_t page_id, bool is_dirty） 当上层有一个进程在读取这个页的时候这个页都要被pin住不能被淘汰，在使用结束的时候会对该页进行一次unpin的操作，这会使得pin_count_–，当这个数值为0的时候该页就可被SetEvictable()函数将其在replacer中标记为可淘汰。\n随着page_id一同传进来的还有一个bool变量is_dirty这个变量用来表示使用这个页的进程对这个页干了什么，如果仅仅只是读的话is_dirty的值就为false，但是进行的改动的话is_dirty的值就为true。 需要注意的一定，只有当原来这个页是干净的时候才能进行状态的修改。\nSummary \u0026\u0026 踩坑记录 在task1的时候没有搞懂IndexOf（）函数的作用是什么，看到进行位操作本能的进行回避，导致被卡了好长时间，毫无头绪，在写的时候还是要搞懂细节，多看官方的注释。 SetEvictable（）这个函数中明白curr_size_什么时候能改，什么时候不能改。 在FlushAllPgsImp()中复用了FlushPgImp()函数，导致在线评测虽然样例都过了但是一直超时，最后还是在BusTub Lab1 Buffer Pool Manager | Fischer.space这篇文章中得到启发。总的来说还是多线程编程学的不是很好。 以上三个都是卡我时间比较长而且处理起来毫无头绪的。不过幸好项目用cmake构建，debug起来算是比较方便，帮我节约了很多的时间。\n我认为比较有挑战的就是task1，大的框架建好之后这种修修补补的编程很有意思。相比于有些课程的全面铺开完全从0开始实现，这种直入主题，学习核心思想的过程让我受益匪浅。\n最后附上通过截图，rank比较靠后就不放了，因为全局一把大锁，能跑下来我已经很开心了。\n",
+  "wordCount" : "581",
+  "inLanguage": "en",
+  "image": "http://localhost:1313/images/papermod-cover.png","datePublished": "2023-12-08T00:00:00Z",
+  "dateModified": "2023-12-08T00:00:00Z",
+  "author":{
+    "@type": "Person",
+    "name": "Theme PaperMod"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "http://localhost:1313/posts/database/project/cmu15-445-project1-buffer-pool-manager/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "JiaLog",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "http://localhost:1313/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="http://localhost:1313/" accesskey="h" title="JiaLog (Alt + H)">JiaLog</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="http://localhost:1313/" title="Home">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/posts/" title="Blog">
+                    <span>Blog</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/essay/" title="Essay">
+                    <span>Essay</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/archives" title="Archive">
+                    <span>Archive</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/search/" title="Search (Alt &#43; /)" accesskey=/>
+                    <span>Search</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/tags/" title="Tags">
+                    <span>Tags</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="http://localhost:1313/">Home</a>&nbsp;»&nbsp;<a href="http://localhost:1313/posts/">Posts</a></div>
+    <h1 class="post-title entry-hint-parent">
+      CMU15-445- Project #1 - Buffer Pool Manager
+    </h1>
+    <div class="post-meta"><span title='2023-12-08 00:00:00 +0000 UTC'>December 8, 2023</span>&nbsp;·&nbsp;3 min&nbsp;·&nbsp;Theme PaperMod&nbsp;|&nbsp;<a href="https://github.com/adityatelange/hugo-PaperMod/tree/exampleSite/content/posts/Database/Project/CMU15-445%20Project1%20Buffer%20Pool%20Manager.md" rel="noopener noreferrer" target="_blank">Suggest Changes</a>
+
+</div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#%e7%8e%af%e5%a2%83%e6%90%ad%e5%bb%ba" aria-label="环境搭建">环境搭建</a></li>
+                <li>
+                    <a href="#overview" aria-label="Overview">Overview</a></li>
+                <li>
+                    <a href="#task-1--extendiblehashtable" aria-label="Task #1 -ExtendibleHashTable">Task #1 -ExtendibleHashTable</a><ul>
+                        
+                <li>
+                    <a href="#%e7%9b%b8%e5%85%b3%e5%87%bd%e6%95%b0" aria-label="相关函数">相关函数</a></li>
+                <li>
+                    <a href="#%e9%a1%b9%e7%9b%ae%e6%9e%b6%e6%9e%84" aria-label="项目架构">项目架构</a></li>
+                <li>
+                    <a href="#bucket-%e5%ad%98%e5%82%a8%e6%a1%b6" aria-label="Bucket 存储桶">Bucket 存储桶</a></li>
+                <li>
+                    <a href="#bucket%e7%9a%84%e7%bb%84%e6%88%90" aria-label="Bucket的组成">Bucket的组成</a></li>
+                <li>
+                    <a href="#%e5%8f%af%e6%89%a9%e5%b1%95%e7%9a%84%e5%93%88%e5%b8%8c%e8%a1%a8%e7%bb%93%e6%9e%84" aria-label="可扩展的哈希表结构">可扩展的哈希表结构</a></li>
+                <li>
+                    <a href="#rehash%e7%9a%84%e8%bf%87%e7%a8%8b%e8%af%a6%e8%a7%a3" aria-label="ReHash的过程详解">ReHash的过程详解</a></li>
+                <li>
+                    <a href="#%e5%85%b7%e4%bd%93%e4%bb%a3%e7%a0%81%e5%ae%9e%e7%8e%b0" aria-label="具体代码实现">具体代码实现</a></li></ul>
+                </li>
+                <li>
+                    <a href="#task-2-lru-k" aria-label="Task #2 LRU-K">Task #2 LRU-K</a><ul>
+                        
+                <li>
+                    <a href="#lru-k-replacer-design" aria-label="LRU-K Replacer Design">LRU-K Replacer Design</a></li></ul>
+                </li>
+                <li>
+                    <a href="#task-3-buffer-pool-manager" aria-label="Task# 3-Buffer Pool Manager">Task# 3-Buffer Pool Manager</a><ul>
+                        
+                <li>
+                    <a href="#newpgimp%e5%92%8cfetchpgimp" aria-label="NewPgImp()和FetchPgImp()">NewPgImp()和FetchPgImp()</a></li>
+                <li>
+                    <a href="#unpinpgimppage_id_t-page_id-bool-is_dirty" aria-label="UnpinPgImp（page_id_t page_id, bool is_dirty）">UnpinPgImp（page_id_t page_id, bool is_dirty）</a></li></ul>
+                </li>
+                <li>
+                    <a href="#summary--%e8%b8%a9%e5%9d%91%e8%ae%b0%e5%bd%95" aria-label="Summary &amp;&amp; 踩坑记录">Summary &amp;&amp; 踩坑记录</a>
+                </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><h2 id="环境搭建">环境搭建<a hidden class="anchor" aria-hidden="true" href="#环境搭建">#</a></h2>
+<p>按照P0的指导中进行环境的搭建，由于我本人现在时WIN平台，课程没有提供一键配置环境的脚本，所以我选择云服务器进行环境的构建，很稳。</p>
+<p>但是我的云服务器配置只有2核2G在编译的时候会爆内存。这里还有个故事，在爆内存之后我已经意识到这个问题，我给阿里云客服提了个工单试图能白嫖一些配置，客服还是很有水平的，直接就分析出来我是内存爆了导致的，但是直接建议我加钱升级配置，不告诉我设置swap分区，有点不厚道了。</p>
+<p>话说回来，设置完swap分区之后就没有再出现过爆内存的现象。用VScode的远程开发，体验还是很不错的。</p>
+<h2 id="overview">Overview<a hidden class="anchor" aria-hidden="true" href="#overview">#</a></h2>
+<p>p1主要是内存管理部分的内容，这门课程的课本和录制视频还是很有必要看一下的。</p>
+<p>主要的任务是以下三个部分：</p>
+<ul>
+<li>可扩展的哈希表</li>
+<li>LRU-K的淘汰策略的视线</li>
+<li>Buffer Pool的一个实例</li>
+</ul>
+<p>在开始梳理项目之前我想要先解释清楚一下三个任务之间的关系，以及各个部分的负责。</p>
+<p>frame更像是一个<strong>载体</strong>，而page是其中的内容。打个比方来说，一个仓库（buffer pool）只有100辆货车（frame），而货物（page）成千上万种，每次都是仓库告诉货车需要什么货物然后由货车带着货物来到仓库，而可扩展的哈希表就是登记货车和货物的<strong>对应关系</strong>。因为只有100辆货车，当每辆车都是满的时候（没有闲置的车辆free_list不为空）就需要根据task2的LRU-K算法挑选出一个符合要求的货车清空后去装载指定的货物。
+而task3就是负责整个的管理和交互。</p>
+<p>大概解释了一下，可能比方不是很恰当，做的时候一定要多看文档和注释，因为漏看注释给我带来了极大的痛苦。</p>
+<h2 id="task-1--extendiblehashtable">Task #1 -ExtendibleHashTable<a hidden class="anchor" aria-hidden="true" href="#task-1--extendiblehashtable">#</a></h2>
+<h3 id="相关函数">相关函数<a hidden class="anchor" aria-hidden="true" href="#相关函数">#</a></h3>
+<ul>
+<li><code>Find(K,V):</code> 查询一个Key是否存在，如果存在则将其V指针指向相关的值，返回true，否则返回false</li>
+<li><code>Insert(K,V):</code> 插入一个（K，V），如果插入失败需要进行一下步骤的重试：
+<ol>
+<li>插入失败肯定是桶满了，但是桶满了分为两种不同的情况。</li>
+<li>一种是global深度和桶的local深度不相同的时候，需要对桶进行重新的分配。</li>
+<li>当两个深度相同的时候说明桶是真的满了，需要对哈希表进行扩展</li>
+</ol>
+</li>
+<li><code>Remove(K):</code> 在哈希表中移除对应的（K，V）对，但是需要进行哈希表缩小的操作。</li>
+<li><code>IndexOf(K):</code>  当前global深度下的映射规则。</li>
+</ul>
+<h3 id="项目架构">项目架构<a hidden class="anchor" aria-hidden="true" href="#项目架构">#</a></h3>
+<p>首先要清楚这个是自己动手实现一个可扩展哈希表用于保存frame和page的<strong>映射关系</strong>的。我觉得首先要明白frame和page之间的关系。不清楚的可以回看上文的解释。</p>
+<h3 id="bucket-存储桶">Bucket 存储桶<a hidden class="anchor" aria-hidden="true" href="#bucket-存储桶">#</a></h3>
+<p>在可可以扩展的哈希表种引入和Bucket的概念，用于解决<strong>哈希冲突</strong>的问题，每一个Bucket的大小都是固定的，当一个Bucket满了的时候就需要进行哈希表的<strong>扩展</strong>。</p>
+<p><img alt="image.png|200" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231205232548.png"></p>
+<h3 id="bucket的组成">Bucket的组成<a hidden class="anchor" aria-hidden="true" href="#bucket的组成">#</a></h3>
+<p><img alt="image.png|325" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231205233054.png"></p>
+<ul>
+<li><strong>depth_</strong>：表示本地深度的一个标识，用于识别当前的深度是否和全局深度相同。要特别注意这个变量。</li>
+<li><strong>list_</strong>：发生哈希冲突时保存多个（K，V）映射的双向链表。</li>
+<li><strong>size</strong>：为了保证效率，list的长度不能无限延伸，所以达到一定长度的时候要进行哈希表的扩展。</li>
+</ul>
+<h3 id="可扩展的哈希表结构">可扩展的哈希表结构<a hidden class="anchor" aria-hidden="true" href="#可扩展的哈希表结构">#</a></h3>
+<p><img alt="image.png|325" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231205234304.png"></p>
+<ul>
+<li>Bucket_size:用于限制每个bucket的list的长度</li>
+<li>dir_:用于哈西运算后保存映射关系。</li>
+<li>global_depth_:全局深度，在<strong>插入</strong>的时候根据<strong>全局深度</strong>和<strong>局部深度</strong>来确定这个桶是否要进行重新的分配。</li>
+<li>num_buckets:用于统计现在一共有多少bucket。</li>
+</ul>
+<h3 id="rehash的过程详解">ReHash的过程详解<a hidden class="anchor" aria-hidden="true" href="#rehash的过程详解">#</a></h3>
+<blockquote>
+<p>1.hash的规则是什么样的</p></blockquote>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">K</span><span class="p">,</span> <span class="k">typename</span> <span class="n">V</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">auto</span> <span class="n">ExtendibleHashTable</span><span class="o">&lt;</span><span class="n">K</span><span class="p">,</span> <span class="n">V</span><span class="o">&gt;::</span><span class="n">IndexOf</span><span class="p">(</span><span class="k">const</span> <span class="n">K</span> <span class="o">&amp;</span><span class="n">key</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">size_t</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">int</span> <span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">global_depth_</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="n">std</span><span class="o">::</span><span class="n">hash</span><span class="o">&lt;</span><span class="n">K</span><span class="o">&gt;</span><span class="p">()(</span><span class="n">key</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">mask</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>上述函数就是该哈希表的映射规则，总的来说就是取hash函数值的<strong>低<code>global_depth</code>位</strong></p>
+<p>假如现在global_depth_的值为3。
+那么 <code>1 &lt;&lt; global_depth_</code>的值就是8转换为二进制就是 1000 。mask=8-1=7，转换为二进制就是 111.</p>
+<p>mask 的作用就是取一个位数和global_depth_一样的全1的二进制数，为了取低global_depth_位做铺垫。</p>
+<p>现在假如key的值进行完hash之后是 10110100011010 和 mask进行进行 &amp; 的操作之后就变成了 010 （低3位）</p>
+<p>刚开始的时候我看这个函数设计左移操作和&amp;操作很复杂的样子，我就没怎么在意，不是很懂这个函数在干什么。但是现在想来 <strong>mask</strong> 应该是<strong>掩码</strong>的意思，所以和计网里掩码的作用是一样的，都是取二进制数位的作用。</p>
+<p>这个函数没搞懂真的给我带来很大的困扰，一直搞不懂到底是怎么映射的。</p>
+<blockquote>
+<p>2.什么时候进行ReHash，以及详细过程。</p></blockquote>
+<p>当一个桶内的list长度达到规定上限的时候进行Rehash。</p>
+<p>但<strong>不是</strong>立刻将所有桶内的映射关系<strong>都立刻</strong>进行重新分配。因为当哈希表比较大的时候这样会带来瞬时的高负载，给机器带来不必要的负担。</p>
+<p>那么什么时候对扩展哈希表后的桶内的（k,v）进行重新的映射呢？</p>
+<p>可以认为是什么时候用上了什么时候再进行重新的映射。这里就提现了<strong>局部深度</strong>和<strong>全局深度</strong>的作用。如果我们将每一次哈希表的扩展都立即为一次<strong>版本的迭代</strong>的话。那么局部深度和全局深度就分别代表了<strong>桶所处的版本</strong>和<strong>现在的最近版本</strong>。这样就能实现对哈希表的线性时间扩展。</p>
+<p>我们可以想象这样一个过程，现在全局版本为V3（global_depth_=3）而某个桶的局部版本为V2（local_depth_=2）. 这时候我们刚好需要向这个桶中插入一个数据，这时候发现不仅这个桶满了而且还落后版本，我们首先要做的就是更新桶的版本，把桶里面不符合新的映射规则（比原来多一位）的给送到新桶里。</p>
+<blockquote>
+<p>这里有一个小坑：哈希表扩展后，取哈希的规则随之而改变，所以当要Find一个page的时候就有可能会映射到新的位置上，但是原来的桶内在没插满之前是不会进行重新分配的这时该如何保证能找到这个数据呢？</p></blockquote>
+<p>下面用一个例子解释一下这个过程。
+<img alt="image.png|300" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231206190032.png"></p>
+<p>假设现在取低 1 位 也就是global=1，假设现在来了一个101需要插入而刚好满了需要进行扩容操作。
+<img alt="image.png|325" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231206204244.png"></p>
+<p>这里也给了上边那个小坑的答案，就是在扩展哈希表的时候后面新扩展出来的仍然指向原来的桶。</p>
+<p>插入101之后原来 1 对应的桶被重新分配 分别对应01 和 11而原来的 0 对应的桶因为还没有需要插入的数据所以不进行重新分配。当需要的时候再进行重新的分配。</p>
+<p>这样就保证了扩展是线性的，不会每一次扩展的时候负载激增。 可以理解为“懒扩展”。</p>
+<h3 id="具体代码实现">具体代码实现<a hidden class="anchor" aria-hidden="true" href="#具体代码实现">#</a></h3>
+<p>因为教授的要求不能放出全部的源代码所以我只给出关键部分</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">K</span><span class="p">,</span> <span class="k">typename</span> <span class="n">V</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="k">auto</span> <span class="n">ExtendibleHashTable</span><span class="o">&lt;</span><span class="n">K</span><span class="p">,</span> <span class="n">V</span><span class="o">&gt;::</span><span class="n">RedistributeBucket</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Bucket</span><span class="o">&gt;</span> <span class="n">bucket</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">void</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">bucket</span><span class="o">-&gt;</span><span class="n">IncrementDepth</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="n">size_t</span> <span class="n">deepth</span> <span class="o">=</span> <span class="n">bucket</span><span class="o">-&gt;</span><span class="n">GetDepth</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="n">num_buckets_</span><span class="o">++</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Bucket</span><span class="o">&gt;</span> <span class="n">new_bucket</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">make_shared</span><span class="o">&lt;</span><span class="n">Bucket</span><span class="o">&gt;</span><span class="p">(</span><span class="n">bucket_size_</span><span class="p">,</span> <span class="n">deepth</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">size_t</span> <span class="n">pre_hash_sign</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">hash</span><span class="o">&lt;</span><span class="n">K</span><span class="o">&gt;</span><span class="p">()((</span><span class="n">bucket</span><span class="o">-&gt;</span><span class="n">GetItems</span><span class="p">().</span><span class="n">begin</span><span class="p">())</span><span class="o">-&gt;</span><span class="n">first</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">((</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="n">deepth</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span> <span class="o">-</span> <span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// 遍历原来的bucket进行符合要求就是新老哈希值不一样的就放进新桶里
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="n">i</span> <span class="o">=</span> <span class="n">bucket</span><span class="o">-&gt;</span><span class="n">GetItems</span><span class="p">().</span><span class="n">begin</span><span class="p">();</span> <span class="n">i</span> <span class="o">!=</span> <span class="n">bucket</span><span class="o">-&gt;</span><span class="n">GetItems</span><span class="p">().</span><span class="n">end</span><span class="p">();)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">size_t</span> <span class="n">temp_hash_sign</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">hash</span><span class="o">&lt;</span><span class="n">K</span><span class="o">&gt;</span><span class="p">()(</span><span class="n">i</span><span class="o">-&gt;</span><span class="n">first</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">((</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="n">deepth</span><span class="p">))</span> <span class="o">-</span> <span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">pre_hash_sign</span> <span class="o">!=</span> <span class="n">temp_hash_sign</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="n">new_bucket</span><span class="o">-&gt;</span><span class="n">Insert</span><span class="p">(</span><span class="n">i</span><span class="o">-&gt;</span><span class="n">first</span><span class="p">,</span> <span class="n">i</span><span class="o">-&gt;</span><span class="n">second</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">      <span class="n">bucket</span><span class="o">-&gt;</span><span class="n">GetItems</span><span class="p">().</span><span class="n">erase</span><span class="p">(</span><span class="n">i</span><span class="o">++</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="n">i</span><span class="o">++</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// 就该把新桶放在后边那新位置
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="c1">// size_t new_hash_sign= std::hash&lt;K&gt;()((new_bucket-&gt;GetItems().begin())-&gt;first) &amp; ((1 &lt;&lt; (deepth)) -1 );
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="k">for</span> <span class="p">(</span><span class="n">size_t</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">dir_</span><span class="p">.</span><span class="n">size</span><span class="p">();</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">((</span><span class="n">i</span> <span class="o">&amp;</span> <span class="p">((</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="n">deepth</span><span class="p">))</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span> <span class="o">!=</span> <span class="n">pre_hash_sign</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">i</span> <span class="o">&amp;</span> <span class="p">((</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="n">deepth</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span> <span class="o">==</span> <span class="n">pre_hash_sign</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="n">dir_</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_bucket</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">K</span><span class="p">,</span> <span class="k">typename</span> <span class="n">V</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">ExtendibleHashTable</span><span class="o">&lt;</span><span class="n">K</span><span class="p">,</span> <span class="n">V</span><span class="o">&gt;::</span><span class="n">Insert</span><span class="p">(</span><span class="k">const</span> <span class="n">K</span> <span class="o">&amp;</span><span class="n">key</span><span class="p">,</span> <span class="k">const</span> <span class="n">V</span> <span class="o">&amp;</span><span class="n">value</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// UNREACHABLE(&#34;not implemented&#34;);
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">std</span><span class="o">::</span><span class="n">scoped_lock</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">mutex</span><span class="o">&gt;</span> <span class="n">lock</span><span class="p">(</span><span class="n">latch_</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="nb">true</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">size_t</span> <span class="n">index</span> <span class="o">=</span> <span class="n">IndexOf</span><span class="p">(</span><span class="n">key</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">dir_</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">Insert</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 判断当前bucket的depth和全局depth 如果相同就进行哈希表的扩容操作，如果不相同就进行桶的重新分配
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">// 这样做的一个好处就是时间复杂度是线性的，不会遇到桶满的时候就负载激增，导致效率下降。
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="n">GetLocalDepthInternal</span><span class="p">(</span><span class="n">index</span><span class="p">)</span> <span class="o">!=</span> <span class="n">GetGlobalDepthInternal</span><span class="p">())</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="n">RedistributeBucket</span><span class="p">(</span><span class="n">dir_</span><span class="p">[</span><span class="n">index</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="n">global_depth_</span><span class="o">++</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="n">size_t</span> <span class="n">size</span> <span class="o">=</span> <span class="n">dir_</span><span class="p">.</span><span class="n">size</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">       <span class="c1">// 这里就是在扩展后将指针指向对应的老桶就是扩展前的桶。
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>      <span class="k">for</span> <span class="p">(</span><span class="n">size_t</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">size</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">dir_</span><span class="p">.</span><span class="n">emplace_back</span><span class="p">(</span><span class="n">dir_</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl">      <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><h2 id="task-2-lru-k">Task #2 LRU-K<a hidden class="anchor" aria-hidden="true" href="#task-2-lru-k">#</a></h2>
+<h3 id="lru-k-replacer-design">LRU-K Replacer Design<a hidden class="anchor" aria-hidden="true" href="#lru-k-replacer-design">#</a></h3>
+<p>LRU-K Replacer 用于存储 buffer pool 中 page 被引用的记录，并根据引用记录来选出在 buffer pool 满时需要被驱逐的 page。</p>
+<p>LRU 应该都比较熟悉了，LRU-K 则是一个小小的变种,出现的目的是为了在一定程度上解决<strong>缓存污染</strong>的问题，有兴趣的可以读一下有关论文，有很详细的介绍。
+<a href="https://www.cs.cmu.edu/~natassa/courses/15-721/papers/p297-o_neil.pdf">cs.cmu.edu/~natassa/courses/15-721/papers/p297-o_neil.pdf</a></p>
+<p>在普通的 LRU 中，我们仅需记录 page 最近一次被引用的时间，在驱逐时，选择最近一次引用时间最早的 page。</p>
+<p>在 LRU-K 中，我们需要记录 page 最近 K 次被引用的时间。假如 list 中所有 page 都被引用了大于等于 K 次，则比较最近第 K 次被引用的时间，驱逐最早的。假如 list 中存在引用次数少于 K 次的 page，则将这些 page 挑选出来，用普通的 LRU 来比较这些 page 第一次被引用的时间，驱逐最早的。</p>
+<p><img loading="lazy" src="https://pic-bed-1309931445.cos.ap-nanjing.myqcloud.com/blog/image-20230322231114-gk3tsn9.png">
+所有的page大概能够分为两类：</p>
+<ol>
+<li>达到k次的，那么则选择distance最大的进行淘汰</li>
+<li>没有达到k次的，就根据普通的LRU进行淘汰</li>
+</ol>
+<p>具体实现不是很难，按照给的注释一步步写就好了
+刚开始我建议先去<a href="https://leetcode.cn/problems/lru-cache/description/">力扣（LeetCode）官网 - 全球极客挚爱的技术成长平台</a>写一下这个LRU，实现的思路不能说差不多也能说是差不多。</p>
+<p>对于数据结构的组织我推荐2023fall封装好的这个，我自己做的是2022fall没有这个封装，需要自己设计，给出了一个推荐的方案，对于一个项目的起步还是非常友好的。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">LRUKNode</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="k">private</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl"><span class="n">std</span><span class="o">::</span><span class="n">list</span><span class="o">&lt;</span><span class="n">size_t</span><span class="o">&gt;</span> <span class="n">history_</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="n">size_t</span> <span class="n">k_</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="n">frame_id_t</span> <span class="n">fid_</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="kt">bool</span> <span class="n">is_evictable_</span><span class="p">{</span><span class="nb">false</span><span class="p">};</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span><span class="line"><span class="cl"><span class="n">std</span><span class="o">::</span><span class="n">unordered_map</span><span class="o">&lt;</span><span class="n">frame_id_t</span><span class="p">,</span> <span class="n">LRUKNode</span><span class="o">&gt;</span> <span class="n">node_store_</span><span class="p">;</span>
+</span></span></code></pre></div><blockquote>
+<p>只有一个需要注意的点：在<code>SetEvictable</code> 这个函数中只有发生改变才修改curr_size_（可驱逐的个数）这个变量。</p></blockquote>
+<h2 id="task-3-buffer-pool-manager">Task# 3-Buffer Pool Manager<a hidden class="anchor" aria-hidden="true" href="#task-3-buffer-pool-manager">#</a></h2>
+<p>这个我认为最主要的就是要厘清各个函数之间的关系</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="cm">/** Array of buffer pool pages. */</span>
+</span></span><span class="line"><span class="cl"><span class="n">Page</span> <span class="o">*</span><span class="n">pages_</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="cm">/** Page table for keeping track of buffer pool pages. */</span>
+</span></span><span class="line"><span class="cl"> <span class="n">ExtendibleHashTable</span><span class="o">&lt;</span><span class="n">page_id_t</span><span class="p">,</span> <span class="n">frame_id_t</span><span class="o">&gt;</span> <span class="o">*</span><span class="n">page_table_</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="cm">/** Replacer to find unpinned pages for replacement. */</span>
+</span></span><span class="line"><span class="cl"><span class="n">LRUKReplacer</span> <span class="o">*</span><span class="n">replacer_</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="cm">/** List of free frames that don&#39;t have any pages on them. */</span>
+</span></span><span class="line"><span class="cl"><span class="n">std</span><span class="o">::</span><span class="n">list</span><span class="o">&lt;</span><span class="n">frame_id_t</span><span class="o">&gt;</span> <span class="n">free_list_</span><span class="p">;</span>
+</span></span></code></pre></div><p>上述的定义要和初始化函数结合在一起看</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="c1">// we allocate a consecutive memory space for the buffer pool
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">pages_</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Page</span><span class="p">[</span><span class="n">pool_size_</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">  <span class="n">page_table_</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ExtendibleHashTable</span><span class="o">&lt;</span><span class="n">page_id_t</span><span class="p">,</span> <span class="n">frame_id_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">bucket_size_</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">replacer_</span> <span class="o">=</span> <span class="k">new</span> <span class="n">LRUKReplacer</span><span class="p">(</span><span class="n">pool_size</span><span class="p">,</span> <span class="n">replacer_k</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// Initially, every page is in the free list.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">  <span class="k">for</span> <span class="p">(</span><span class="n">size_t</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">pool_size_</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">free_list_</span><span class="p">.</span><span class="n">emplace_back</span><span class="p">(</span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">i</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"> 
+</span></span></code></pre></div><p>结合注释不难发现他们之间的关系</p>
+<ul>
+<li><code>pages_:</code>Array of buffer pool pages 。buffer pool的一个数组。他的下标就是frame_id。</li>
+<li><code>page_table_</code>:记录page和frame之间的映射关系。</li>
+<li><code>replacer_</code>: 记录访问历史，在free_list中没有空闲frame可以承载page的时候进行驱逐。</li>
+<li><code>free_list</code>:表示有无空闲的frame可供使用</li>
+</ul>
+<p><img alt="image.png|550" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231206222714.png"></p>
+<blockquote>
+<p>上图<strong>引用自</strong>：<a href="https://itfischer.space/2023/03/20/bustub/Bustub-Lab1/">BusTub Lab1 Buffer Pool Manager | Fischer.space</a></p></blockquote>
+<p>这个图很好的解释了三者之间的关系以及各部分所负责的东西。</p>
+<p>接下来梳理一下task3中比较重要的部分</p>
+<h3 id="newpgimp和fetchpgimp">NewPgImp()和FetchPgImp()<a hidden class="anchor" aria-hidden="true" href="#newpgimp和fetchpgimp">#</a></h3>
+<p>两个函数有很大一部分都是相同的
+重点也是这相同的一部分</p>
+<p>先来看<strong>NewPgImp()</strong> 的要求：</p>
+<blockquote>
+<p>Create a new page in the buffer pool. Set page_id to the new page&rsquo;s id, or nullptr if all frames are currently in use and not evictable (in another word, pinned)</p></blockquote>
+<p>就是新建一个页，但是新建页的过程非常的有讲究：</p>
+<ol>
+<li>首先需要找到一个空闲的frame_承载这个page，优先从free_list中找frame</li>
+<li>如果free_list中不存在的话，就需要在replacer_中用驱逐函数将一个frame上的page数据清空，清空在table里的映射关系。用来承载新建的page。</li>
+<li>在驱逐的时候如果原来的页是脏的要先吧脏页写回磁盘，防止数据的丢失</li>
+</ol>
+<p>之后就是页的初始化操作，注意要顾及到<strong>每一个</strong>变量。
+将新的映射关系写入table，新的访问历史放入replacer</p>
+<p><strong>FetchPgImp()</strong> 的流程大致相同：</p>
+<p>只是第一步先去table里找有无这个page存在，如果没有就类似于<strong>NewPgImp()</strong> 先找一个frame，然后通过disk_manager_将磁盘的数据读入新页。之后建立新的关系。</p>
+<h3 id="unpinpgimppage_id_t-page_id-bool-is_dirty">UnpinPgImp（page_id_t page_id, bool is_dirty）<a hidden class="anchor" aria-hidden="true" href="#unpinpgimppage_id_t-page_id-bool-is_dirty">#</a></h3>
+<p>当上层有一个进程在读取这个页的时候这个页都要被pin住不能被淘汰，在使用结束的时候会对该页进行一次unpin的操作，这会使得pin_count_&ndash;，当这个数值为0的时候该页就可被<code>SetEvictable()</code>函数将其在replacer中标记为可淘汰。</p>
+<p>随着page_id一同传进来的还有一个bool变量<code>is_dirty</code>这个变量用来表示使用这个页的进程对这个页干了什么，如果仅仅只是读的话<code>is_dirty</code>的值就为false，但是进行的改动的话<code>is_dirty</code>的值就为true。
+需要注意的一定，只有当原来这个页是<strong>干净的时候</strong>才能进行状态的修改。</p>
+<h2 id="summary--踩坑记录">Summary &amp;&amp; 踩坑记录<a hidden class="anchor" aria-hidden="true" href="#summary--踩坑记录">#</a></h2>
+<ol>
+<li>在task1的时候没有搞懂IndexOf（）函数的作用是什么，看到进行位操作本能的进行回避，导致被卡了好长时间，毫无头绪，在写的时候还是要搞懂细节，多看官方的注释。</li>
+<li>SetEvictable（）这个函数中明白curr_size_什么时候能改，什么时候不能改。</li>
+<li>在FlushAllPgsImp()中复用了FlushPgImp()函数，导致在线评测虽然样例都过了但是一直超时，最后还是在<a href="https://itfischer.space/2023/03/20/bustub/Bustub-Lab1/">BusTub Lab1 Buffer Pool Manager | Fischer.space</a>这篇文章中得到启发。总的来说还是多线程编程学的不是很好。</li>
+</ol>
+<p>以上三个都是卡我时间比较长而且处理起来毫无头绪的。不过幸好项目用cmake构建，debug起来算是比较方便，帮我节约了很多的时间。</p>
+<p>我认为比较有挑战的就是task1，大的框架建好之后这种修修补补的编程很有意思。相比于有些课程的全面铺开完全从0开始实现，这种直入主题，学习核心思想的过程让我受益匪浅。</p>
+<p>最后附上通过截图，rank比较靠后就不放了，因为全局一把大锁，能跑下来我已经很开心了。</p>
+<p><img alt="image.png" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231205150555.png"></p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="http://localhost:1313/tags/project/">Project</a></li>
+      <li><a href="http://localhost:1313/tags/cmu15-445/">CMU15-445</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="http://localhost:1313/posts/c&#43;&#43;/effective-modern-c&#43;&#43;/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>Effective Modern C&#43;&#43; 笔记</span>
+  </a>
+  <a class="next" href="http://localhost:1313/posts/database/note/b&#43;-tree-index/">
+    <span class="title">Next »</span>
+    <br>
+    <span>B&#43; Tree Index</span>
+  </a>
+</nav>
+
+
+<ul class="share-buttons">
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share CMU15-445- Project #1 - Buffer Pool Manager on x"
+            href="https://x.com/intent/tweet/?text=CMU15-445-%20Project%20%231%20-%20Buffer%20Pool%20Manager&amp;url=http%3a%2f%2flocalhost%3a1313%2fposts%2fdatabase%2fproject%2fcmu15-445-project1-buffer-pool-manager%2f&amp;hashtags=Project%2cCMU15-445">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M512 62.554 L 512 449.446 C 512 483.97 483.97 512 449.446 512 L 62.554 512 C 28.03 512 0 483.97 0 449.446 L 0 62.554 C 0 28.03 28.029 0 62.554 0 L 449.446 0 C 483.971 0 512 28.03 512 62.554 Z M 269.951 190.75 L 182.567 75.216 L 56 75.216 L 207.216 272.95 L 63.9 436.783 L 125.266 436.783 L 235.9 310.383 L 332.567 436.783 L 456 436.783 L 298.367 228.367 L 432.367 75.216 L 371.033 75.216 Z M 127.633 110 L 164.101 110 L 383.481 400.065 L 349.5 400.065 Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share CMU15-445- Project #1 - Buffer Pool Manager on linkedin"
+            href="https://www.linkedin.com/shareArticle?mini=true&amp;url=http%3a%2f%2flocalhost%3a1313%2fposts%2fdatabase%2fproject%2fcmu15-445-project1-buffer-pool-manager%2f&amp;title=CMU15-445-%20Project%20%231%20-%20Buffer%20Pool%20Manager&amp;summary=CMU15-445-%20Project%20%231%20-%20Buffer%20Pool%20Manager&amp;source=http%3a%2f%2flocalhost%3a1313%2fposts%2fdatabase%2fproject%2fcmu15-445-project1-buffer-pool-manager%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-288.985,423.278l0,-225.717l-75.04,0l0,225.717l75.04,0Zm270.539,0l0,-129.439c0,-69.333 -37.018,-101.586 -86.381,-101.586c-39.804,0 -57.634,21.891 -67.617,37.266l0,-31.958l-75.021,0c0.995,21.181 0,225.717 0,225.717l75.02,0l0,-126.056c0,-6.748 0.486,-13.492 2.474,-18.315c5.414,-13.475 17.767,-27.434 38.494,-27.434c27.135,0 38.007,20.707 38.007,51.037l0,120.768l75.024,0Zm-307.552,-334.556c-25.674,0 -42.448,16.879 -42.448,39.002c0,21.658 16.264,39.002 41.455,39.002l0.484,0c26.165,0 42.452,-17.344 42.452,-39.002c-0.485,-22.092 -16.241,-38.954 -41.943,-39.002Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share CMU15-445- Project #1 - Buffer Pool Manager on reddit"
+            href="https://reddit.com/submit?url=http%3a%2f%2flocalhost%3a1313%2fposts%2fdatabase%2fproject%2fcmu15-445-project1-buffer-pool-manager%2f&title=CMU15-445-%20Project%20%231%20-%20Buffer%20Pool%20Manager">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-3.446,265.638c0,-22.964 -18.616,-41.58 -41.58,-41.58c-11.211,0 -21.361,4.457 -28.841,11.666c-28.424,-20.508 -67.586,-33.757 -111.204,-35.278l18.941,-89.121l61.884,13.157c0.756,15.734 13.642,28.29 29.56,28.29c16.407,0 29.706,-13.299 29.706,-29.701c0,-16.403 -13.299,-29.702 -29.706,-29.702c-11.666,0 -21.657,6.792 -26.515,16.578l-69.105,-14.69c-1.922,-0.418 -3.939,-0.042 -5.585,1.036c-1.658,1.073 -2.811,2.761 -3.224,4.686l-21.152,99.438c-44.258,1.228 -84.046,14.494 -112.837,35.232c-7.468,-7.164 -17.589,-11.591 -28.757,-11.591c-22.965,0 -41.585,18.616 -41.585,41.58c0,16.896 10.095,31.41 24.568,37.918c-0.639,4.135 -0.99,8.328 -0.99,12.576c0,63.977 74.469,115.836 166.33,115.836c91.861,0 166.334,-51.859 166.334,-115.836c0,-4.218 -0.347,-8.387 -0.977,-12.493c14.564,-6.47 24.735,-21.034 24.735,-38.001Zm-119.474,108.193c-20.27,20.241 -59.115,21.816 -70.534,21.816c-11.428,0 -50.277,-1.575 -70.522,-21.82c-3.007,-3.008 -3.007,-7.882 0,-10.889c3.003,-2.999 7.882,-3.003 10.885,0c12.777,12.781 40.11,17.317 59.637,17.317c19.522,0 46.86,-4.536 59.657,-17.321c3.016,-2.999 7.886,-2.995 10.885,0.008c3.008,3.011 3.003,7.882 -0.008,10.889Zm-5.23,-48.781c-16.373,0 -29.701,-13.324 -29.701,-29.698c0,-16.381 13.328,-29.714 29.701,-29.714c16.378,0 29.706,13.333 29.706,29.714c0,16.374 -13.328,29.698 -29.706,29.698Zm-160.386,-29.702c0,-16.381 13.328,-29.71 29.714,-29.71c16.369,0 29.689,13.329 29.689,29.71c0,16.373 -13.32,29.693 -29.689,29.693c-16.386,0 -29.714,-13.32 -29.714,-29.693Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share CMU15-445- Project #1 - Buffer Pool Manager on facebook"
+            href="https://facebook.com/sharer/sharer.php?u=http%3a%2f%2flocalhost%3a1313%2fposts%2fdatabase%2fproject%2fcmu15-445-project1-buffer-pool-manager%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-106.468,0l0,-192.915l66.6,0l12.672,-82.621l-79.272,0l0,-53.617c0,-22.603 11.073,-44.636 46.58,-44.636l36.042,0l0,-70.34c0,0 -32.71,-5.582 -63.982,-5.582c-65.288,0 -107.96,39.569 -107.96,111.204l0,62.971l-72.573,0l0,82.621l72.573,0l0,192.915l-191.104,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share CMU15-445- Project #1 - Buffer Pool Manager on whatsapp"
+            href="https://api.whatsapp.com/send?text=CMU15-445-%20Project%20%231%20-%20Buffer%20Pool%20Manager%20-%20http%3a%2f%2flocalhost%3a1313%2fposts%2fdatabase%2fproject%2fcmu15-445-project1-buffer-pool-manager%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-58.673,127.703c-33.842,-33.881 -78.847,-52.548 -126.798,-52.568c-98.799,0 -179.21,80.405 -179.249,179.234c-0.013,31.593 8.241,62.428 23.927,89.612l-25.429,92.884l95.021,-24.925c26.181,14.28 55.659,21.807 85.658,21.816l0.074,0c98.789,0 179.206,-80.413 179.247,-179.243c0.018,-47.895 -18.61,-92.93 -52.451,-126.81Zm-126.797,275.782l-0.06,0c-26.734,-0.01 -52.954,-7.193 -75.828,-20.767l-5.441,-3.229l-56.386,14.792l15.05,-54.977l-3.542,-5.637c-14.913,-23.72 -22.791,-51.136 -22.779,-79.287c0.033,-82.142 66.867,-148.971 149.046,-148.971c39.793,0.014 77.199,15.531 105.329,43.692c28.128,28.16 43.609,65.592 43.594,105.4c-0.034,82.149 -66.866,148.983 -148.983,148.984Zm81.721,-111.581c-4.479,-2.242 -26.499,-13.075 -30.604,-14.571c-4.105,-1.495 -7.091,-2.241 -10.077,2.241c-2.986,4.483 -11.569,14.572 -14.182,17.562c-2.612,2.988 -5.225,3.364 -9.703,1.12c-4.479,-2.241 -18.91,-6.97 -36.017,-22.23c-13.314,-11.876 -22.304,-26.542 -24.916,-31.026c-2.612,-4.484 -0.279,-6.908 1.963,-9.14c2.016,-2.007 4.48,-5.232 6.719,-7.847c2.24,-2.615 2.986,-4.484 4.479,-7.472c1.493,-2.99 0.747,-5.604 -0.374,-7.846c-1.119,-2.241 -10.077,-24.288 -13.809,-33.256c-3.635,-8.733 -7.327,-7.55 -10.077,-7.688c-2.609,-0.13 -5.598,-0.158 -8.583,-0.158c-2.986,0 -7.839,1.121 -11.944,5.604c-4.105,4.484 -15.675,15.32 -15.675,37.364c0,22.046 16.048,43.342 18.287,46.332c2.24,2.99 31.582,48.227 76.511,67.627c10.685,4.615 19.028,7.371 25.533,9.434c10.728,3.41 20.492,2.929 28.209,1.775c8.605,-1.285 26.499,-10.833 30.231,-21.295c3.732,-10.464 3.732,-19.431 2.612,-21.298c-1.119,-1.869 -4.105,-2.99 -8.583,-5.232Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share CMU15-445- Project #1 - Buffer Pool Manager on telegram"
+            href="https://telegram.me/share/url?text=CMU15-445-%20Project%20%231%20-%20Buffer%20Pool%20Manager&amp;url=http%3a%2f%2flocalhost%3a1313%2fposts%2fdatabase%2fproject%2fcmu15-445-project1-buffer-pool-manager%2f">
+            <svg version="1.1" xml:space="preserve" viewBox="2 2 28 28" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M26.49,29.86H5.5a3.37,3.37,0,0,1-2.47-1,3.35,3.35,0,0,1-1-2.47V5.48A3.36,3.36,0,0,1,3,3,3.37,3.37,0,0,1,5.5,2h21A3.38,3.38,0,0,1,29,3a3.36,3.36,0,0,1,1,2.46V26.37a3.35,3.35,0,0,1-1,2.47A3.38,3.38,0,0,1,26.49,29.86Zm-5.38-6.71a.79.79,0,0,0,.85-.66L24.73,9.24a.55.55,0,0,0-.18-.46.62.62,0,0,0-.41-.17q-.08,0-16.53,6.11a.59.59,0,0,0-.41.59.57.57,0,0,0,.43.52l4,1.24,1.61,4.83a.62.62,0,0,0,.63.43.56.56,0,0,0,.4-.17L16.54,20l4.09,3A.9.9,0,0,0,21.11,23.15ZM13.8,20.71l-1.21-4q8.72-5.55,8.78-5.55c.15,0,.23,0,.23.16a.18.18,0,0,1,0,.06s-2.51,2.3-7.52,6.8Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share CMU15-445- Project #1 - Buffer Pool Manager on ycombinator"
+            href="https://news.ycombinator.com/submitlink?t=CMU15-445-%20Project%20%231%20-%20Buffer%20Pool%20Manager&u=http%3a%2f%2flocalhost%3a1313%2fposts%2fdatabase%2fproject%2fcmu15-445-project1-buffer-pool-manager%2f">
+            <svg version="1.1" xml:space="preserve" width="30px" height="30px" viewBox="0 0 512 512" fill="currentColor"
+                xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape">
+                <path
+                    d="M449.446 0C483.971 0 512 28.03 512 62.554L512 449.446C512 483.97 483.97 512 449.446 512L62.554 512C28.03 512 0 483.97 0 449.446L0 62.554C0 28.03 28.029 0 62.554 0L449.446 0ZM183.8767 87.9921H121.8427L230.6673 292.4508V424.0079H281.3328V292.4508L390.1575 87.9921H328.1233L256 238.2489z" />
+            </svg>
+        </a>
+    </li>
+</ul>
+
+  </footer><script src="https://giscus.app/client.js"
+        data-repo="WJLE007/comment"
+        data-repo-id="R_kgDOOTuC9Q"
+        data-category="General"
+        data-category-id="DIC_kwDOOTuC9c4Cow7G"
+        data-mapping="pathname"
+        data-strict="0"
+        data-reactions-enabled="1"
+        data-emit-metadata="0"
+        data-input-position="bottom"
+        data-theme="preferred_color_scheme"
+        data-lang="zh-CN"
+        crossorigin="anonymous"
+        async>
+</script>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>© <a href="https://jialog.top">JiaLog</a> 豫ICP备2024077894号-1 苏公网安备32031202000962号 32031202000962</span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

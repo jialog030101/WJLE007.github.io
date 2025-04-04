@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>CMU15-445-Project #2 - B&#43; Tree Index Checkpoint 1 | JiaLog</title>
+<meta name="keywords" content="Project, CMU15-445">
+<meta name="description" content="一些工具
+
+BusTub B&#43;Tree PrinterCMU官方在线的B&#43;树的生成工具。我主要用来细节实现的时候进行参考。
+JavaScript B&#43; TreeB&#43;树插入和删除的动态演示。
+Graphviz Online可视化自己的树。在debug的时候会用到。将生成的dot文件转换成svg图片。
+Log In | Gradescope在线评测网站,邀请码：PXWVR5，
+Project #2 - B&#43;Tree | CMU 15-445/645 :: Intro to Database Systems (Fall 2022)最重要的当然还是课程网站了
+课程的视频，还有对应的教材还是推荐看一下的上面有很多实现细节的。非常值得参考。
+
+如何Debug自己的🌳
+大致上可以分为两种方式
+
+可视化的用自带的printer将树生成dot文件然后复制到上面的可视化网站。
+由于本项目采用的是cmake构建的，所以可以很方便的在测试文件中打上断点。进行调试。
+
+==可视化调试==
+在终端中执行以下命令，构建和执行printer。
+➜  build git:(main) make b_plus_tree_printer -j2 // 构建printer
+➜  build git:(main) ./bin/b_plus_tree_printer    // 执行printer  
+执行完之后就会有以下提示：
+
+按照这个提示就可以生成dot文件，然后复制到上述的网站进行可视化。（当你看到自己的树呈现出来的时候还是非常有成就感的😁）
+==非可视化==
+
+可以很方便的直接打断点，然后在vscode中的cmake插件中选择调试进行debug。
+官方还提供了一种大打log的方式进行debug，我是不太习惯这种方式所以没有进行很深入的研究。感兴趣的可以自己进行了解😗。
+两种debug的方式是相辅相成的，在你过不了本地样例的时候好好的用非可视化的方式进行debug，线上样例过不了大部分原因是细节处理上出问题了。用可视化的方式会更加的直观。
+请不要公开代码，尊重Andy劳动成果
+
+概览
+Project2是实现B&#43;树索引，整个project大致被分为了两个部分
+
+checkpoint1：实现一个单线程的b&#43;树。
+checkpoint2：实现一个多线程的b&#43;树。
+
+实验代码中给出的自由发挥的空间非常的大，只给出了Getvalue(),Insert(),Remove()这三个函数的接口，剩下的所有的实现都非常的自由，整个实验实现的过程就像一个黑盒一样，只在乎输入和输出。
+
+本实验需要完成b&#43; index部分，b&#43;树中的页（page）都需要从上一个实验中实现的buffer pool中取。
+
+Checkpoint-1
+Task #1 - B&#43;Tree Pages
+需要完成以下三个page，主要都是一些getter和setter的函数，重在理解各部分的组成。
+
+
+
+B&#43;Tree Parent Page
+
+
+
+
+B&#43;Tree Internal Page
+
+
+
+
+B&#43;Tree Leaf Page
+
+
+
+其中parentPage是internal page和leaf page的父类。我更倾向于把这几个page类型理解为 从buffer pool中取回来的Page的不同解释形式。Page还是那个Page。主要就是在于你如何去解释它的组成部分。">
+<meta name="author" content="Theme PaperMod">
+<link rel="canonical" href="http://localhost:1313/posts/database/project/cmu15-445-project2-b&#43;-tree-index-checkpoint-1/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.6da9a63d25a9608bca2f7f907a030e887a7dd3c3f3918e4cc113129361414bda.css" integrity="sha256-bammPSWpYIvKL3&#43;QegMOiHp908PzkY5MwRMSk2FBS9o=" rel="preload stylesheet" as="style">
+<link rel="icon" href="http://localhost:1313/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://localhost:1313/apple-touch-icon.png">
+<link rel="mask-icon" href="http://localhost:1313/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="http://localhost:1313/posts/database/project/cmu15-445-project2-b&#43;-tree-index-checkpoint-1/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:url" content="http://localhost:1313/posts/database/project/cmu15-445-project2-b&#43;-tree-index-checkpoint-1/">
+  <meta property="og:site_name" content="JiaLog">
+  <meta property="og:title" content="CMU15-445-Project #2 - B&#43; Tree Index Checkpoint 1">
+  <meta property="og:description" content="一些工具 BusTub B&#43;Tree PrinterCMU官方在线的B&#43;树的生成工具。我主要用来细节实现的时候进行参考。 JavaScript B&#43; TreeB&#43;树插入和删除的动态演示。 Graphviz Online可视化自己的树。在debug的时候会用到。将生成的dot文件转换成svg图片。 Log In | Gradescope在线评测网站,邀请码：PXWVR5， Project #2 - B&#43;Tree | CMU 15-445/645 :: Intro to Database Systems (Fall 2022)最重要的当然还是课程网站了 课程的视频，还有对应的教材还是推荐看一下的上面有很多实现细节的。非常值得参考。 如何Debug自己的🌳 大致上可以分为两种方式
+可视化的用自带的printer将树生成dot文件然后复制到上面的可视化网站。 由于本项目采用的是cmake构建的，所以可以很方便的在测试文件中打上断点。进行调试。 ==可视化调试==
+在终端中执行以下命令，构建和执行printer。
+➜ build git:(main) make b_plus_tree_printer -j2 // 构建printer ➜ build git:(main) ./bin/b_plus_tree_printer // 执行printer 执行完之后就会有以下提示：
+按照这个提示就可以生成dot文件，然后复制到上述的网站进行可视化。（当你看到自己的树呈现出来的时候还是非常有成就感的😁）
+==非可视化==
+可以很方便的直接打断点，然后在vscode中的cmake插件中选择调试进行debug。
+官方还提供了一种大打log的方式进行debug，我是不太习惯这种方式所以没有进行很深入的研究。感兴趣的可以自己进行了解😗。
+两种debug的方式是相辅相成的，在你过不了本地样例的时候好好的用非可视化的方式进行debug，线上样例过不了大部分原因是细节处理上出问题了。用可视化的方式会更加的直观。
+请不要公开代码，尊重Andy劳动成果
+概览 Project2是实现B&#43;树索引，整个project大致被分为了两个部分
+checkpoint1：实现一个单线程的b&#43;树。 checkpoint2：实现一个多线程的b&#43;树。 实验代码中给出的自由发挥的空间非常的大，只给出了Getvalue(),Insert(),Remove()这三个函数的接口，剩下的所有的实现都非常的自由，整个实验实现的过程就像一个黑盒一样，只在乎输入和输出。
+本实验需要完成b&#43; index部分，b&#43;树中的页（page）都需要从上一个实验中实现的buffer pool中取。
+Checkpoint-1 Task #1 - B&#43;Tree Pages 需要完成以下三个page，主要都是一些getter和setter的函数，重在理解各部分的组成。
+B&#43;Tree Parent Page B&#43;Tree Internal Page B&#43;Tree Leaf Page 其中parentPage是internal page和leaf page的父类。我更倾向于把这几个page类型理解为 从buffer pool中取回来的Page的不同解释形式。Page还是那个Page。主要就是在于你如何去解释它的组成部分。">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2024-02-01T00:00:00+00:00">
+    <meta property="article:modified_time" content="2024-02-01T00:00:00+00:00">
+    <meta property="article:tag" content="Project">
+    <meta property="article:tag" content="CMU15-445">
+      <meta property="og:image" content="http://localhost:1313/images/papermod-cover.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://localhost:1313/images/papermod-cover.png">
+<meta name="twitter:title" content="CMU15-445-Project #2 - B&#43; Tree Index Checkpoint 1">
+<meta name="twitter:description" content="一些工具
+
+BusTub B&#43;Tree PrinterCMU官方在线的B&#43;树的生成工具。我主要用来细节实现的时候进行参考。
+JavaScript B&#43; TreeB&#43;树插入和删除的动态演示。
+Graphviz Online可视化自己的树。在debug的时候会用到。将生成的dot文件转换成svg图片。
+Log In | Gradescope在线评测网站,邀请码：PXWVR5，
+Project #2 - B&#43;Tree | CMU 15-445/645 :: Intro to Database Systems (Fall 2022)最重要的当然还是课程网站了
+课程的视频，还有对应的教材还是推荐看一下的上面有很多实现细节的。非常值得参考。
+
+如何Debug自己的🌳
+大致上可以分为两种方式
+
+可视化的用自带的printer将树生成dot文件然后复制到上面的可视化网站。
+由于本项目采用的是cmake构建的，所以可以很方便的在测试文件中打上断点。进行调试。
+
+==可视化调试==
+在终端中执行以下命令，构建和执行printer。
+➜  build git:(main) make b_plus_tree_printer -j2 // 构建printer
+➜  build git:(main) ./bin/b_plus_tree_printer    // 执行printer  
+执行完之后就会有以下提示：
+
+按照这个提示就可以生成dot文件，然后复制到上述的网站进行可视化。（当你看到自己的树呈现出来的时候还是非常有成就感的😁）
+==非可视化==
+
+可以很方便的直接打断点，然后在vscode中的cmake插件中选择调试进行debug。
+官方还提供了一种大打log的方式进行debug，我是不太习惯这种方式所以没有进行很深入的研究。感兴趣的可以自己进行了解😗。
+两种debug的方式是相辅相成的，在你过不了本地样例的时候好好的用非可视化的方式进行debug，线上样例过不了大部分原因是细节处理上出问题了。用可视化的方式会更加的直观。
+请不要公开代码，尊重Andy劳动成果
+
+概览
+Project2是实现B&#43;树索引，整个project大致被分为了两个部分
+
+checkpoint1：实现一个单线程的b&#43;树。
+checkpoint2：实现一个多线程的b&#43;树。
+
+实验代码中给出的自由发挥的空间非常的大，只给出了Getvalue(),Insert(),Remove()这三个函数的接口，剩下的所有的实现都非常的自由，整个实验实现的过程就像一个黑盒一样，只在乎输入和输出。
+
+本实验需要完成b&#43; index部分，b&#43;树中的页（page）都需要从上一个实验中实现的buffer pool中取。
+
+Checkpoint-1
+Task #1 - B&#43;Tree Pages
+需要完成以下三个page，主要都是一些getter和setter的函数，重在理解各部分的组成。
+
+
+
+B&#43;Tree Parent Page
+
+
+
+
+B&#43;Tree Internal Page
+
+
+
+
+B&#43;Tree Leaf Page
+
+
+
+其中parentPage是internal page和leaf page的父类。我更倾向于把这几个page类型理解为 从buffer pool中取回来的Page的不同解释形式。Page还是那个Page。主要就是在于你如何去解释它的组成部分。">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "http://localhost:1313/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "CMU15-445-Project #2 - B+ Tree Index Checkpoint 1",
+      "item": "http://localhost:1313/posts/database/project/cmu15-445-project2-b+-tree-index-checkpoint-1/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "CMU15-445-Project #2 - B+ Tree Index Checkpoint 1",
+  "name": "CMU15-445-Project #2 - B\u002b Tree Index Checkpoint 1",
+  "description": "一些工具 BusTub B+Tree PrinterCMU官方在线的B+树的生成工具。我主要用来细节实现的时候进行参考。 JavaScript B+ TreeB+树插入和删除的动态演示。 Graphviz Online可视化自己的树。在debug的时候会用到。将生成的dot文件转换成svg图片。 Log In | Gradescope在线评测网站,邀请码：PXWVR5， Project #2 - B+Tree | CMU 15-445/645 :: Intro to Database Systems (Fall 2022)最重要的当然还是课程网站了 课程的视频，还有对应的教材还是推荐看一下的上面有很多实现细节的。非常值得参考。 如何Debug自己的🌳 大致上可以分为两种方式\n可视化的用自带的printer将树生成dot文件然后复制到上面的可视化网站。 由于本项目采用的是cmake构建的，所以可以很方便的在测试文件中打上断点。进行调试。 ==可视化调试==\n在终端中执行以下命令，构建和执行printer。\n➜ build git:(main) make b_plus_tree_printer -j2 // 构建printer ➜ build git:(main) ./bin/b_plus_tree_printer // 执行printer 执行完之后就会有以下提示：\n按照这个提示就可以生成dot文件，然后复制到上述的网站进行可视化。（当你看到自己的树呈现出来的时候还是非常有成就感的😁）\n==非可视化==\n可以很方便的直接打断点，然后在vscode中的cmake插件中选择调试进行debug。\n官方还提供了一种大打log的方式进行debug，我是不太习惯这种方式所以没有进行很深入的研究。感兴趣的可以自己进行了解😗。\n两种debug的方式是相辅相成的，在你过不了本地样例的时候好好的用非可视化的方式进行debug，线上样例过不了大部分原因是细节处理上出问题了。用可视化的方式会更加的直观。\n请不要公开代码，尊重Andy劳动成果\n概览 Project2是实现B+树索引，整个project大致被分为了两个部分\ncheckpoint1：实现一个单线程的b+树。 checkpoint2：实现一个多线程的b+树。 实验代码中给出的自由发挥的空间非常的大，只给出了Getvalue(),Insert(),Remove()这三个函数的接口，剩下的所有的实现都非常的自由，整个实验实现的过程就像一个黑盒一样，只在乎输入和输出。\n本实验需要完成b+ index部分，b+树中的页（page）都需要从上一个实验中实现的buffer pool中取。\nCheckpoint-1 Task #1 - B+Tree Pages 需要完成以下三个page，主要都是一些getter和setter的函数，重在理解各部分的组成。\nB+Tree Parent Page B+Tree Internal Page B+Tree Leaf Page 其中parentPage是internal page和leaf page的父类。我更倾向于把这几个page类型理解为 从buffer pool中取回来的Page的不同解释形式。Page还是那个Page。主要就是在于你如何去解释它的组成部分。\n",
+  "keywords": [
+    "Project", "CMU15-445"
+  ],
+  "articleBody": "一些工具 BusTub B+Tree PrinterCMU官方在线的B+树的生成工具。我主要用来细节实现的时候进行参考。 JavaScript B+ TreeB+树插入和删除的动态演示。 Graphviz Online可视化自己的树。在debug的时候会用到。将生成的dot文件转换成svg图片。 Log In | Gradescope在线评测网站,邀请码：PXWVR5， Project #2 - B+Tree | CMU 15-445/645 :: Intro to Database Systems (Fall 2022)最重要的当然还是课程网站了 课程的视频，还有对应的教材还是推荐看一下的上面有很多实现细节的。非常值得参考。 如何Debug自己的🌳 大致上可以分为两种方式\n可视化的用自带的printer将树生成dot文件然后复制到上面的可视化网站。 由于本项目采用的是cmake构建的，所以可以很方便的在测试文件中打上断点。进行调试。 ==可视化调试==\n在终端中执行以下命令，构建和执行printer。\n➜ build git:(main) make b_plus_tree_printer -j2 // 构建printer ➜ build git:(main) ./bin/b_plus_tree_printer // 执行printer 执行完之后就会有以下提示：\n按照这个提示就可以生成dot文件，然后复制到上述的网站进行可视化。（当你看到自己的树呈现出来的时候还是非常有成就感的😁）\n==非可视化==\n可以很方便的直接打断点，然后在vscode中的cmake插件中选择调试进行debug。\n官方还提供了一种大打log的方式进行debug，我是不太习惯这种方式所以没有进行很深入的研究。感兴趣的可以自己进行了解😗。\n两种debug的方式是相辅相成的，在你过不了本地样例的时候好好的用非可视化的方式进行debug，线上样例过不了大部分原因是细节处理上出问题了。用可视化的方式会更加的直观。\n请不要公开代码，尊重Andy劳动成果\n概览 Project2是实现B+树索引，整个project大致被分为了两个部分\ncheckpoint1：实现一个单线程的b+树。 checkpoint2：实现一个多线程的b+树。 实验代码中给出的自由发挥的空间非常的大，只给出了Getvalue(),Insert(),Remove()这三个函数的接口，剩下的所有的实现都非常的自由，整个实验实现的过程就像一个黑盒一样，只在乎输入和输出。\n本实验需要完成b+ index部分，b+树中的页（page）都需要从上一个实验中实现的buffer pool中取。\nCheckpoint-1 Task #1 - B+Tree Pages 需要完成以下三个page，主要都是一些getter和setter的函数，重在理解各部分的组成。\nB+Tree Parent Page B+Tree Internal Page B+Tree Leaf Page 其中parentPage是internal page和leaf page的父类。我更倾向于把这几个page类型理解为 从buffer pool中取回来的Page的不同解释形式。Page还是那个Page。主要就是在于你如何去解释它的组成部分。\n==Page的组成==\n首先回顾一下在P1中就已经接触到的Page。这个Page我理解为数据在disk上的存储单位。相当于一个计量概念。\n可以看出这个data_数组的大小为4096B即4KB。这个大小是定义的常量BUSTUB_PAGE_SIZE决定的。\n本项目的所有的数据都是在data_中的。—–我理解的就是对data数组中的数据解释方式不同。\n==BPlusTreePage==\n这是internal page和leaf page的父类b_plus_tree_page。\nIndexPageType page_type_; // leaf or internal. 4 Byte lsn_t lsn_ // temporarily unused. 4 Byte int size_; // tree page data size(not in byte, in count). 4 Byte int max_size_; // tree page data max size(not in byte, in count). 4 Byte page_id_t parent_page_id_; // 4 Byte page_id_t page_id_; // 4 Byte // 24 Byte in total 以上部分组成了两种节点的公共部分，共占据24B，还剩下4KB-24B的空间，但是如何使用这剩下的空间呢？ 可以从下面的这个flexible数组找到答案。这个大佬解释的比较的详细，我也是在这看到的。做个数据库：2022 CMU15-445 Project2 B+Tree Index - 知乎\n众所周知，数据在数组中的排列是连续的，可以通过下标一直向下进行访问，就是通过利用这个特性使用头指针加上偏移量就到准确的找到我们想要的那个数据。\n因此我认为这个array_数组相当于提供了一个使用剩下空间的一个入口，有个这个门把手就可以轻松的使用剩下的空间。 大致可以认为数据就是以上的这种形式。每一个小方格都是一个kv对。\n今天我在网上冲浪的时候发现了更加详细的关于柔性数组的信息。 截图自C语言结构体里的成员数组和指针 | 酷 壳 - CoolShell。 同时这篇文章也贴出了文章出处Zero Length (Using the GNU Compiler Collection (GCC))。\n现在细细想来这篇博客我很早其实就看到过，但是在当时我总觉得这些都是一些语法糖罢了，没想到自己错失了很多学习的机会。🤤\n==Internalpage==\n上图中红色的就是internalpage。 我们发现第一个key是空着的，但是value指向了小于value（1）的page。其实internal的value存放的是pageid。 所以internalpage的第一个key要置空处理，其实最后一个置空也可以了，只要能自洽就可以了。\n需要注意的是：这里只存放孩子节点的pageId，找到这个id之后取buffer pool里取 ==LeafPage==\n基本组成和这个internalpage是一样的，多了一个next_page_id. 这个next_page_id用与指向相邻的叶子节点，从上图中绿色叶子节点的指针就能看出来。 这个的主要作用就是能够进行遍历。\n需要说明的一点是：在叶子节点中key是索引，value是recordId，这种形式也就是二级索引 在数据库中需要拿到这个recodeId之后返回表中进行查询。大大加快查询的速度。\n我觉得二级索引有以下几个优势：\n更新的代价很低：因为value都只是一些id所以占得空间很小，处理起来开销自然就小了。 一张表能够组织多个索引：更换不同的key就能组织起来一个索引。 Task1的内容很简单，基本就上述这些，主要是弄清楚page的组成，和框架的构建。被折磨了这么多天的我真心建议多用提供的工具画一些树先不要着急动手，想清楚每个部分的组成和作用再下手也不迟，正所谓磨刀不误砍柴工。\n==补充一点==\n聚簇索引和非聚簇索引（二级索引） 一言以蔽及：聚簇索引的value就是你想要找的数据或者是数据所在的页本身，非聚簇索引存放的相当于是你想要的数据所在位置的快速指针帮助你快速定位。\nTask #2 - B+Tree Data Structure task2是checkpoint1的重头戏，非常的有意思。 有几个需要注意的点：\n要求此b+树的索引是唯一的，不支持重复的插入。 UpdateRootPageId在root_page_id发生改变的时候需要调用已经实现好的这个函数，保证树的持久化。 在实现的时候一定多多考虑实现的细节，比如每种节点的最大最小值，插入后的键/值对的数量等于叶节点的max_size，插入前的子节点的数量等于内部节点的max_size。 下面按照函数的顺序进行介绍。 在介绍函数之前我想说明一下Transaction这个类的作用。顾名思义，这个Transaction被翻译为事务。在这篇文章中对这个事务有着详细的介绍。[[查询的处理和优化]]。 在这个类中实现了很多函数，可以把需要处理的page放在实务中等结束了进行统一的处理。因为在函数中涉及到很多的fetch和unpin，而且函数还有递归嵌套，处理起来是非常的麻烦，所以我建议直接尝试使用transaction，反正后面也要用。 ^d53eec\nGetValue（） ==GetValue（）==\n写到这里的时候理应对b+树的结构非常的了解，其实也就是两种节点，一种是internal，一种是leaf，从root节点开始寻找每一个节点中最后一个\u003c=输入key的值。然后找到key所在的leaf节点，从前向后遍历，找到想要的值。下面是一个模拟示意图👇。 其实无论我们是查找，插入，还是删除，首先都必须找到key所在的leaf节点。由此可以将上面这个寻找key所在的leaf节点的过程封装出一个使用频率极高而且非常重要的函数：FindLeafPage()。我们从书上给出的伪代码和上述模拟过程对照分析。\n虽然说我们要找的是最后一个\u003c=输入key的值，但是在具体的伪代码实现中确实寻找第一个\u003e=输入key的值，并进行分类讨论。\nauto next_page = buffer_pool_manager_-\u003eFetchPage(curr_internal-\u003eLookUp(key, comparator_)); auto target=std::lower_bound(array_+1,array_+GetSize(),key,[\u0026keyComparator](auto const\u0026pair,auto k){return keyComparator(pair.first,k)\u003c0; }); if (target==array_+GetSize()) { return ValueAt(GetSize()-1); // 输入的key比所有的值都大，返回最后一个 } if (keyComparator(target-\u003efirst,key)==0) { return target-\u003esecond; //找到的target的key和输入的key相同就返回target的value } return std::prev(target)-\u003esecond; // 找到了第一个大于key的target，返回前一个的value。 LookUp返回的就是page_id,前面我们也提到过，internal节点的value就是page_id. 这里用到了lower_bound（）函数，比自己实现二分查找会方便一些。\n但是这个lower_bound函数传入了keycompareter（）的比较方法，进行了回调函数的改造，使用类定义的比较规则。不是简单的比大小。\n现在找到了key所在的page我们该如何使用这个page呢？\nauto leaf_page = reinterpret_cast\u003cLeafPage *\u003e(page-\u003eGetData()); 通过reinterpret_cast将page解释为LeafPage类型。来供我们进行使用。需要注意的是这种方式非常的不安全，只是将同样的数据进行了不同的解释。只有在我们非常清楚两者之间的关系的时候使用才不容易出错。\n找到LeafPage后同样使用上述改造过后的的lower_bound()函数进行查找key😀。\n==记得UnpinPage==\n在使用完page之后一定记得unpin不然的话高强度使用过后内存会不足。 我的比较建议还是之前提到的transaction，进行统筹处理，少死点脑细胞。\nInsert（） 相较于上一个函数而言，insert（）的逻辑就相对而言要复杂一些了。\n==Insert（）== 插入一个kv对由少到多的情况一个一个进行梳理\n刚开始树是空的：需要新建一个根节点。 有空间能够直接插入 插入之后pageSize=leafMaxSize，需要进行分裂，分裂之后将新的page插入到父节点中。 有重复的插入，直接返回。 现在再看伪代码大概的情况也是这几种。 对照代码再分析一下：\nINDEX_TEMPLATE_ARGUMENTS auto BPLUSTREE_TYPE::Insert(const KeyType \u0026key, const ValueType \u0026value, Transaction *transaction) -\u003e bool { if (IsEmpty()) { StartNewTree(key, value); // 这个对应空树的情况， return true; } return InsertIntoLeaf(key, value, transaction); // 剩下的所有情况都在这处理 } 书上给的伪代码是插入之前与(leaf_max_size-1)进行比较，我在处理的时候是插入之后与leaf_max_size进行比较。\n⚠️ 这里需要注意的是LeafPage和InternalPage的分裂条件并不一样，也就是说leafpage中最多有(leaf_max_size-1)个kv对，而internal中可以有internal_max_size个kv对。 两个的max_size都是5，但是最多的kv对确是不一样的。\n==InsertIntoLeaf()==\nauto leaf_page = reinterpret_cast\u003cLeafPage *\u003e(page-\u003eGetData()); int pre_size = leaf_page-\u003eGetSize(); int curr_size = leaf_page-\u003eInsert(key, valueType, comparator_); if (pre_size == curr_size) { // 这是有重复的节点直接返回 Unpin(transaction, I); return false; } if (curr_size == leaf_max_size_) { // 插入之后等于叶子节点的最大值那么就进行愉快的分裂吧。 page_id_t new_page_leaf_id; auto new_leaf_node_page = buffer_pool_manager_-NewPage(\u0026new_page_leaf_id); auto new_leaf = reinterpret_cast\u003cLeafPage *\u003e(new_leaf_node_page-\u003eGetData()); new_leaf-\u003eInit(new_page_leaf_id, INVALID_PAGE_ID, leaf_max_size_); leaf_page-\u003eSplit(new_leaf_node_page); InsertIntoParent(page, new_leaf-\u003eKeyAt(0), new_leaf_node_page, transaction); } 到这里所有的插入的情况就已经考虑完全了，但是分裂之后需要将新分裂的页插入到父节点中，插入到父节点中之后又涉及到父节点分裂的问题，这就是一个递归嵌套了\n==InsertIntoParent()==\n仔细看伪代码的写法，基本是按照伪代码一步步写成的。\nINDEX_TEMPLATE_ARGUMENTS auto BPLUSTREE_TYPE::InsertIntoParent(Page *old_leaf, const KeyType \u0026key, Page *new_leaf, Transaction *transaction)-\u003e void{ // 如果原页是根节点，那么新建一个根节点，将新旧节点插入到新的根节点中，并更新节点 if（old_leaf-\u003epageID==root_page_id）{ //新建一个节点作为根节点，把两个都插入之后更新各自的指针 ps.进到这个函数的时候说明根节点已经满了，所以直接创一个新的就行了。 } if（parent_internal-\u003eGetSize() \u003c parent_internal-\u003eGetMaxSize()）{ // 父节点的空间是够的，直接插入就行了 } // 剩下的自然就是空间不够需要进行父节点分裂的情况 ..... parent_internal-\u003eSplit(key, new_leaf, new_parent_page, comparator_, buffer_pool_manager_); ...... InsertIntoParent(parent_page, new_parent_internal-\u003eKeyAt(0), new_parent_page, transaction); ...... } ⚠️ internalPage在分裂的时候尽量创建一个tmp空间进行插入和重新的分配，在本实验中直接在原来的页上插入和分配页没有问题，如果maxsize的大小很极限的话，插入一个kv对可能会容不下，发生错误。\nRemove（） remove（）函数的逻辑相较于前两个则是复杂非常多的，但是按照伪代码按图索骥，一步一步来，是能够完美实现的。 auto brother_node = reinterpret_cast\u003cBPlusTreePage *\u003e(brother_page-\u003eGetData()); if (brother_node-\u003eGetSize() + btree_page-\u003eGetSize() \u003c= (btree_page-\u003eIsLeafPage() ? leaf_max_size_ - 1 : internal_max_size_)) { if (is_pre) { std::swap(leaf_page, brother_page); } Coalesce(leaf_page, brother_page, parent_key, transaction); DeleteEntry(parent_page, parent_key, transaction); } else { Redistribute(leaf_page, brother_page, parent_page, parent_key, is_pre, transaction); } ==DeleteEntry()==\n大致梳理一下思路：\n首先找到页之后自然是删除，需要注意的是leaf和internal的组成略有差异，需要分别进行处理 如果所在页是根节点而且只剩下一个子节点需要进行额外的Adjustroot（）函数进行操作。 删除之后发现kv对的数量小于规定的MinSize(),那么进行分类讨论 和兄弟节点合起来Coalesce()的大小没有超过maxSize，但是不同类型的节点maxSize计量方式不同，这也是一个坑点,那就将两个节点合并，但是最后记得把被合并的key从父节点中删除 和兄弟节点合起来的大小超过了maxSize，那么需要Redistribute(),从兄弟节点中协调一个过来。这里分成四种情况，是否是叶子节点，以及兄弟节点在前在后分成了四种情况 ⚠️需要注意的是，root page 并不受 min size 的限制。但如果 root page 被删到 size 只剩 1，即只有一个 child page 的时候，应将此 child page 设置为新的 root page。\n还有两种类的page计算maxSize的逻辑不太一样需要注意一下。\n另外，在合并时，两个 page 合并成一个 page，另一个 page 应该删除，释放资源。删除 page 时，仍是调用 buffer pool 的 DeletePage() 函数。\n==AdjustRoot（）== 根节点只剩一个子节点的时候小小的调整一下。\n==Coalesce()==\n还是要区分是否是leafPage，处理方式不太一样\n如果是leaf节点简简单单的合并到一个节点然后更改一下叶子节点的next指针就够了\n如果是Internal节点的话需要合并完之后更新一下子节点的父节点。\n==Redistribute（）==\n发现不能合并之后就只需要从兄弟节点处协调一个即可 协调的过程比较简单，从左侧节点偷取时，把左侧节点最后一个 KV 对转移至当前节点第一个 KV 对，从右侧节点偷取时，把右侧节点的 KV 对转移至当前节点最后一个 KV 对。leaf page 和 internal page 的偷取过程基本相同，仅需注意 internal page 偷取后更新子节点的父节点指针。\nSummary ckeckpoint1主要的难点就是在细枝末节的处理上，非常的折磨人，我开始没并没有按照严格按照伪代码写，除了很多的奇奇怪怪的bug，最后几乎是推到重来，按照伪代码才算是能正确的运行。\n但是unpin我一直处理不好，卡了我好长时间，最后还是祭出transaction，好好研究了一下才把线上评测过了。\n最后附上通过截图 也是最这一段时间的一个总结。\n",
+  "wordCount" : "516",
+  "inLanguage": "en",
+  "image": "http://localhost:1313/images/papermod-cover.png","datePublished": "2024-02-01T00:00:00Z",
+  "dateModified": "2024-02-01T00:00:00Z",
+  "author":{
+    "@type": "Person",
+    "name": "Theme PaperMod"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "http://localhost:1313/posts/database/project/cmu15-445-project2-b+-tree-index-checkpoint-1/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "JiaLog",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "http://localhost:1313/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="http://localhost:1313/" accesskey="h" title="JiaLog (Alt + H)">JiaLog</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="http://localhost:1313/" title="Home">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/posts/" title="Blog">
+                    <span>Blog</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/essay/" title="Essay">
+                    <span>Essay</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/archives" title="Archive">
+                    <span>Archive</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/search/" title="Search (Alt &#43; /)" accesskey=/>
+                    <span>Search</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/tags/" title="Tags">
+                    <span>Tags</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="http://localhost:1313/">Home</a>&nbsp;»&nbsp;<a href="http://localhost:1313/posts/">Posts</a></div>
+    <h1 class="post-title entry-hint-parent">
+      CMU15-445-Project #2 - B&#43; Tree Index Checkpoint 1
+    </h1>
+    <div class="post-meta"><span title='2024-02-01 00:00:00 +0000 UTC'>February 1, 2024</span>&nbsp;·&nbsp;3 min&nbsp;·&nbsp;Theme PaperMod&nbsp;|&nbsp;<a href="https://github.com/adityatelange/hugo-PaperMod/tree/exampleSite/content/posts/Database/Project/CMU15-445%20Project2-B&#43;%20Tree%20Index%20Checkpoint%201.md" rel="noopener noreferrer" target="_blank">Suggest Changes</a>
+
+</div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#%e4%b8%80%e4%ba%9b%e5%b7%a5%e5%85%b7" aria-label="一些工具">一些工具</a><ul>
+                        
+                <li>
+                    <a href="#%e5%a6%82%e4%bd%95debug%e8%87%aa%e5%b7%b1%e7%9a%84" aria-label="如何Debug自己的🌳">如何Debug自己的🌳</a></li></ul>
+                </li>
+                <li>
+                    <a href="#%e6%a6%82%e8%a7%88" aria-label="概览">概览</a></li>
+                <li>
+                    <a href="#checkpoint-1" aria-label="Checkpoint-1">Checkpoint-1</a><ul>
+                        
+                <li>
+                    <a href="#task-1---btree-pages" aria-label="Task #1 - B&#43;Tree Pages">Task #1 - B+Tree Pages</a></li>
+                <li>
+                    <a href="#task-2---btree-data-structure" aria-label="Task #2 - B&#43;Tree Data Structure">Task #2 - B+Tree Data Structure</a><ul>
+                        
+                <li>
+                    <a href="#getvalue" aria-label="GetValue（）">GetValue（）</a></li>
+                <li>
+                    <a href="#insert" aria-label="Insert（）">Insert（）</a></li>
+                <li>
+                    <a href="#remove" aria-label="Remove（）">Remove（）</a></li></ul>
+                </li></ul>
+                </li>
+                <li>
+                    <a href="#summary" aria-label="Summary">Summary</a>
+                </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><h2 id="一些工具">一些工具<a hidden class="anchor" aria-hidden="true" href="#一些工具">#</a></h2>
+<ul>
+<li><a href="https://15445.courses.cs.cmu.edu/fall2022/bpt-printer/">BusTub B+Tree Printer</a>CMU官方在线的B+树的生成工具。我主要用来细节实现的时候进行参考。</li>
+<li><a href="https://goneill.co.nz/btree-demo.php">JavaScript B+ Tree</a>B+树插入和删除的动态演示。</li>
+<li><a href="https://dreampuf.github.io/GraphvizOnline/#digraph%20G%20%7B%0A%0A%20%20subgraph%20cluster_0%20%7B%0A%20%20%20%20style%3Dfilled%3B%0A%20%20%20%20color%3Dlightgrey%3B%0A%20%20%20%20node%20%5Bstyle%3Dfilled%2Ccolor%3Dwhite%5D%3B%0A%20%20%20%20a0%20-%3E%20a1%20-%3E%20a2%20-%3E%20a3%3B%0A%20%20%20%20label%20%3D%20%22process%20%231%22%3B%0A%20%20%7D%0A%0A%20%20subgraph%20cluster_1%20%7B%0A%20%20%20%20node%20%5Bstyle%3Dfilled%5D%3B%0A%20%20%20%20b0%20-%3E%20b1%20-%3E%20b2%20-%3E%20b3%3B%0A%20%20%20%20label%20%3D%20%22process%20%232%22%3B%0A%20%20%20%20color%3Dblue%0A%20%20%7D%0A%20%20start%20-%3E%20a0%3B%0A%20%20start%20-%3E%20b0%3B%0A%20%20a1%20-%3E%20b3%3B%0A%20%20b2%20-%3E%20a3%3B%0A%20%20a3%20-%3E%20a0%3B%0A%20%20a3%20-%3E%20end%3B%0A%20%20b3%20-%3E%20end%3B%0A%0A%20%20start%20%5Bshape%3DMdiamond%5D%3B%0A%20%20end%20%5Bshape%3DMsquare%5D%3B%0A%7D">Graphviz Online</a>可视化自己的树。在debug的时候会用到。将生成的dot文件转换成svg图片。</li>
+<li><a href="https://www.gradescope.com/courses/425272">Log In | Gradescope</a>在线评测网站,邀请码：PXWVR5，</li>
+<li><a href="https://15445.courses.cs.cmu.edu/fall2022/project2/">Project #2 - B+Tree | CMU 15-445/645 :: Intro to Database Systems (Fall 2022)</a>最重要的当然还是课程网站了</li>
+<li>课程的视频，还有对应的教材还是推荐看一下的上面有很多实现细节的。非常值得参考。</li>
+</ul>
+<h3 id="如何debug自己的">如何Debug自己的🌳<a hidden class="anchor" aria-hidden="true" href="#如何debug自己的">#</a></h3>
+<p>大致上可以分为两种方式</p>
+<ul>
+<li>可视化的用自带的<code>printer</code>将树生成dot文件然后复制到上面的可视化网站。</li>
+<li>由于本项目采用的是cmake构建的，所以可以很方便的在测试文件中打上断点。进行调试。</li>
+</ul>
+<p>==可视化调试==</p>
+<p>在终端中执行以下命令，构建和执行<code>printer</code>。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="err">➜</span>  <span class="n">build</span> <span class="nl">git</span><span class="p">:(</span><span class="n">main</span><span class="p">)</span> <span class="n">make</span> <span class="n">b_plus_tree_printer</span> <span class="o">-</span><span class="n">j2</span> <span class="c1">// 构建printer
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="err">➜</span>  <span class="n">build</span> <span class="nl">git</span><span class="p">:(</span><span class="n">main</span><span class="p">)</span> <span class="p">.</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">b_plus_tree_printer</span>    <span class="c1">// 执行printer  
+</span></span></span></code></pre></div><p>执行完之后就会有以下提示：</p>
+<p><img alt="image.png|675" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240202215423.png"></p>
+<p>按照这个提示就可以生成dot文件，然后复制到上述的网站进行可视化。（当你看到自己的树呈现出来的时候还是非常有成就感的😁）</p>
+<p>==非可视化==</p>
+<p><img alt="image.png|675" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240202220003.png"></p>
+<p>可以很方便的直接打断点，然后在vscode中的cmake插件中选择调试进行debug。</p>
+<p>官方还提供了一种大打log的方式进行debug，我是不太习惯这种方式所以没有进行很深入的研究。感兴趣的可以自己进行了解😗。</p>
+<p>两种debug的方式是<strong>相辅相成的</strong>，在你过不了<strong>本地样例</strong>的时候好好的用非可视化的方式进行debug，线上样例过不了大部分原因是细节处理上出问题了。用可视化的方式会更加的直观。</p>
+<p><em>请不要公开代码，尊重Andy劳动成果</em></p>
+<hr>
+<h2 id="概览">概览<a hidden class="anchor" aria-hidden="true" href="#概览">#</a></h2>
+<p>Project2是实现B+树索引，整个project大致被分为了两个部分</p>
+<ul>
+<li>checkpoint1：实现一个单线程的b+树。</li>
+<li>checkpoint2：实现一个多线程的b+树。</li>
+</ul>
+<p>实验代码中给出的自由发挥的空间非常的大，只给出了<code>Getvalue()</code>,<code>Insert()</code>,<code>Remove()</code>这三个函数的接口，剩下的所有的实现都非常的自由，整个实验实现的过程就像一个黑盒一样，只在乎输入和输出。</p>
+<p><img alt="image.png|600" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240202220853.png"></p>
+<p>本实验需要完成b+ index部分，b+树中的页（page）都需要从上一个实验中实现的buffer pool中取。</p>
+<hr>
+<h2 id="checkpoint-1">Checkpoint-1<a hidden class="anchor" aria-hidden="true" href="#checkpoint-1">#</a></h2>
+<h3 id="task-1---btree-pages">Task #1 - B+Tree Pages<a hidden class="anchor" aria-hidden="true" href="#task-1---btree-pages">#</a></h3>
+<p>需要完成以下三个page，主要都是一些getter和setter的函数，重在理解各部分的组成。</p>
+<ul>
+<li>
+<ul>
+<li><a href="https://15445.courses.cs.cmu.edu/fall2022/project2/#b&#43;tree-page"><strong>B+Tree Parent Page</strong></a></li>
+</ul>
+</li>
+<li>
+<ul>
+<li><a href="https://15445.courses.cs.cmu.edu/fall2022/project2/#b&#43;tree-internal-page"><strong>B+Tree Internal Page</strong></a></li>
+</ul>
+</li>
+<li>
+<ul>
+<li><a href="https://15445.courses.cs.cmu.edu/fall2022/project2/#b&#43;tree-leaf-page"><strong>B+Tree Leaf Page</strong></a></li>
+</ul>
+</li>
+</ul>
+<p>其中parentPage是internal page和leaf page的父类。我更<strong>倾向于</strong>把这几个page类型理解为 从buffer pool中取回来的Page的<strong>不同解释形式</strong>。Page还是那个Page。主要就是在于你如何去解释它的组成部分。</p>
+<p>==Page的组成==</p>
+<p>首先回顾一下在P1中就已经接触到的Page。这个Page我理解为数据在disk上的存储单位。相当于一个计量概念。</p>
+<p><img alt="image.png|600" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240202230539.png"></p>
+<p><img alt="image.png|600" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240202231733.png"></p>
+<p>可以看出这个data_数组的大小为4096B即4KB。这个大小是定义的常量<code>BUSTUB_PAGE_SIZE</code>决定的。</p>
+<p>本项目的所有的数据都是在data_中的。&mdash;&ndash;我理解的就是对data数组中的数据解释方式不同。</p>
+<p>==BPlusTreePage==</p>
+<p>这是internal page和leaf page的父类<code>b_plus_tree_page</code>。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="n">IndexPageType</span> <span class="n">page_type_</span><span class="p">;</span>   <span class="c1">// leaf or internal. 4 Byte
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">lsn_t</span> <span class="n">lsn_</span>  <span class="c1">// temporarily unused. 4 Byte
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kt">int</span> <span class="n">size_</span><span class="p">;</span>  <span class="c1">// tree page data size(not in byte, in count). 4 Byte
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kt">int</span> <span class="n">max_size_</span><span class="p">;</span>  <span class="c1">// tree page data max size(not in byte, in count). 4 Byte
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">page_id_t</span> <span class="n">parent_page_id_</span><span class="p">;</span> <span class="c1">// 4 Byte
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">page_id_t</span> <span class="n">page_id_</span><span class="p">;</span> <span class="c1">// 4 Byte
+</span></span></span><span class="line"><span class="cl"><span class="c1">// 24 Byte in total
+</span></span></span></code></pre></div><p>以上部分组成了两种节点的公共部分，共占据24B，还剩下4KB-24B的空间，但是如何使用这剩下的空间呢？
+可以从下面的这个flexible数组找到答案。这个大佬解释的比较的详细，我也是在这看到的。<a href="https://zhuanlan.zhihu.com/p/580014163">做个数据库：2022 CMU15-445 Project2 B+Tree Index - 知乎</a></p>
+<p><img alt="image.png|600" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240202234104.png">
+众所周知，数据在数组中的排列是连续的，可以通过下标一直向下进行访问，就是通过利用这个特性使用头指针加上偏移量就到准确的找到我们想要的那个数据。</p>
+<p>因此我认为这个array_数组相当于提供了一个使用剩下空间的一个入口，有个这个<strong>门把手</strong>就可以轻松的使用剩下的空间。
+<img alt="image.png|600" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240202234934.png"></p>
+<p>大致可以认为数据就是以上的这种形式。每一个小方格都是一个kv对。</p>
+<hr>
+<p>今天我在网上冲浪的时候发现了更加详细的关于柔性数组的信息。
+<img alt="image.png|600" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240221132115.png">
+截图自<a href="https://coolshell.cn/articles/11377.html">C语言结构体里的成员数组和指针 | 酷 壳 - CoolShell</a>。
+同时这篇文章也贴出了文章出处<a href="https://gcc.gnu.org/onlinedocs/gcc/Zero-Length.html">Zero Length (Using the GNU Compiler Collection (GCC))</a>。</p>
+<p>现在细细想来这篇博客我很早其实就看到过，但是在当时我总觉得这些都是一些语法糖罢了，没想到自己错失了很多学习的机会。🤤</p>
+<p>==Internalpage==</p>
+<p><img alt="image.png|600" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240202235613.png"></p>
+<p>上图中红色的就是internalpage。
+我们发现第一个key是空着的，但是value指向了小于value（1）的page。其实internal的value存放的是pageid。
+<img alt="image.png|600" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240202235848.png">
+所以internalpage的第一个key要置空处理，其实最后一个置空也可以了，只要能自洽就可以了。</p>
+<pre><code>需要注意的是：这里只存放孩子节点的pageId，找到这个id之后取buffer pool里取
+</code></pre>
+<p>==LeafPage==</p>
+<p>基本组成和这个internalpage是一样的，多了一个<code>next_page_id</code>.
+<img alt="image.png|600" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240203000849.png">
+这个<code>next_page_id</code>用与指向相邻的叶子节点，从上图中绿色叶子节点的指针就能看出来。
+这个的主要作用就是能够进行<strong>遍历</strong>。</p>
+<p><strong>需要说明的一点是</strong>：在叶子节点中key是索引，value是recordId，这种形式也就是<em>二级索引</em>
+在数据库中需要拿到这个recodeId之后返回表中进行查询。大大加快查询的速度。</p>
+<p>我觉得二级索引有以下几个<strong>优势</strong>：</p>
+<ul>
+<li>更新的代价很低：因为value都只是一些id所以占得空间很小，处理起来开销自然就小了。</li>
+<li>一张表能够组织多个索引：更换不同的key就能组织起来一个索引。</li>
+</ul>
+<p>Task1的内容很简单，基本就上述这些，主要是弄清楚page的组成，和框架的构建。被折磨了这么多天的我真心建议多用提供的工具画一些树先不要着急动手，想清楚每个部分的组成和作用再下手也不迟，正所谓磨刀不误砍柴工。</p>
+<p>==补充一点==</p>
+<p><strong>聚簇索引和非聚簇索引（二级索引）</strong>
+一言以蔽及：聚簇索引的value就是你想要找的数据或者是数据所在的页本身，非聚簇索引存放的相当于是你想要的数据所在位置的快速指针帮助你快速定位。</p>
+<hr>
+<h3 id="task-2---btree-data-structure">Task #2 - B+Tree Data Structure<a hidden class="anchor" aria-hidden="true" href="#task-2---btree-data-structure">#</a></h3>
+<p>task2是checkpoint1的重头戏，非常的有意思。
+有几个需要注意的点：</p>
+<ul>
+<li>要求此b+树的索引是唯一的，不支持重复的插入。</li>
+<li><code>UpdateRootPageId</code>在root_page_id发生改变的时候需要调用已经实现好的这个函数，保证树的持久化。</li>
+<li>在实现的时候一定多多考虑实现的细节，比如每种节点的最大最小值，<code>插入后的键/值对的数量等于叶节点的max_size，插入前的子节点的数量等于内部节点的max_size。</code></li>
+</ul>
+<p>下面按照函数的顺序进行介绍。
+在介绍函数之前我想说明一下<code>Transaction</code>这个类的作用。顾名思义，这个Transaction被翻译为事务。在这篇文章中对这个事务有着详细的介绍。[[查询的处理和优化]]。
+<img alt="image.png|600" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240203152518.png">
+在这个类中实现了很多函数，可以把需要处理的page放在实务中等结束了进行统一的处理。因为在函数中涉及到很多的fetch和unpin，而且函数还有递归嵌套，处理起来是非常的麻烦，所以我建议直接尝试使用transaction，反正后面也要用。 ^d53eec</p>
+<h4 id="getvalue">GetValue（）<a hidden class="anchor" aria-hidden="true" href="#getvalue">#</a></h4>
+<p>==GetValue（）==</p>
+<p>写到这里的时候理应对b+树的结构非常的了解，其实也就是两种节点，一种是internal，一种是leaf，从root节点开始寻找每一个节点中<strong>最后一个</strong>&lt;=输入key的值。然后找到key所在的leaf节点，从前向后遍历，找到想要的值。下面是一个模拟示意图👇。
+<img alt="image.png|600" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240203154935.png"></p>
+<p>其实无论我们是查找，插入，还是删除，首先都必须找到key所在的leaf节点。由此可以将上面这个<strong>寻找key所在的leaf节点</strong>的过程封装出一个使用频率极高而且非常重要的函数：<code>FindLeafPage()</code>。我们从书上给出的伪代码和上述模拟过程对照分析。</p>
+<p><img alt="image.png|600" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240203155759.png"></p>
+<p>虽然说我们要找的是最后一个&lt;=输入key的值，但是在具体的伪代码实现中确实寻找第一个&gt;=输入key的值，并进行分类讨论。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">auto</span> <span class="n">next_page</span> <span class="o">=</span> <span class="n">buffer_pool_manager_</span><span class="o">-&gt;</span><span class="n">FetchPage</span><span class="p">(</span><span class="n">curr_internal</span><span class="o">-&gt;</span><span class="n">LookUp</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">comparator_</span><span class="p">));</span>
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">auto</span> <span class="n">target</span><span class="o">=</span><span class="n">std</span><span class="o">::</span><span class="n">lower_bound</span><span class="p">(</span><span class="n">array_</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">array_</span><span class="o">+</span><span class="n">GetSize</span><span class="p">(),</span><span class="n">key</span><span class="p">,[</span><span class="o">&amp;</span><span class="n">keyComparator</span><span class="p">](</span><span class="k">auto</span> <span class="k">const</span><span class="o">&amp;</span><span class="n">pair</span><span class="p">,</span><span class="k">auto</span> <span class="n">k</span><span class="p">){</span><span class="k">return</span> <span class="nf">keyComparator</span><span class="p">(</span><span class="n">pair</span><span class="p">.</span><span class="n">first</span><span class="p">,</span><span class="n">k</span><span class="p">)</span><span class="o">&lt;</span><span class="mi">0</span><span class="p">;</span> <span class="p">});</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">target</span><span class="o">==</span><span class="n">array_</span><span class="o">+</span><span class="n">GetSize</span><span class="p">())</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="k">return</span> <span class="nf">ValueAt</span><span class="p">(</span><span class="n">GetSize</span><span class="p">()</span><span class="o">-</span><span class="mi">1</span><span class="p">);</span> <span class="c1">// 输入的key比所有的值都大，返回最后一个
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">keyComparator</span><span class="p">(</span><span class="n">target</span><span class="o">-&gt;</span><span class="n">first</span><span class="p">,</span><span class="n">key</span><span class="p">)</span><span class="o">==</span><span class="mi">0</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl"> <span class="k">return</span> <span class="n">target</span><span class="o">-&gt;</span><span class="n">second</span><span class="p">;</span> <span class="c1">//找到的target的key和输入的key相同就返回target的value
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">   <span class="k">return</span> <span class="n">std</span><span class="o">::</span><span class="n">prev</span><span class="p">(</span><span class="n">target</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">second</span><span class="p">;</span> <span class="c1">// 找到了第一个大于key的target，返回前一个的value。
+</span></span></span></code></pre></div><p>LookUp返回的就是page_id,前面我们也提到过，internal节点的value就是page_id.
+这里用到了lower_bound（）函数，比自己实现二分查找会方便一些。</p>
+<p>但是这个lower_bound函数传入了<code>keycompareter（）</code>的比较方法，进行了回调函数的改造，使用类定义的比较规则。不是简单的比大小。</p>
+<p><img alt="image.png|600" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240203162440.png"></p>
+<p>现在找到了key所在的page我们该<strong>如何使用</strong>这个page呢？</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">auto</span> <span class="n">leaf_page</span> <span class="o">=</span> <span class="k">reinterpret_cast</span><span class="o">&lt;</span><span class="n">LeafPage</span> <span class="o">*&gt;</span><span class="p">(</span><span class="n">page</span><span class="o">-&gt;</span><span class="n">GetData</span><span class="p">());</span>
+</span></span></code></pre></div><p>通过<code>reinterpret_cast</code>将page解释为<code>LeafPage</code>类型。来供我们进行使用。需要注意的是这种方式非常的不安全，只是将同样的数据进行了不同的解释。只有在我们非常清楚两者之间的关系的时候使用才不容易出错。</p>
+<p>找到LeafPage后同样使用上述改造过后的的lower_bound()函数进行查找key😀。</p>
+<p>==记得UnpinPage==</p>
+<p>在使用完page之后一定记得unpin不然的话高强度使用过后内存会不足。
+我的比较建议还是之前提到的<code>transaction</code>，进行统筹处理，少死点脑细胞。</p>
+<h4 id="insert">Insert（）<a hidden class="anchor" aria-hidden="true" href="#insert">#</a></h4>
+<p>相较于上一个函数而言，insert（）的逻辑就相对而言要复杂一些了。</p>
+<p>==Insert（）==
+插入一个kv对由少到多的情况一个一个进行梳理</p>
+<ul>
+<li>刚开始树是空的：需要新建一个根节点。</li>
+<li>有空间能够直接插入</li>
+<li>插入之后pageSize=leafMaxSize，需要进行分裂，分裂之后将新的page插入到父节点中。</li>
+<li>有重复的插入，直接返回。</li>
+</ul>
+<p>现在再看伪代码大概的情况也是这几种。
+<img alt="image.png|600" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240203221858.png"></p>
+<p>对照代码再分析一下：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="n">INDEX_TEMPLATE_ARGUMENTS</span>
+</span></span><span class="line"><span class="cl"><span class="k">auto</span> <span class="n">BPLUSTREE_TYPE</span><span class="o">::</span><span class="n">Insert</span><span class="p">(</span><span class="k">const</span> <span class="n">KeyType</span> <span class="o">&amp;</span><span class="n">key</span><span class="p">,</span> <span class="k">const</span> <span class="n">ValueType</span> <span class="o">&amp;</span><span class="n">value</span><span class="p">,</span> <span class="n">Transaction</span> <span class="o">*</span><span class="n">transaction</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">bool</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="n">IsEmpty</span><span class="p">())</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">StartNewTree</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">);</span> <span class="c1">// 这个对应空树的情况，
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">return</span> <span class="nb">true</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="nf">InsertIntoLeaf</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">transaction</span><span class="p">);</span> <span class="c1">// 剩下的所有情况都在这处理
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
+</span></span></code></pre></div><p><img alt="image.png|400" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240203231409.png">
+书上给的伪代码是插入之前与<code>(leaf_max_size-1)</code>进行比较，我在处理的时候是插入之后与<code>leaf_max_size</code>进行比较。</p>
+<p>⚠️ 这里需要注意的是LeafPage和InternalPage的分裂条件并不一样，也就是说leafpage中最多有<code>(leaf_max_size-1)</code>个kv对，而internal中可以有<code>internal_max_size</code>个kv对。
+<img alt="image.png|600" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240204004644.png">
+两个的max_size都是5，但是最多的kv对确是不一样的。</p>
+<p>==InsertIntoLeaf()==</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl">  <span class="k">auto</span> <span class="n">leaf_page</span> <span class="o">=</span> <span class="k">reinterpret_cast</span><span class="o">&lt;</span><span class="n">LeafPage</span> <span class="o">*&gt;</span><span class="p">(</span><span class="n">page</span><span class="o">-&gt;</span><span class="n">GetData</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">int</span> <span class="n">pre_size</span> <span class="o">=</span> <span class="n">leaf_page</span><span class="o">-&gt;</span><span class="n">GetSize</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">int</span> <span class="n">curr_size</span> <span class="o">=</span> <span class="n">leaf_page</span><span class="o">-&gt;</span><span class="n">Insert</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">valueType</span><span class="p">,</span> <span class="n">comparator_</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="n">pre_size</span> <span class="o">==</span> <span class="n">curr_size</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 这是有重复的节点直接返回
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">Unpin</span><span class="p">(</span><span class="n">transaction</span><span class="p">,</span> <span class="n">I</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="nb">false</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="n">curr_size</span> <span class="o">==</span> <span class="n">leaf_max_size_</span><span class="p">)</span> <span class="p">{</span>  <span class="c1">// 插入之后等于叶子节点的最大值那么就进行愉快的分裂吧。
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span> <span class="n">page_id_t</span> <span class="n">new_page_leaf_id</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">auto</span> <span class="n">new_leaf_node_page</span> <span class="o">=</span> <span class="n">buffer_pool_manager_</span><span class="o">-</span><span class="n">NewPage</span><span class="p">(</span><span class="o">&amp;</span><span class="n">new_page_leaf_id</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="k">auto</span> <span class="n">new_leaf</span> <span class="o">=</span> <span class="k">reinterpret_cast</span><span class="o">&lt;</span><span class="n">LeafPage</span> <span class="o">*&gt;</span><span class="p">(</span><span class="n">new_leaf_node_page</span><span class="o">-&gt;</span><span class="n">GetData</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl"><span class="n">new_leaf</span><span class="o">-&gt;</span><span class="n">Init</span><span class="p">(</span><span class="n">new_page_leaf_id</span><span class="p">,</span> <span class="n">INVALID_PAGE_ID</span><span class="p">,</span> <span class="n">leaf_max_size_</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">leaf_page</span><span class="o">-&gt;</span><span class="n">Split</span><span class="p">(</span><span class="n">new_leaf_node_page</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">InsertIntoParent</span><span class="p">(</span><span class="n">page</span><span class="p">,</span> <span class="n">new_leaf</span><span class="o">-&gt;</span><span class="n">KeyAt</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">new_leaf_node_page</span><span class="p">,</span> <span class="n">transaction</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span></code></pre></div><p>到这里所有的插入的情况就已经考虑完全了，但是分裂之后需要将新分裂的页插入到父节点中，插入到父节点中之后又涉及到父节点分裂的问题，这就是一个递归嵌套了</p>
+<p>==InsertIntoParent()==</p>
+<p><img alt="image.png|600" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240204005750.png">
+仔细看伪代码的写法，基本是按照伪代码一步步写成的。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="n">INDEX_TEMPLATE_ARGUMENTS</span>
+</span></span><span class="line"><span class="cl"><span class="k">auto</span> <span class="n">BPLUSTREE_TYPE</span><span class="o">::</span><span class="n">InsertIntoParent</span><span class="p">(</span><span class="n">Page</span> <span class="o">*</span><span class="n">old_leaf</span><span class="p">,</span> <span class="k">const</span> <span class="n">KeyType</span> <span class="o">&amp;</span><span class="n">key</span><span class="p">,</span> <span class="n">Page</span> <span class="o">*</span><span class="n">new_leaf</span><span class="p">,</span> <span class="n">Transaction</span> <span class="o">*</span><span class="n">transaction</span><span class="p">)</span><span class="o">-&gt;</span> <span class="kt">void</span><span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="c1">// 如果原页是根节点，那么新建一个根节点，将新旧节点插入到新的根节点中，并更新节点
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">if</span><span class="err">（</span><span class="n">old_leaf</span><span class="o">-&gt;</span><span class="n">pageID</span><span class="o">==</span><span class="n">root_page_id</span><span class="err">）</span><span class="p">{</span>
+</span></span><span class="line"><span class="cl"> <span class="c1">//新建一个节点作为根节点，把两个都插入之后更新各自的指针
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span> <span class="n">ps</span><span class="p">.</span><span class="err">进到这个函数的时候说明根节点已经满了，所以直接创一个新的就行了。</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="k">if</span><span class="err">（</span><span class="n">parent_internal</span><span class="o">-&gt;</span><span class="n">GetSize</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">parent_internal</span><span class="o">-&gt;</span><span class="n">GetMaxSize</span><span class="p">()</span><span class="err">）</span><span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="c1">// 父节点的空间是够的，直接插入就行了
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="c1">// 剩下的自然就是空间不够需要进行父节点分裂的情况
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">.....</span>
+</span></span><span class="line"><span class="cl"><span class="n">parent_internal</span><span class="o">-&gt;</span><span class="n">Split</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">new_leaf</span><span class="p">,</span> <span class="n">new_parent_page</span><span class="p">,</span> <span class="n">comparator_</span><span class="p">,</span> <span class="n">buffer_pool_manager_</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">......</span>
+</span></span><span class="line"><span class="cl"><span class="n">InsertIntoParent</span><span class="p">(</span><span class="n">parent_page</span><span class="p">,</span> <span class="n">new_parent_internal</span><span class="o">-&gt;</span><span class="n">KeyAt</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">new_parent_page</span><span class="p">,</span> <span class="n">transaction</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">......</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>⚠️ internalPage在分裂的时候尽量创建一个tmp空间进行插入和重新的分配，在本实验中直接在原来的页上插入和分配页没有问题，如果maxsize的大小很极限的话，插入一个kv对可能会容不下，发生错误。</p>
+<h4 id="remove">Remove（）<a hidden class="anchor" aria-hidden="true" href="#remove">#</a></h4>
+<p>remove（）函数的逻辑相较于前两个则是复杂非常多的，但是按照伪代码按图索骥，一步一步来，是能够完美实现的。
+<img alt="image.png|550" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240204012543.png"></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">auto</span> <span class="n">brother_node</span> <span class="o">=</span> <span class="k">reinterpret_cast</span><span class="o">&lt;</span><span class="n">BPlusTreePage</span> <span class="o">*&gt;</span><span class="p">(</span><span class="n">brother_page</span><span class="o">-&gt;</span><span class="n">GetData</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">brother_node</span><span class="o">-&gt;</span><span class="n">GetSize</span><span class="p">()</span> <span class="o">+</span> <span class="n">btree_page</span><span class="o">-&gt;</span><span class="n">GetSize</span><span class="p">()</span> <span class="o">&lt;=</span>
+</span></span><span class="line"><span class="cl">        <span class="p">(</span><span class="n">btree_page</span><span class="o">-&gt;</span><span class="n">IsLeafPage</span><span class="p">()</span> <span class="o">?</span> <span class="n">leaf_max_size_</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">:</span> <span class="n">internal_max_size_</span><span class="p">))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="k">if</span> <span class="p">(</span><span class="n">is_pre</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">std</span><span class="o">::</span><span class="n">swap</span><span class="p">(</span><span class="n">leaf_page</span><span class="p">,</span> <span class="n">brother_page</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">      <span class="p">}</span>
+</span></span><span class="line"><span class="cl">      <span class="n">Coalesce</span><span class="p">(</span><span class="n">leaf_page</span><span class="p">,</span> <span class="n">brother_page</span><span class="p">,</span> <span class="n">parent_key</span><span class="p">,</span> <span class="n">transaction</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">      <span class="n">DeleteEntry</span><span class="p">(</span><span class="n">parent_page</span><span class="p">,</span> <span class="n">parent_key</span><span class="p">,</span> <span class="n">transaction</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="n">Redistribute</span><span class="p">(</span><span class="n">leaf_page</span><span class="p">,</span> <span class="n">brother_page</span><span class="p">,</span> <span class="n">parent_page</span><span class="p">,</span> <span class="n">parent_key</span><span class="p">,</span> <span class="n">is_pre</span><span class="p">,</span> <span class="n">transaction</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span></code></pre></div><p>==DeleteEntry()==</p>
+<p>大致梳理一下思路：</p>
+<ul>
+<li>首先找到页之后自然是删除，需要注意的是leaf和internal的组成略有差异，需要分别进行处理</li>
+<li>如果所在页是根节点而且只剩下一个子节点需要进行额外的<code>Adjustroot（）</code>函数进行操作。</li>
+<li>删除之后发现kv对的数量小于规定的<code>MinSize()</code>,那么进行分类讨论
+<ul>
+<li>和兄弟节点合起来<code>Coalesce()</code>的大小没有超过maxSize，但是<code>不同类型的节点maxSize计量方式不同</code>，这也是一个坑点,那就将两个节点合并，但是最后记得把被合并的key从父节点中删除</li>
+<li>和兄弟节点合起来的大小超过了maxSize，那么需要<code>Redistribute()</code>,从兄弟节点中协调一个过来。这里分成<strong>四种</strong>情况，是否是叶子节点，以及兄弟节点在前在后分成了四种情况</li>
+</ul>
+</li>
+</ul>
+<p>⚠️需要注意的是，root page 并不受 min size 的限制。但如果 root page 被删到 size 只剩 1，即只有一个 child page 的时候，应将此 child page 设置为新的 root page。</p>
+<p>还有两种类的page计算maxSize的逻辑不太一样需要注意一下。</p>
+<p>另外，在合并时，两个 page 合并成一个 page，另一个 page 应该删除，释放资源。删除 page 时，仍是调用 buffer pool 的 <code>DeletePage()</code> 函数。</p>
+<p>==AdjustRoot（）==
+根节点只剩一个子节点的时候小小的调整一下。</p>
+<p>==Coalesce()==</p>
+<p>还是要区分是否是leafPage，处理方式不太一样</p>
+<p>如果是leaf节点简简单单的合并到一个节点然后更改一下叶子节点的next指针就够了</p>
+<p>如果是Internal节点的话需要合并完之后更新一下子节点的父节点。</p>
+<p>==Redistribute（）==</p>
+<p>发现不能合并之后就只需要从兄弟节点处协调一个即可
+协调的过程比较简单，从左侧节点偷取时，把左侧节点最后一个 KV 对转移至当前节点第一个 KV 对，从右侧节点偷取时，把右侧节点的 KV 对转移至当前节点最后一个 KV 对。leaf page 和 internal page 的偷取过程基本相同，仅需注意 internal page 偷取后更新子节点的父节点指针。</p>
+<h2 id="summary">Summary<a hidden class="anchor" aria-hidden="true" href="#summary">#</a></h2>
+<p>ckeckpoint1主要的难点就是在细枝末节的处理上，非常的折磨人，我开始没并没有按照严格按照伪代码写，除了很多的奇奇怪怪的bug，最后几乎是推到重来，按照伪代码才算是能正确的运行。</p>
+<p>但是unpin我一直处理不好，卡了我好长时间，最后还是祭出transaction，好好研究了一下才把线上评测过了。</p>
+<p>最后附上通过截图
+<img alt="image.png|350" loading="lazy" src="https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240204021017.png">
+也是最这一段时间的一个总结。</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="http://localhost:1313/tags/project/">Project</a></li>
+      <li><a href="http://localhost:1313/tags/cmu15-445/">CMU15-445</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="http://localhost:1313/posts/database/project/cmu15-445-project2-b&#43;-tree-index-checkpoint-2/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>CMU15-445-Project #2 - B&#43; Tree Index Checkpoint 2</span>
+  </a>
+  <a class="next" href="http://localhost:1313/posts/rust/%E5%9F%BA%E6%9C%AC%E7%B1%BB%E5%9E%8B/">
+    <span class="title">Next »</span>
+    <br>
+    <span>基本类型</span>
+  </a>
+</nav>
+
+
+<ul class="share-buttons">
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share CMU15-445-Project #2 - B&#43; Tree Index Checkpoint 1 on x"
+            href="https://x.com/intent/tweet/?text=CMU15-445-Project%20%232%20-%20B%2b%20Tree%20Index%20Checkpoint%201&amp;url=http%3a%2f%2flocalhost%3a1313%2fposts%2fdatabase%2fproject%2fcmu15-445-project2-b%2b-tree-index-checkpoint-1%2f&amp;hashtags=Project%2cCMU15-445">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M512 62.554 L 512 449.446 C 512 483.97 483.97 512 449.446 512 L 62.554 512 C 28.03 512 0 483.97 0 449.446 L 0 62.554 C 0 28.03 28.029 0 62.554 0 L 449.446 0 C 483.971 0 512 28.03 512 62.554 Z M 269.951 190.75 L 182.567 75.216 L 56 75.216 L 207.216 272.95 L 63.9 436.783 L 125.266 436.783 L 235.9 310.383 L 332.567 436.783 L 456 436.783 L 298.367 228.367 L 432.367 75.216 L 371.033 75.216 Z M 127.633 110 L 164.101 110 L 383.481 400.065 L 349.5 400.065 Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share CMU15-445-Project #2 - B&#43; Tree Index Checkpoint 1 on linkedin"
+            href="https://www.linkedin.com/shareArticle?mini=true&amp;url=http%3a%2f%2flocalhost%3a1313%2fposts%2fdatabase%2fproject%2fcmu15-445-project2-b%2b-tree-index-checkpoint-1%2f&amp;title=CMU15-445-Project%20%232%20-%20B%2b%20Tree%20Index%20Checkpoint%201&amp;summary=CMU15-445-Project%20%232%20-%20B%2b%20Tree%20Index%20Checkpoint%201&amp;source=http%3a%2f%2flocalhost%3a1313%2fposts%2fdatabase%2fproject%2fcmu15-445-project2-b%2b-tree-index-checkpoint-1%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-288.985,423.278l0,-225.717l-75.04,0l0,225.717l75.04,0Zm270.539,0l0,-129.439c0,-69.333 -37.018,-101.586 -86.381,-101.586c-39.804,0 -57.634,21.891 -67.617,37.266l0,-31.958l-75.021,0c0.995,21.181 0,225.717 0,225.717l75.02,0l0,-126.056c0,-6.748 0.486,-13.492 2.474,-18.315c5.414,-13.475 17.767,-27.434 38.494,-27.434c27.135,0 38.007,20.707 38.007,51.037l0,120.768l75.024,0Zm-307.552,-334.556c-25.674,0 -42.448,16.879 -42.448,39.002c0,21.658 16.264,39.002 41.455,39.002l0.484,0c26.165,0 42.452,-17.344 42.452,-39.002c-0.485,-22.092 -16.241,-38.954 -41.943,-39.002Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share CMU15-445-Project #2 - B&#43; Tree Index Checkpoint 1 on reddit"
+            href="https://reddit.com/submit?url=http%3a%2f%2flocalhost%3a1313%2fposts%2fdatabase%2fproject%2fcmu15-445-project2-b%2b-tree-index-checkpoint-1%2f&title=CMU15-445-Project%20%232%20-%20B%2b%20Tree%20Index%20Checkpoint%201">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-3.446,265.638c0,-22.964 -18.616,-41.58 -41.58,-41.58c-11.211,0 -21.361,4.457 -28.841,11.666c-28.424,-20.508 -67.586,-33.757 -111.204,-35.278l18.941,-89.121l61.884,13.157c0.756,15.734 13.642,28.29 29.56,28.29c16.407,0 29.706,-13.299 29.706,-29.701c0,-16.403 -13.299,-29.702 -29.706,-29.702c-11.666,0 -21.657,6.792 -26.515,16.578l-69.105,-14.69c-1.922,-0.418 -3.939,-0.042 -5.585,1.036c-1.658,1.073 -2.811,2.761 -3.224,4.686l-21.152,99.438c-44.258,1.228 -84.046,14.494 -112.837,35.232c-7.468,-7.164 -17.589,-11.591 -28.757,-11.591c-22.965,0 -41.585,18.616 -41.585,41.58c0,16.896 10.095,31.41 24.568,37.918c-0.639,4.135 -0.99,8.328 -0.99,12.576c0,63.977 74.469,115.836 166.33,115.836c91.861,0 166.334,-51.859 166.334,-115.836c0,-4.218 -0.347,-8.387 -0.977,-12.493c14.564,-6.47 24.735,-21.034 24.735,-38.001Zm-119.474,108.193c-20.27,20.241 -59.115,21.816 -70.534,21.816c-11.428,0 -50.277,-1.575 -70.522,-21.82c-3.007,-3.008 -3.007,-7.882 0,-10.889c3.003,-2.999 7.882,-3.003 10.885,0c12.777,12.781 40.11,17.317 59.637,17.317c19.522,0 46.86,-4.536 59.657,-17.321c3.016,-2.999 7.886,-2.995 10.885,0.008c3.008,3.011 3.003,7.882 -0.008,10.889Zm-5.23,-48.781c-16.373,0 -29.701,-13.324 -29.701,-29.698c0,-16.381 13.328,-29.714 29.701,-29.714c16.378,0 29.706,13.333 29.706,29.714c0,16.374 -13.328,29.698 -29.706,29.698Zm-160.386,-29.702c0,-16.381 13.328,-29.71 29.714,-29.71c16.369,0 29.689,13.329 29.689,29.71c0,16.373 -13.32,29.693 -29.689,29.693c-16.386,0 -29.714,-13.32 -29.714,-29.693Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share CMU15-445-Project #2 - B&#43; Tree Index Checkpoint 1 on facebook"
+            href="https://facebook.com/sharer/sharer.php?u=http%3a%2f%2flocalhost%3a1313%2fposts%2fdatabase%2fproject%2fcmu15-445-project2-b%2b-tree-index-checkpoint-1%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-106.468,0l0,-192.915l66.6,0l12.672,-82.621l-79.272,0l0,-53.617c0,-22.603 11.073,-44.636 46.58,-44.636l36.042,0l0,-70.34c0,0 -32.71,-5.582 -63.982,-5.582c-65.288,0 -107.96,39.569 -107.96,111.204l0,62.971l-72.573,0l0,82.621l72.573,0l0,192.915l-191.104,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share CMU15-445-Project #2 - B&#43; Tree Index Checkpoint 1 on whatsapp"
+            href="https://api.whatsapp.com/send?text=CMU15-445-Project%20%232%20-%20B%2b%20Tree%20Index%20Checkpoint%201%20-%20http%3a%2f%2flocalhost%3a1313%2fposts%2fdatabase%2fproject%2fcmu15-445-project2-b%2b-tree-index-checkpoint-1%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-58.673,127.703c-33.842,-33.881 -78.847,-52.548 -126.798,-52.568c-98.799,0 -179.21,80.405 -179.249,179.234c-0.013,31.593 8.241,62.428 23.927,89.612l-25.429,92.884l95.021,-24.925c26.181,14.28 55.659,21.807 85.658,21.816l0.074,0c98.789,0 179.206,-80.413 179.247,-179.243c0.018,-47.895 -18.61,-92.93 -52.451,-126.81Zm-126.797,275.782l-0.06,0c-26.734,-0.01 -52.954,-7.193 -75.828,-20.767l-5.441,-3.229l-56.386,14.792l15.05,-54.977l-3.542,-5.637c-14.913,-23.72 -22.791,-51.136 -22.779,-79.287c0.033,-82.142 66.867,-148.971 149.046,-148.971c39.793,0.014 77.199,15.531 105.329,43.692c28.128,28.16 43.609,65.592 43.594,105.4c-0.034,82.149 -66.866,148.983 -148.983,148.984Zm81.721,-111.581c-4.479,-2.242 -26.499,-13.075 -30.604,-14.571c-4.105,-1.495 -7.091,-2.241 -10.077,2.241c-2.986,4.483 -11.569,14.572 -14.182,17.562c-2.612,2.988 -5.225,3.364 -9.703,1.12c-4.479,-2.241 -18.91,-6.97 -36.017,-22.23c-13.314,-11.876 -22.304,-26.542 -24.916,-31.026c-2.612,-4.484 -0.279,-6.908 1.963,-9.14c2.016,-2.007 4.48,-5.232 6.719,-7.847c2.24,-2.615 2.986,-4.484 4.479,-7.472c1.493,-2.99 0.747,-5.604 -0.374,-7.846c-1.119,-2.241 -10.077,-24.288 -13.809,-33.256c-3.635,-8.733 -7.327,-7.55 -10.077,-7.688c-2.609,-0.13 -5.598,-0.158 -8.583,-0.158c-2.986,0 -7.839,1.121 -11.944,5.604c-4.105,4.484 -15.675,15.32 -15.675,37.364c0,22.046 16.048,43.342 18.287,46.332c2.24,2.99 31.582,48.227 76.511,67.627c10.685,4.615 19.028,7.371 25.533,9.434c10.728,3.41 20.492,2.929 28.209,1.775c8.605,-1.285 26.499,-10.833 30.231,-21.295c3.732,-10.464 3.732,-19.431 2.612,-21.298c-1.119,-1.869 -4.105,-2.99 -8.583,-5.232Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share CMU15-445-Project #2 - B&#43; Tree Index Checkpoint 1 on telegram"
+            href="https://telegram.me/share/url?text=CMU15-445-Project%20%232%20-%20B%2b%20Tree%20Index%20Checkpoint%201&amp;url=http%3a%2f%2flocalhost%3a1313%2fposts%2fdatabase%2fproject%2fcmu15-445-project2-b%2b-tree-index-checkpoint-1%2f">
+            <svg version="1.1" xml:space="preserve" viewBox="2 2 28 28" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M26.49,29.86H5.5a3.37,3.37,0,0,1-2.47-1,3.35,3.35,0,0,1-1-2.47V5.48A3.36,3.36,0,0,1,3,3,3.37,3.37,0,0,1,5.5,2h21A3.38,3.38,0,0,1,29,3a3.36,3.36,0,0,1,1,2.46V26.37a3.35,3.35,0,0,1-1,2.47A3.38,3.38,0,0,1,26.49,29.86Zm-5.38-6.71a.79.79,0,0,0,.85-.66L24.73,9.24a.55.55,0,0,0-.18-.46.62.62,0,0,0-.41-.17q-.08,0-16.53,6.11a.59.59,0,0,0-.41.59.57.57,0,0,0,.43.52l4,1.24,1.61,4.83a.62.62,0,0,0,.63.43.56.56,0,0,0,.4-.17L16.54,20l4.09,3A.9.9,0,0,0,21.11,23.15ZM13.8,20.71l-1.21-4q8.72-5.55,8.78-5.55c.15,0,.23,0,.23.16a.18.18,0,0,1,0,.06s-2.51,2.3-7.52,6.8Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share CMU15-445-Project #2 - B&#43; Tree Index Checkpoint 1 on ycombinator"
+            href="https://news.ycombinator.com/submitlink?t=CMU15-445-Project%20%232%20-%20B%2b%20Tree%20Index%20Checkpoint%201&u=http%3a%2f%2flocalhost%3a1313%2fposts%2fdatabase%2fproject%2fcmu15-445-project2-b%2b-tree-index-checkpoint-1%2f">
+            <svg version="1.1" xml:space="preserve" width="30px" height="30px" viewBox="0 0 512 512" fill="currentColor"
+                xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape">
+                <path
+                    d="M449.446 0C483.971 0 512 28.03 512 62.554L512 449.446C512 483.97 483.97 512 449.446 512L62.554 512C28.03 512 0 483.97 0 449.446L0 62.554C0 28.03 28.029 0 62.554 0L449.446 0ZM183.8767 87.9921H121.8427L230.6673 292.4508V424.0079H281.3328V292.4508L390.1575 87.9921H328.1233L256 238.2489z" />
+            </svg>
+        </a>
+    </li>
+</ul>
+
+  </footer><script src="https://giscus.app/client.js"
+        data-repo="WJLE007/comment"
+        data-repo-id="R_kgDOOTuC9Q"
+        data-category="General"
+        data-category-id="DIC_kwDOOTuC9c4Cow7G"
+        data-mapping="pathname"
+        data-strict="0"
+        data-reactions-enabled="1"
+        data-emit-metadata="0"
+        data-input-position="bottom"
+        data-theme="preferred_color_scheme"
+        data-lang="zh-CN"
+        crossorigin="anonymous"
+        async>
+</script>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>© <a href="https://jialog.top">JiaLog</a> 豫ICP备2024077894号-1 苏公网安备32031202000962号 32031202000962</span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

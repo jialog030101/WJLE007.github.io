@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>C&#43;&#43; on JiaLog</title>
+    <link>http://localhost:1313/categories/c&#43;&#43;/</link>
+    <description>Recent content in C&#43;&#43; on JiaLog</description>
+    <image>
+      <title>JiaLog</title>
+      <url>http://localhost:1313/images/papermod-cover.png</url>
+      <link>http://localhost:1313/images/papermod-cover.png</link>
+    </image>
+    <generator>Hugo -- 0.144.2</generator>
+    <language>en</language>
+    <copyright>JiaLog 豫ICP备2024077894号-1 苏公网安备32031202000962号 32031202000962</copyright>
+    <lastBuildDate>Sat, 09 Dec 2023 00:00:00 +0000</lastBuildDate>
+    <atom:link href="http://localhost:1313/categories/c++/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Effective Modern C&#43;&#43; 笔记</title>
+      <link>http://localhost:1313/posts/c&#43;&#43;/effective-modern-c&#43;&#43;/</link>
+      <pubDate>Sat, 09 Dec 2023 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/c&#43;&#43;/effective-modern-c&#43;&#43;/</guid>
+      <description>&lt;h2 id=&#34;auto&#34;&gt;auto&lt;/h2&gt;
+&lt;p&gt;在概念上auto已经极简了，但是实际上仍然要微妙许多。它可以节约声明类型，也可以避免许多手动类型的正确性和声明问题。但是从结果的角度来说，尽管auto很努力在做事了，但是仍然可能是错误的。如果出现这种情况我们要知道如何去引导auto让他成为正确的类型，因为退回使用手动声明类型仍然是下下策。&lt;/p&gt;
+&lt;p&gt;接下来的内容会涵盖&lt;code&gt;auto&lt;/code&gt;的所有细节&lt;/p&gt;
+&lt;h3 id=&#34;item-5-prefer-auto-to-explicit-type-declarations&#34;&gt;Item 5: Prefer auto to explicit type declarations.&lt;/h3&gt;
+&lt;p&gt;不仅可以避免出现为初始化的变量，避免啰嗦又繁杂的类型声明，能直接持有闭包，还可以避免一些因为“类型捷径”出现的问题。
+eg1.&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png|675&#34; loading=&#34;lazy&#34; src=&#34;https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231210204514.png&#34;&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;有一些程序员会对类型发生误判，到时用范围较小的类型在32位机器上能够运行但是在64位机器上发生了改变，导致程序在移植的时候出现问题。
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;eg2.
+&lt;img alt=&#34;image.png|600&#34; loading=&#34;lazy&#34; src=&#34;https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231210205424.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;上述代码看起来没什么问题，但是当实际运行之后并没有对哈希表m进行操作。原因在于哈希表中的kay值是const类型的，手动声明的类型不一样的话编译器会进行一个神奇的操作，它会讲m中的内容复制成为临时变量将key的类型改为和声明一致的，再将p绑定到临时变量上。&lt;/p&gt;
+&lt;h4 id=&#34;summary&#34;&gt;Summary&lt;/h4&gt;
+&lt;p&gt;auto说到底只是一个可选项罢了，不是必选项，如果你觉得你的项目使用显式的声明能够使得项目变得更加的可读和高效，当然可以继续使用。但是c++引入auto并不是一个多新鲜的东西，只是一个在其他语言中被称为“类型推导”的东西罢了。在其他的静态类型语言中类型推导都或多或少存在。而且动态语言还为类型推导积累了大量的经验。而且此类技术并不会于大型的工程项目产生冲突。&lt;/p&gt;
+&lt;p&gt;一些人觉得用完auto之后会让变量的类型变得不是一眼可以识别，但是这个问题随着ide的优化和适配已经被解决的相当完美了。&lt;/p&gt;
+&lt;p&gt;事实上手动声明变量经常是在画蛇添足，无论是正确率还是效率上。&lt;/p&gt;
+&lt;h3 id=&#34;item-6-use-the-explicitly-typed-initializer-idiom-when-auto-deduces-undesired-types&#34;&gt;Item 6: Use the explicitly typed initializer idiom when auto deduces undesired types.&lt;/h3&gt;
+&lt;p&gt;纵使auto有万般好，但是auto也会出现推断的类型和你心目中期待的不一样的情况（当然也不完全是auto错了哦😀）
+下面举一个auto推断不符合预期的例子。&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png|650&#34; loading=&#34;lazy&#34; src=&#34;https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231210214843.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;上述声明了一个返回vector&amp;lt; bool &amp;gt;类型的函数，使用了auto之后虽然仍然能够直接进行编译和运行但是结果却不是所想要的。&lt;/p&gt;
+&lt;p&gt;而发生这样错误的原因是，在c++的设计当中回避了bit的引用所以返回的不是bool&amp;amp;，实际上c++中设计了一个&lt;strong&gt;代理类&lt;/strong&gt;来完成向bool的转换操作，这就不展开细说了，但是代理类并不少见，我们经常使用的两个智能指针就是一种代理类。&lt;/p&gt;
+&lt;p&gt;代理类的设计在使用的时候尽量少的对程序员暴露内部细节，这些代理类的使用往往会在文档中标识出来，如果在文档中没有体现的话，也避免不了在头文件中漏出一些破绽，最不济在debug的时候可能也会发觉是使用了代理类。&lt;/p&gt;
+&lt;p&gt;但是这些都不重要了，现在重要的事怎么把auto引导到正确的道路上🙃。&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png|700&#34; loading=&#34;lazy&#34; src=&#34;https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231210220544.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;就是使用一个强制的类型转换，让它去到该去的位置，虽然看起来有点滑稽，给人一种头痛医脚的感觉🤣。虽然在这些时候你也可以放弃使用auto，但是在这个踩坑的过程中不是也收获了新的知识么?😁&lt;/p&gt;
+&lt;p&gt;总之记住以下两点
+&lt;img alt=&#34;image.png|700&#34; loading=&#34;lazy&#34; src=&#34;https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231210220919.png&#34;&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;隐形的代理类可能会让auto推断出错误的类型。&lt;/li&gt;
+&lt;li&gt;显式的类型转换可以让auto走向正确道路。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;moving-to-modern-c&#34;&gt;Moving to Modern C++&lt;/h2&gt;
+&lt;p&gt;接下来这一章会详细介绍现代c++的一些细节特性。我自己会记录几个我认为比较实用的。并不是全部。&lt;/p&gt;
+&lt;h3 id=&#34;item-8-prefer-nullptr-to-0-and-null&#34;&gt;Item 8: Prefer nullptr to 0 and NULL.&lt;/h3&gt;
+&lt;p&gt;非常显然的是0的类型是&lt;strong&gt;int&lt;/strong&gt;，不是一个指针，但是在一个本应该出现指针类型的地方出现了0，编译器也会勉强吧0解释为空指针，但这毕竟是不得已而为之的行为🙉， 总之0是int，不是指针。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;nullptr’s advantage is that it doesn’t have an integral type. To be honest, it doesn’t have a pointer type, either, but you can think of it as a pointer of all types. nullptr’s actual type is std::nullptr_t, and, in a wonderfully circular definition, std::nullptr_t is defined to be the type of nullptr. The type std::nullptr_t implicitly converts to all raw pointer types, and that’s what makes nullptr act as if it were a pointer of all types.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

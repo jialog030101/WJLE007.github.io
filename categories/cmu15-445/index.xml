@@ -1,0 +1,451 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>CMU15-445 on JiaLog</title>
+    <link>http://localhost:1313/categories/cmu15-445/</link>
+    <description>Recent content in CMU15-445 on JiaLog</description>
+    <image>
+      <title>JiaLog</title>
+      <url>http://localhost:1313/images/papermod-cover.png</url>
+      <link>http://localhost:1313/images/papermod-cover.png</link>
+    </image>
+    <generator>Hugo -- 0.144.2</generator>
+    <language>en</language>
+    <copyright>JiaLog 豫ICP备2024077894号-1 苏公网安备32031202000962号 32031202000962</copyright>
+    <lastBuildDate>Thu, 22 Feb 2024 00:00:00 +0000</lastBuildDate>
+    <atom:link href="http://localhost:1313/categories/cmu15-445/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>CMU15-445总结</title>
+      <link>http://localhost:1313/posts/database/note/cmu15-445%E6%80%BB%E7%BB%93/</link>
+      <pubDate>Thu, 22 Feb 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/database/note/cmu15-445%E6%80%BB%E7%BB%93/</guid>
+      <description>&lt;p&gt;先随便写几个要点，等整个结束了再详细写。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;动手之前先计划，详细周到考虑&lt;/li&gt;
+&lt;li&gt;多动手，多试错&lt;/li&gt;
+&lt;li&gt;多读源代码，多练习debug&lt;/li&gt;
+&lt;li&gt;英语好好学，英语太重要了。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img alt=&#34;Clip_2024-06-30_15-13-04.png|675&#34; loading=&#34;lazy&#34; src=&#34;https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/Clip_2024-06-30_15-13-04.png&#34;&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Bustub架构简单分析</title>
+      <link>http://localhost:1313/posts/database/note/bustub%E6%89%A7%E8%A1%8C%E5%99%A8%E6%9E%B6%E6%9E%84%E7%AE%80%E5%8D%95%E5%88%86%E6%9E%90/</link>
+      <pubDate>Wed, 21 Feb 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/database/note/bustub%E6%89%A7%E8%A1%8C%E5%99%A8%E6%9E%B6%E6%9E%84%E7%AE%80%E5%8D%95%E5%88%86%E6%9E%90/</guid>
+      <description>&lt;h2 id=&#34;写在前面&#34;&gt;写在前面&lt;/h2&gt;
+&lt;p&gt;在这篇文章中我们先抛开SQL在bustub的中的历程，直接快进到最后开始执行的阶段，这篇文章只关注设计上的细节。&lt;/p&gt;
+&lt;p&gt;至于如何理顺这些细节在[[CMU15-445 Project3 - Query Execution]]文章中会有详细的介绍，这里就不再赘述。😃&lt;/p&gt;
+&lt;h2 id=&#34;架构总览&#34;&gt;架构总览&lt;/h2&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png|600&#34; loading=&#34;lazy&#34; src=&#34;https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240221212132.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;上图中catalog其实不是特别准确，按照我的理解应该是下面这种情况👇。通过一个table_id双向映射表的名字和实体table。
+&lt;img alt=&#34;image.png|600&#34; loading=&#34;lazy&#34; src=&#34;https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240221212842.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;接下来就按照从上到下的顺序依次介绍各个部分的结构。&lt;/p&gt;
+&lt;h2 id=&#34;catalog&#34;&gt;Catalog&lt;/h2&gt;
+&lt;p&gt;下面这个图是是整个catalog关于table的。👇这里引出了&lt;code&gt;TableInfo&lt;/code&gt;.
+&lt;img alt=&#34;image.png|600&#34; loading=&#34;lazy&#34; src=&#34;https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240221221311.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;Catalog中不仅仅包含table的信息还储存了index的信息。这里引出了&lt;code&gt;IndexInfo&lt;/code&gt;,但是后边用的不是很多。
+&lt;img alt=&#34;image.png|600&#34; loading=&#34;lazy&#34; src=&#34;https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240221222700.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;接下来看&lt;code&gt;TableInfo&lt;/code&gt;的组成。（TableInfo的定义就在Catalog.h文件中）&lt;/p&gt;
+&lt;h2 id=&#34;tableinfo&#34;&gt;TableInfo&lt;/h2&gt;
+&lt;p&gt;&lt;img alt=&#34;主要成员变量|600&#34; loading=&#34;lazy&#34; src=&#34;https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240221223744.png&#34;&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;name_:就是表的名字&lt;/li&gt;
+&lt;li&gt;table_: 是一个每个节点都是tablepage的双向链表&lt;/li&gt;
+&lt;li&gt;oid_: 顾名思义就是表的id&lt;/li&gt;
+&lt;li&gt;Schema_：其实到现在我都没有很弄懂这个是干什么的东西，但是chat给出了答案。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;什么是schema&#34;&gt;什么是Schema&lt;/h3&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png|600&#34; loading=&#34;lazy&#34; src=&#34;https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240221224249.png&#34;&gt;
+按照我的理解应该是一个类似于表头的包含各种配置信息的一个抽象集合。现在就看看源码。👇
+&lt;img alt=&#34;image.png|600&#34; loading=&#34;lazy&#34; src=&#34;https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240221225429.png&#34;&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;在bustub中schema的信息似乎没有包含很多，就是对每一个列的数据类型约束进行了记录。以及对所有的列进行一个汇总，方便获取到每一个列。
+&lt;img alt=&#34;image.png|600&#34; loading=&#34;lazy&#34; src=&#34;https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240221225647.png&#34;&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;==Column==&lt;/p&gt;
+&lt;p&gt;实际上每个列的实现实体是&lt;code&gt;Column&lt;/code&gt;，在这个实体中包含&lt;strong&gt;列名，数据类型，长度&lt;/strong&gt;等基本信息。
+&lt;img alt=&#34;image.png|600&#34; loading=&#34;lazy&#34; src=&#34;https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240221230318.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;⚠️值得注意的是column对于&lt;code&gt;varchar&lt;/code&gt;单独做了处理🙂,变长数组终究还是不一样啊。
+&lt;img alt=&#34;image.png|600&#34; loading=&#34;lazy&#34; src=&#34;https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240221231559.png&#34;&gt;&lt;/p&gt;
+&lt;h2 id=&#34;tableheap&#34;&gt;TableHeap&lt;/h2&gt;
+&lt;p&gt;实质上就是配合&lt;code&gt;TablePage&lt;/code&gt;里面的信息构成的双向链表，我觉得这个设计真的非常的巧妙。只用了基本的&lt;code&gt;pre_page_id&lt;/code&gt; 和&lt;code&gt;next_page_id&lt;/code&gt;这两个变量就把双向链表给建立起来而且耦合度非常的低。&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png|600&#34; loading=&#34;lazy&#34; src=&#34;https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240221233636.png&#34;&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;first_page_id_: 就是第一个pageid&lt;/li&gt;
+&lt;li&gt;bufferpool：所有的page都需要从bufferpool中去取。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;tablepage的结构&#34;&gt;TablePage的结构&lt;/h3&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png|600&#34; loading=&#34;lazy&#34; src=&#34;https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240222001937.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png|600&#34; loading=&#34;lazy&#34; src=&#34;https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240222001143.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;ok看到这里有疑问了？ 那么多的信息都存在那里， 这继承的加上初始化的也不够啊。
+答案在这里👇
+&lt;img alt=&#34;image.png|600&#34; loading=&#34;lazy&#34; src=&#34;https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240222001417.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;通过&lt;code&gt;偏移量&lt;/code&gt;直接在page的剩余空间里去定义各种变量。&lt;/p&gt;
+&lt;p&gt;==通过InsertTuple（）函数了解详细结构==&lt;/p&gt;
+&lt;p&gt;直接看源代码：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-cpp&#34; data-lang=&#34;cpp&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt; &lt;span class=&#34;k&#34;&gt;if&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;tuple&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;size_&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;+&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;32&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;BUSTUB_PAGE_SIZE&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  &lt;span class=&#34;c1&#34;&gt;// larger than one page size
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;    &lt;span class=&#34;n&#34;&gt;txn&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;SetState&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;TransactionState&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;::&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;ABORTED&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;k&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;nb&#34;&gt;false&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  &lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  &lt;span class=&#34;k&#34;&gt;auto&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;cur_page&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;static_cast&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;TablePage&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;*&amp;gt;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;buffer_pool_manager_&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;FetchPage&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;first_page_id_&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;));&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  &lt;span class=&#34;k&#34;&gt;if&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;cur_page&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;==&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;nullptr&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;n&#34;&gt;txn&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;SetState&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;TransactionState&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;::&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;ABORTED&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;k&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;nb&#34;&gt;false&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  &lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;这主要是判断一些前置条件的合法性&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;em&gt;为什么要用tuple的大小+32进行比较呢？&lt;/em&gt; 文末给出答案&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png|800&#34; loading=&#34;lazy&#34; src=&#34;https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240222002633.png&#34;&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;在第一页中进行插入，如果没有足够的空间就开一个新页然后插进去&lt;/li&gt;
+&lt;li&gt;⚠️需要注意的是，在离开第一页的时候&lt;strong&gt;仍然要持有写锁&lt;/strong&gt;，因为还要写&lt;code&gt;next_page_id&lt;/code&gt;变量.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;💡跟随代码跳转到&lt;code&gt;TablePage::InserTuple()&lt;/code&gt;.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>数据库事务</title>
+      <link>http://localhost:1313/posts/database/note/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%BA%8B%E5%8A%A1/</link>
+      <pubDate>Tue, 20 Feb 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/database/note/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%BA%8B%E5%8A%A1/</guid>
+      <description>&lt;h1 id=&#34;事务&#34;&gt;事务&lt;/h1&gt;
+&lt;p&gt;==Transaction==&lt;/p&gt;
+&lt;p&gt;在英文中事务用transaction表示，一般约定俗成的缩写为&lt;code&gt;txn&lt;/code&gt;，所以在数据库的源代码中看到&lt;code&gt;txn&lt;/code&gt;的话多半就是事务。&lt;/p&gt;
+&lt;p&gt;==事务诞生的背景==&lt;/p&gt;
+&lt;p&gt;我们假设一个银行的场景，&lt;strong&gt;转账&lt;/strong&gt;这一操作在外界看来是单一的操作，但是在数据库内部涉及到很多的操作，假如转账操作发生了失败，那么数据的不一致是不能被接受的。所以这一连串的操作可以被归为逻辑上的一个操作集。要么整体都成功要么都失败。&lt;/p&gt;
+&lt;h2 id=&#34;事务的概念&#34;&gt;事务的概念&lt;/h2&gt;
+&lt;p&gt;在chatgpt上问事务的概念他会这样子进行回答。
+这也正是事务的关键。
+&lt;img alt=&#34;image.png|600&#34; loading=&#34;lazy&#34; src=&#34;https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240220222726.png&#34;&gt;
+我们回归课本，看课本上给出的定义
+&lt;img alt=&#34;image.png|600&#34; loading=&#34;lazy&#34; src=&#34;https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240220231837.png&#34;&gt;&lt;/p&gt;
+&lt;h2 id=&#34;事务的隔离性级别&#34;&gt;事务的隔离性级别&lt;/h2&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png|600&#34; loading=&#34;lazy&#34; src=&#34;https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240221012712.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;我个人觉得对于隔离性的的理解是非常重要的，在后续的算子的实现当中几乎都要考虑事务的隔离等级，根据不同的&lt;strong&gt;隔离等级&lt;/strong&gt;去进行不同的操作。（我个人现在比较迷茫的是怎么能比较周全的考虑不同隔离等级所带来的影响。：）。看来是时候找个大佬请教一下了。🙃&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>查询的处理和优化</title>
+      <link>http://localhost:1313/posts/database/note/%E6%9F%A5%E8%AF%A2%E7%9A%84%E5%A4%84%E7%90%86%E5%92%8C%E4%BC%98%E5%8C%96/</link>
+      <pubDate>Fri, 09 Feb 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/database/note/%E6%9F%A5%E8%AF%A2%E7%9A%84%E5%A4%84%E7%90%86%E5%92%8C%E4%BC%98%E5%8C%96/</guid>
+      <description>&lt;hr&gt;
+&lt;h2 id=&#34;join-operation-连表&#34;&gt;Join Operation， 连表&lt;/h2&gt;
+&lt;p&gt;在查询过程中经常会涉及到连表的操作。那么为什么总是需要连表呢？&lt;/p&gt;
+&lt;p&gt;==为什么需要连表？==&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png|600&#34; loading=&#34;lazy&#34; src=&#34;https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240209151410.png&#34;&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;在存储的时候为了避免数据的冗杂，将表进行规范化，导致表的割裂。&lt;/li&gt;
+&lt;li&gt;在查询的时候需要获取完整的信息，所以将表进行重新的组装。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;连表的算法&#34;&gt;连表的算法&lt;/h3&gt;
+&lt;p&gt;&lt;a href=&#34;https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/show.mp4&#34;&gt;Fetching Title#i6kq&lt;/a&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>CMU15-445-Project #3 - Project3 - Query Execution</title>
+      <link>http://localhost:1313/posts/database/project/cmu15-445-project3---query-execution/</link>
+      <pubDate>Thu, 08 Feb 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/database/project/cmu15-445-project3---query-execution/</guid>
+      <description>&lt;p&gt;做这个p3首先需要明晰整个bustub的架构[[Bustub执行器架构简单分析]],在这个文章中进行了很详细的分析。
+&lt;img alt=&#34;image.png|600&#34; loading=&#34;lazy&#34; src=&#34;https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240221215146.png&#34;&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>CMU15-445-Project #2 - B&#43; Tree Index Checkpoint 2</title>
+      <link>http://localhost:1313/posts/database/project/cmu15-445-project2-b&#43;-tree-index-checkpoint-2/</link>
+      <pubDate>Sun, 04 Feb 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/database/project/cmu15-445-project2-b&#43;-tree-index-checkpoint-2/</guid>
+      <description>&lt;h2 id=&#34;checkpoint-2&#34;&gt;CHECKPOINT-2&lt;/h2&gt;
+&lt;h3 id=&#34;task-3---index-iterator&#34;&gt;Task #3 - Index Iterator&lt;/h3&gt;
+&lt;p&gt;简单来说就是实现一个迭代器&lt;/p&gt;
+&lt;p&gt;将所有的叶子节点视为一个链表，要求实现给出的函数。在当前的迭代器中保存所在的pageId和当前的起始位置，然后通过leafpage中的next_page_id来获取下一个叶子节点。
+总体上来说难度不是很大，没有什么好说的，就是还是注意要加锁，其中的某一个函数在实现的时候需要考虑跨页的情况，这时候就要考虑加锁和去锁的情况了。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;task-4---concurrent-index&#34;&gt;Task #4 - Concurrent Index&lt;/h3&gt;
+&lt;p&gt;这就是要完实现一个多线程的b+树，加锁的实现方式和原理在[[B+ Tree Index#b+ tree latches]]中有比较详细的介绍，这里我简单的解释一下。&lt;/p&gt;
+&lt;p&gt;这是整个项目的重点也是难点，考察对b+树整个结构和每个操作涉及到的点，当然可以像之前的项目一样一把大锁报平安，但是对于b+树来说这样会使的性能约等于单线程，每次都需要从根节点进入整个树，但是一把大锁就意味着每次整个树中都只能存在一个线程在操作。。。&lt;/p&gt;
+&lt;p&gt;所以我们需要&lt;strong&gt;更细粒度&lt;/strong&gt;的锁，于是螃蟹锁🦀应运而生。 ：）rust的吉祥物也是个螃蟹吧。。&lt;/p&gt;
+&lt;p&gt;==螃蟹锁==&lt;/p&gt;
+&lt;p&gt;因为其加锁和解锁的过程以及逻辑特别像螃蟹的行走的方式，因此而得名&lt;strong&gt;螃蟹锁&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;读模式&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;在&lt;strong&gt;读模式&lt;/strong&gt;的时候最为形象，当获取到父节点的读锁之后，尝试着获取目标子节点的读锁，当获取到锁之后立马释放父节点的锁
+&lt;img alt=&#34;image.png|600&#34; loading=&#34;lazy&#34; src=&#34;https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240207192232.png&#34;&gt;
+在上图中，一个线程获取A页的锁之后会尝试着获取目标子节点B的锁，当获取B的锁之后就会释放A的锁。如此循环往复，就像螃蟹在走。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;写模式&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;写模式的时候只是锁释放的条件不一样，读模式的时候当获取的下一个页的锁的时候就可以立马释放当前页的锁，但是写模式涉及到&lt;strong&gt;插入&lt;/strong&gt;和&lt;strong&gt;删除&lt;/strong&gt;，可能整个路径上的页都会受影响。
+&lt;img alt=&#34;image.png|600&#34; loading=&#34;lazy&#34; src=&#34;https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240207192622.png&#34;&gt;
+如上图所示，当获取到B页的锁的时候不能释放A页的锁，因为B有可能会发生合并，于是继续向下获取锁，获取到C页的锁之后发现C页是处于&lt;strong&gt;安全状态&lt;/strong&gt;的。所以可以释放C页之上的所有锁。⚠️注意：并不包括C本身。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;安全状态&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;安全状态的这个概念只存在于&lt;strong&gt;写模式&lt;/strong&gt;的时候。需要注意的是：在&lt;strong&gt;删除&lt;/strong&gt;和&lt;strong&gt;插入&lt;/strong&gt;的时候页处于安全状态的&lt;strong&gt;条件&lt;/strong&gt;并不一样。&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png|600&#34; loading=&#34;lazy&#34; src=&#34;https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240207193015.png&#34;&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;在插入的时候：该页不是满的&amp;mdash;&amp;ndash;》就算发生分裂的情况，到此页也就结束了。&lt;/li&gt;
+&lt;li&gt;在删除的时候：大于半数&amp;mdash;&amp;mdash;&amp;mdash;》就算删除之后发生合并或者重新分配到此页就结束了。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;code&gt;螃蟹锁的优势在哪里？&lt;/code&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;⚠️这里的优势是相较于一把大锁而言。
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;虽然B+树可以做的很高很大，但是无论如何都只有一个入口。如果每次都是一把大锁，那不管什么操作都会先获取根节点并且锁住，那直接就编程单线程的了。&lt;/p&gt;
+&lt;p&gt;所以整个的&lt;strong&gt;瓶颈&lt;/strong&gt;就是根节点上锁的时间太长了。影响了并发。所以螃蟹锁的优势就在于：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;能够显著的减少根结点上锁的时间，让更多的线程进入B+树进行操作&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;code&gt;更优的螃蟹锁执行策略&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;当前释放的策略仍然拥有很大的优化空间。在原来的策略上写模式的时候会对根节点上写锁，知道找到一个安全节点之后才会释放，这就占用了很长时间，导致效率降低。这种不分青红皂白的直接给各个节点上写锁的行为称之为&lt;strong&gt;悲观锁&lt;/strong&gt;。顾名思义，悲观锁表示这种策略对多线程的执行非常的悲观，觉得每个页都会被修改，必须都上锁才安心。但是事实上在实际的应用过程中触发分裂或者合并并不是很频繁。&lt;/p&gt;
+&lt;p&gt;所以就诞生了一种更优的加锁策略&lt;strong&gt;乐观锁&lt;/strong&gt;，在写模式的时候就大胆的假设从根节点到最后的叶子节点都是安全的，给路径的页都上读锁，最后的叶子节点才上写锁。如果在这个过程中发现了某个节点跟假设的不一样，不是安全的，那么之前的所有锁都释放，再重新按照&lt;strong&gt;悲观锁&lt;/strong&gt;的方式进行操作。&lt;/p&gt;
+&lt;p&gt;这样做的好处是，在相较于悲观锁乐观锁在一定程度上能改善根节点总是上写锁导致并发时读取效率的降低。&lt;/p&gt;
+&lt;p&gt;但是我本人还没有实现乐观锁，修改&lt;code&gt;FindLeafPage()&lt;/code&gt;或者添加&lt;code&gt;FindLeafPageHelper()&lt;/code&gt;应该都是可以的。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h4 id=&#34;具体实现&#34;&gt;具体实现&lt;/h4&gt;
+&lt;p&gt;==GetValue（）==&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png|600&#34; loading=&#34;lazy&#34; src=&#34;https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240207222907.png&#34;&gt;
+&lt;img alt=&#34;image.png|600&#34; loading=&#34;lazy&#34; src=&#34;https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240207223113.png&#34;&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;如上如所示，当获取到下一个读锁的时候就释放父节点的读锁，然后接着循环这样的操作&lt;/li&gt;
+&lt;li&gt;这样子像螃蟹走路的方式，也是这种加锁策略的由来。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;==Insert（）==&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png|600&#34; loading=&#34;lazy&#34; src=&#34;https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240207225033.png&#34;&gt;
+&lt;img alt=&#34;image.png|600&#34; loading=&#34;lazy&#34; src=&#34;https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240207225237.png&#34;&gt;
+&lt;img alt=&#34;image.png|600&#34; loading=&#34;lazy&#34; src=&#34;https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240207225451.png&#34;&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;还有一个图我懒得画了，page4也是不安全的，所以page2、3、4.在这里都不能释放。&lt;/li&gt;
+&lt;li&gt;找到一个安全的节点之后如何安全有便捷的释放所有父节点链的锁呢？&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;==Remove（）==&lt;/p&gt;
+&lt;p&gt;移除和上图大同小异啦，就是判断安全的条件不一样啦。注意一下就好了&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;Transaction、事务&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;这里就用到了我在checkpoint1中提到的这个东西[[CMU15-445 Project2-B+ Tree Index Checkpoint 1#^d53eec|对Transaction的详细介绍]],可以翻看前文。
+它可以跟踪记录某个线程上的锁，并且是按照顺序的。从上到下。便于进行统筹操作。&lt;/p&gt;
+&lt;p&gt;由于越往上page越密集，竞争越激烈，在释放锁的时候可以优先释放处于顶部的锁，也算是一个小优化🤣。&lt;/p&gt;
+&lt;h3 id=&#34;summary&#34;&gt;Summary&lt;/h3&gt;
+&lt;p&gt;整个checkpoint2想较于checkpoint1来说我觉得需要注意的事情更多。特别是对根节点的加锁时机的把握，很重要的。难度我觉得是有提升的。&lt;/p&gt;
+&lt;p&gt;写完这个让我体会最深的是，代码写完整个工作完成百分之20，跑起来并且过本地测试勉强算完成一半，线上测试是真难啊啊啊，每次卡玩都回来一点一点看log👀，眼瞪的比黑猫警长还大。&lt;/p&gt;
+&lt;p&gt;最后附上通过截图。
+&lt;img alt=&#34;image.png|350&#34; loading=&#34;lazy&#34; src=&#34;https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240207232212.png&#34;&gt;
+&lt;img alt=&#34;image.png|775&#34; loading=&#34;lazy&#34; src=&#34;https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240207232250.png&#34;&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>CMU15-445-Project #2 - B&#43; Tree Index Checkpoint 1</title>
+      <link>http://localhost:1313/posts/database/project/cmu15-445-project2-b&#43;-tree-index-checkpoint-1/</link>
+      <pubDate>Thu, 01 Feb 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/database/project/cmu15-445-project2-b&#43;-tree-index-checkpoint-1/</guid>
+      <description>&lt;h2 id=&#34;一些工具&#34;&gt;一些工具&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://15445.courses.cs.cmu.edu/fall2022/bpt-printer/&#34;&gt;BusTub B+Tree Printer&lt;/a&gt;CMU官方在线的B+树的生成工具。我主要用来细节实现的时候进行参考。&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://goneill.co.nz/btree-demo.php&#34;&gt;JavaScript B+ Tree&lt;/a&gt;B+树插入和删除的动态演示。&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://dreampuf.github.io/GraphvizOnline/#digraph%20G%20%7B%0A%0A%20%20subgraph%20cluster_0%20%7B%0A%20%20%20%20style%3Dfilled%3B%0A%20%20%20%20color%3Dlightgrey%3B%0A%20%20%20%20node%20%5Bstyle%3Dfilled%2Ccolor%3Dwhite%5D%3B%0A%20%20%20%20a0%20-%3E%20a1%20-%3E%20a2%20-%3E%20a3%3B%0A%20%20%20%20label%20%3D%20%22process%20%231%22%3B%0A%20%20%7D%0A%0A%20%20subgraph%20cluster_1%20%7B%0A%20%20%20%20node%20%5Bstyle%3Dfilled%5D%3B%0A%20%20%20%20b0%20-%3E%20b1%20-%3E%20b2%20-%3E%20b3%3B%0A%20%20%20%20label%20%3D%20%22process%20%232%22%3B%0A%20%20%20%20color%3Dblue%0A%20%20%7D%0A%20%20start%20-%3E%20a0%3B%0A%20%20start%20-%3E%20b0%3B%0A%20%20a1%20-%3E%20b3%3B%0A%20%20b2%20-%3E%20a3%3B%0A%20%20a3%20-%3E%20a0%3B%0A%20%20a3%20-%3E%20end%3B%0A%20%20b3%20-%3E%20end%3B%0A%0A%20%20start%20%5Bshape%3DMdiamond%5D%3B%0A%20%20end%20%5Bshape%3DMsquare%5D%3B%0A%7D&#34;&gt;Graphviz Online&lt;/a&gt;可视化自己的树。在debug的时候会用到。将生成的dot文件转换成svg图片。&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.gradescope.com/courses/425272&#34;&gt;Log In | Gradescope&lt;/a&gt;在线评测网站,邀请码：PXWVR5，&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://15445.courses.cs.cmu.edu/fall2022/project2/&#34;&gt;Project #2 - B+Tree | CMU 15-445/645 :: Intro to Database Systems (Fall 2022)&lt;/a&gt;最重要的当然还是课程网站了&lt;/li&gt;
+&lt;li&gt;课程的视频，还有对应的教材还是推荐看一下的上面有很多实现细节的。非常值得参考。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;如何debug自己的&#34;&gt;如何Debug自己的🌳&lt;/h3&gt;
+&lt;p&gt;大致上可以分为两种方式&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;可视化的用自带的&lt;code&gt;printer&lt;/code&gt;将树生成dot文件然后复制到上面的可视化网站。&lt;/li&gt;
+&lt;li&gt;由于本项目采用的是cmake构建的，所以可以很方便的在测试文件中打上断点。进行调试。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;==可视化调试==&lt;/p&gt;
+&lt;p&gt;在终端中执行以下命令，构建和执行&lt;code&gt;printer&lt;/code&gt;。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-c++&#34; data-lang=&#34;c++&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;err&#34;&gt;➜&lt;/span&gt;  &lt;span class=&#34;n&#34;&gt;build&lt;/span&gt; &lt;span class=&#34;nl&#34;&gt;git&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;main&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;make&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;b_plus_tree_printer&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;-&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;j2&lt;/span&gt; &lt;span class=&#34;c1&#34;&gt;// 构建printer
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;➜&lt;/span&gt;  &lt;span class=&#34;n&#34;&gt;build&lt;/span&gt; &lt;span class=&#34;nl&#34;&gt;git&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;main&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;/&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;bin&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;/&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;b_plus_tree_printer&lt;/span&gt;    &lt;span class=&#34;c1&#34;&gt;// 执行printer  
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;执行完之后就会有以下提示：&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png|675&#34; loading=&#34;lazy&#34; src=&#34;https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240202215423.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;按照这个提示就可以生成dot文件，然后复制到上述的网站进行可视化。（当你看到自己的树呈现出来的时候还是非常有成就感的😁）&lt;/p&gt;
+&lt;p&gt;==非可视化==&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png|675&#34; loading=&#34;lazy&#34; src=&#34;https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240202220003.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;可以很方便的直接打断点，然后在vscode中的cmake插件中选择调试进行debug。&lt;/p&gt;
+&lt;p&gt;官方还提供了一种大打log的方式进行debug，我是不太习惯这种方式所以没有进行很深入的研究。感兴趣的可以自己进行了解😗。&lt;/p&gt;
+&lt;p&gt;两种debug的方式是&lt;strong&gt;相辅相成的&lt;/strong&gt;，在你过不了&lt;strong&gt;本地样例&lt;/strong&gt;的时候好好的用非可视化的方式进行debug，线上样例过不了大部分原因是细节处理上出问题了。用可视化的方式会更加的直观。&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;请不要公开代码，尊重Andy劳动成果&lt;/em&gt;&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;概览&#34;&gt;概览&lt;/h2&gt;
+&lt;p&gt;Project2是实现B+树索引，整个project大致被分为了两个部分&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;checkpoint1：实现一个单线程的b+树。&lt;/li&gt;
+&lt;li&gt;checkpoint2：实现一个多线程的b+树。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;实验代码中给出的自由发挥的空间非常的大，只给出了&lt;code&gt;Getvalue()&lt;/code&gt;,&lt;code&gt;Insert()&lt;/code&gt;,&lt;code&gt;Remove()&lt;/code&gt;这三个函数的接口，剩下的所有的实现都非常的自由，整个实验实现的过程就像一个黑盒一样，只在乎输入和输出。&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png|600&#34; loading=&#34;lazy&#34; src=&#34;https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240202220853.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;本实验需要完成b+ index部分，b+树中的页（page）都需要从上一个实验中实现的buffer pool中取。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;checkpoint-1&#34;&gt;Checkpoint-1&lt;/h2&gt;
+&lt;h3 id=&#34;task-1---btree-pages&#34;&gt;Task #1 - B+Tree Pages&lt;/h3&gt;
+&lt;p&gt;需要完成以下三个page，主要都是一些getter和setter的函数，重在理解各部分的组成。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://15445.courses.cs.cmu.edu/fall2022/project2/#b&amp;#43;tree-page&#34;&gt;&lt;strong&gt;B+Tree Parent Page&lt;/strong&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://15445.courses.cs.cmu.edu/fall2022/project2/#b&amp;#43;tree-internal-page&#34;&gt;&lt;strong&gt;B+Tree Internal Page&lt;/strong&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://15445.courses.cs.cmu.edu/fall2022/project2/#b&amp;#43;tree-leaf-page&#34;&gt;&lt;strong&gt;B+Tree Leaf Page&lt;/strong&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;其中parentPage是internal page和leaf page的父类。我更&lt;strong&gt;倾向于&lt;/strong&gt;把这几个page类型理解为 从buffer pool中取回来的Page的&lt;strong&gt;不同解释形式&lt;/strong&gt;。Page还是那个Page。主要就是在于你如何去解释它的组成部分。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>CMU15-445- Project #1 - Buffer Pool Manager</title>
+      <link>http://localhost:1313/posts/database/project/cmu15-445-project1-buffer-pool-manager/</link>
+      <pubDate>Fri, 08 Dec 2023 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/database/project/cmu15-445-project1-buffer-pool-manager/</guid>
+      <description>&lt;h2 id=&#34;环境搭建&#34;&gt;环境搭建&lt;/h2&gt;
+&lt;p&gt;按照P0的指导中进行环境的搭建，由于我本人现在时WIN平台，课程没有提供一键配置环境的脚本，所以我选择云服务器进行环境的构建，很稳。&lt;/p&gt;
+&lt;p&gt;但是我的云服务器配置只有2核2G在编译的时候会爆内存。这里还有个故事，在爆内存之后我已经意识到这个问题，我给阿里云客服提了个工单试图能白嫖一些配置，客服还是很有水平的，直接就分析出来我是内存爆了导致的，但是直接建议我加钱升级配置，不告诉我设置swap分区，有点不厚道了。&lt;/p&gt;
+&lt;p&gt;话说回来，设置完swap分区之后就没有再出现过爆内存的现象。用VScode的远程开发，体验还是很不错的。&lt;/p&gt;
+&lt;h2 id=&#34;overview&#34;&gt;Overview&lt;/h2&gt;
+&lt;p&gt;p1主要是内存管理部分的内容，这门课程的课本和录制视频还是很有必要看一下的。&lt;/p&gt;
+&lt;p&gt;主要的任务是以下三个部分：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;可扩展的哈希表&lt;/li&gt;
+&lt;li&gt;LRU-K的淘汰策略的视线&lt;/li&gt;
+&lt;li&gt;Buffer Pool的一个实例&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;在开始梳理项目之前我想要先解释清楚一下三个任务之间的关系，以及各个部分的负责。&lt;/p&gt;
+&lt;p&gt;frame更像是一个&lt;strong&gt;载体&lt;/strong&gt;，而page是其中的内容。打个比方来说，一个仓库（buffer pool）只有100辆货车（frame），而货物（page）成千上万种，每次都是仓库告诉货车需要什么货物然后由货车带着货物来到仓库，而可扩展的哈希表就是登记货车和货物的&lt;strong&gt;对应关系&lt;/strong&gt;。因为只有100辆货车，当每辆车都是满的时候（没有闲置的车辆free_list不为空）就需要根据task2的LRU-K算法挑选出一个符合要求的货车清空后去装载指定的货物。
+而task3就是负责整个的管理和交互。&lt;/p&gt;
+&lt;p&gt;大概解释了一下，可能比方不是很恰当，做的时候一定要多看文档和注释，因为漏看注释给我带来了极大的痛苦。&lt;/p&gt;
+&lt;h2 id=&#34;task-1--extendiblehashtable&#34;&gt;Task #1 -ExtendibleHashTable&lt;/h2&gt;
+&lt;h3 id=&#34;相关函数&#34;&gt;相关函数&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;Find(K,V):&lt;/code&gt; 查询一个Key是否存在，如果存在则将其V指针指向相关的值，返回true，否则返回false&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Insert(K,V):&lt;/code&gt; 插入一个（K，V），如果插入失败需要进行一下步骤的重试：
+&lt;ol&gt;
+&lt;li&gt;插入失败肯定是桶满了，但是桶满了分为两种不同的情况。&lt;/li&gt;
+&lt;li&gt;一种是global深度和桶的local深度不相同的时候，需要对桶进行重新的分配。&lt;/li&gt;
+&lt;li&gt;当两个深度相同的时候说明桶是真的满了，需要对哈希表进行扩展&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Remove(K):&lt;/code&gt; 在哈希表中移除对应的（K，V）对，但是需要进行哈希表缩小的操作。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;IndexOf(K):&lt;/code&gt;  当前global深度下的映射规则。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;项目架构&#34;&gt;项目架构&lt;/h3&gt;
+&lt;p&gt;首先要清楚这个是自己动手实现一个可扩展哈希表用于保存frame和page的&lt;strong&gt;映射关系&lt;/strong&gt;的。我觉得首先要明白frame和page之间的关系。不清楚的可以回看上文的解释。&lt;/p&gt;
+&lt;h3 id=&#34;bucket-存储桶&#34;&gt;Bucket 存储桶&lt;/h3&gt;
+&lt;p&gt;在可可以扩展的哈希表种引入和Bucket的概念，用于解决&lt;strong&gt;哈希冲突&lt;/strong&gt;的问题，每一个Bucket的大小都是固定的，当一个Bucket满了的时候就需要进行哈希表的&lt;strong&gt;扩展&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png|200&#34; loading=&#34;lazy&#34; src=&#34;https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231205232548.png&#34;&gt;&lt;/p&gt;
+&lt;h3 id=&#34;bucket的组成&#34;&gt;Bucket的组成&lt;/h3&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png|325&#34; loading=&#34;lazy&#34; src=&#34;https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231205233054.png&#34;&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;depth_&lt;/strong&gt;：表示本地深度的一个标识，用于识别当前的深度是否和全局深度相同。要特别注意这个变量。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;list_&lt;/strong&gt;：发生哈希冲突时保存多个（K，V）映射的双向链表。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;size&lt;/strong&gt;：为了保证效率，list的长度不能无限延伸，所以达到一定长度的时候要进行哈希表的扩展。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;可扩展的哈希表结构&#34;&gt;可扩展的哈希表结构&lt;/h3&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png|325&#34; loading=&#34;lazy&#34; src=&#34;https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231205234304.png&#34;&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Bucket_size:用于限制每个bucket的list的长度&lt;/li&gt;
+&lt;li&gt;dir_:用于哈西运算后保存映射关系。&lt;/li&gt;
+&lt;li&gt;global_depth_:全局深度，在&lt;strong&gt;插入&lt;/strong&gt;的时候根据&lt;strong&gt;全局深度&lt;/strong&gt;和&lt;strong&gt;局部深度&lt;/strong&gt;来确定这个桶是否要进行重新的分配。&lt;/li&gt;
+&lt;li&gt;num_buckets:用于统计现在一共有多少bucket。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;rehash的过程详解&#34;&gt;ReHash的过程详解&lt;/h3&gt;
+&lt;blockquote&gt;
+&lt;p&gt;1.hash的规则是什么样的&lt;/p&gt;&lt;/blockquote&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-c++&#34; data-lang=&#34;c++&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;k&#34;&gt;template&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;typename&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;K&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;typename&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;V&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;k&#34;&gt;auto&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;ExtendibleHashTable&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;K&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;V&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;&amp;gt;::&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;IndexOf&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;const&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;K&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;key&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;size_t&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  &lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;mask&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;global_depth_&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;-&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  &lt;span class=&#34;k&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;std&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;::&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;hash&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;K&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;()(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;key&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;amp;&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;mask&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;上述函数就是该哈希表的映射规则，总的来说就是取hash函数值的&lt;strong&gt;低&lt;code&gt;global_depth&lt;/code&gt;位&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;假如现在global_depth_的值为3。
+那么 &lt;code&gt;1 &amp;lt;&amp;lt; global_depth_&lt;/code&gt;的值就是8转换为二进制就是 1000 。mask=8-1=7，转换为二进制就是 111.&lt;/p&gt;
+&lt;p&gt;mask 的作用就是取一个位数和global_depth_一样的全1的二进制数，为了取低global_depth_位做铺垫。&lt;/p&gt;
+&lt;p&gt;现在假如key的值进行完hash之后是 10110100011010 和 mask进行进行 &amp;amp; 的操作之后就变成了 010 （低3位）&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>B&#43; Tree Index</title>
+      <link>http://localhost:1313/posts/database/note/b&#43;-tree-index/</link>
+      <pubDate>Thu, 07 Dec 2023 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/database/note/b&#43;-tree-index/</guid>
+      <description>&lt;h2 id=&#34;table-index&#34;&gt;TABLE INDEX&lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;A table index is a replica of a subset of a table&amp;rsquo;s attributes that are organized and/or sorted for efficient access using those attributes.The DBMS ensures that the contents of the table and the index are logically synchronized.&lt;/p&gt;&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;索引&lt;/strong&gt;让数据在数据库中的查询更加的高效，DBMS负责使索引和实际内容&lt;strong&gt;同步&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png|575&#34; loading=&#34;lazy&#34; src=&#34;https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231208203437.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;DBMS的工作是选择最优的索引去执行查询，这就带来一个需要权衡的问题——索引越多查询越高效但是相对的&lt;strong&gt;维护成本&lt;/strong&gt;（Maintenance Overhead）和&lt;strong&gt;存储成本&lt;/strong&gt;（Storage Overhead） 就会相应的提高。&lt;/p&gt;
+&lt;h2 id=&#34;b-tree-family&#34;&gt;B-TREE FAMILY&lt;/h2&gt;
+&lt;p&gt;B-树家族。&lt;/p&gt;
+&lt;p&gt;重点了解B+树。&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png|600&#34; loading=&#34;lazy&#34; src=&#34;https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231208214614.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;（B树虽然是一个平衡树（balance），但B树的B不是balance的缩写，到底代表什么还存疑）&lt;/p&gt;
+&lt;h3 id=&#34;btree&#34;&gt;B+TREE&lt;/h3&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png|600&#34; loading=&#34;lazy&#34; src=&#34;https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231208215020.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;B+树是一个自平衡树的数据结构，&lt;strong&gt;顺序的&lt;/strong&gt;存储数据，并且将查询，顺序访问，插入和删除的时间复杂度基本控制在&lt;strong&gt;O(log n)&lt;/strong&gt;。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;是二叉搜索树的推广，因为它可以有超过两个的孩子节点。&lt;/li&gt;
+&lt;li&gt;它针对系统和存储之间的大块数据读写进行了特别的优化。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;btree-properties&#34;&gt;B+TREE PROPERTIES&lt;/h3&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png|550&#34; loading=&#34;lazy&#34; src=&#34;https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231208220751.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;B+树是一个多叉搜索树，有以下特性：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;他完美平衡&lt;/li&gt;
+&lt;li&gt;除了根节点都至少半满&lt;/li&gt;
+&lt;li&gt;k个值会把一个节点分为k+1部分。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;btree-example&#34;&gt;B+TREE EXAMPLE&lt;/h3&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png|675&#34; loading=&#34;lazy&#34; src=&#34;https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231208223923.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;上图是一个小例子，能够发现B+树底层是能够双向访问的，这在&lt;strong&gt;多线程&lt;/strong&gt;的时候有可能会造成&lt;strong&gt;死锁&lt;/strong&gt;问题。这在后面讲解B+树多线程的章节也会对原因进行讲解。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>CMU15-445- Project #0 - C&#43;&#43; Primer</title>
+      <link>http://localhost:1313/posts/database/project/cmu15-445-project-0---c&#43;&#43;-primer/</link>
+      <pubDate>Tue, 28 Nov 2023 23:44:18 +0000</pubDate>
+      <guid>http://localhost:1313/posts/database/project/cmu15-445-project-0---c&#43;&#43;-primer/</guid>
+      <description>&lt;h1 id=&#34;cmu15-445&#34;&gt;CMU15-445&lt;/h1&gt;
+&lt;p&gt;作为 CMU 数据库的入门课，这门课由数据库领域的大牛 Andy Pavlo 讲授（“这个世界上我只在乎两件事，一是我的老婆，二就是数据库”）。&lt;/p&gt;
+&lt;p&gt;这是一门质量极高，资源极齐全的 Database 入门课，这门课的 Faculty 和背后的 CMU Database Group 将课程对应的基础设施 (Autograder, Discord) 和课程资料 (Lectures, Notes, Homework) 完全开源，让每一个愿意学习数据库的同学都可以享受到几乎等同于 CMU 本校学生的课程体验。&lt;/p&gt;
+&lt;p&gt;亮点在于这门课程实现了一个关系型数据库的Demo&amp;ndash;bustub，并对组成部分进行修改，最后达到完成整个数据库的目的，非常的有意思。&lt;/p&gt;
+&lt;p&gt;近年来由于CMU15-445这门课的热度大增，无论是找工作还是保研的简历上都少不了这个课程。到了可以说是人手一个的地步（还有MIT6.824），但是最后的排行榜上真正完成4个项目并且有成绩的不过100余人。在这种背景下也催生出了很多卖课的机构和个人。还有种种乱象。暂且按下不表，进入主题。&lt;/p&gt;
+&lt;h2 id=&#34;前言&#34;&gt;前言&lt;/h2&gt;
+&lt;p&gt;先附上 &lt;a href=&#34;https://15445.courses.cs.cmu.edu/fall2022&#34;&gt;课程链接&lt;/a&gt;我原本是想要完成最新的课程即2023fall的，但是2023fall的P0直接就把我劝退了，相较于2022fall的P0我认为难度上升了不止一点。但是其他的Project的实现差别并不是太大，所以我选择了较为容易下手的2022fall的课程进行学习。&lt;/p&gt;
+&lt;h1 id=&#34;project0-c-primer&#34;&gt;Project0-C++ Primer&lt;/h1&gt;
+&lt;p&gt;还是先放上&lt;a href=&#34;https://15445.courses.cs.cmu.edu/fall2022/project0/&#34;&gt;项目Project#0-C++primer链接&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id=&#34;概述&#34;&gt;概述&lt;/h2&gt;
+&lt;p&gt;这是一个相当于先导课程的项目，&lt;strong&gt;旨在培养和检验学生的现代C++编程能力&lt;/strong&gt; ，BusTub大量使用C++17，当你上手之后&lt;strong&gt;可能&lt;/strong&gt;就会发现和你印象中的C++不一样。&lt;/p&gt;
+&lt;p&gt;在CMU如果你没能满分通过P0，那么你会被要求退课。
+&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231129141237.png&#34;&gt;&lt;/p&gt;
+&lt;h2 id=&#34;所需前置知识&#34;&gt;所需前置知识&lt;/h2&gt;
+&lt;p&gt;我认为需要的前置知识主要包括&lt;a href=&#34;https://github.com/cmu-db/15445-bootcamp&#34;&gt;&lt;strong&gt;C++11的新特性&lt;/strong&gt;&lt;/a&gt;
+这是在2023fall课程的一个可能是助教写的一个小demo包含了几个例子能够帮助你快速的上手c++11的新特性。&lt;/p&gt;
+&lt;p&gt;熟悉&lt;strong&gt;字典树&lt;/strong&gt;能够理解字典树原理能够完成一个字典树的小demo&lt;a href=&#34;https://leetcode.cn/problems/implement-trie-prefix-tree/description/&#34;&gt;LeetCode.208实现前缀字典树&lt;/a&gt; 可以先把这个做了，了解一下什么是字典树。&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231129144859.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;上图就是一个字典树的简单示意图&lt;/p&gt;
+&lt;h2 id=&#34;文件结构&#34;&gt;文件结构&lt;/h2&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png|264&#34; loading=&#34;lazy&#34; src=&#34;https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231129162120.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;在文件中作为字典树的架子文件中包含了三个类。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;TrieNode&lt;/li&gt;
+&lt;li&gt;TrieNodeWithValue&lt;/li&gt;
+&lt;li&gt;Trie&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;task1-字典树&#34;&gt;Task#1 字典树&lt;/h2&gt;
+&lt;p&gt;先完成一个单线程版本的字典树，后期再考虑并发。&lt;/p&gt;
+&lt;h3 id=&#34;trienode&#34;&gt;TrieNode&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;TrieNode&lt;/code&gt;定义了一个Trie树的一个节点。
+&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231129160311.png&#34;&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;一个包含关键字的char类型`key_char_。&lt;/li&gt;
+&lt;li&gt;一个bool类型&lt;code&gt;is_node&lt;/code&gt;的标志来标记这个节点是否是&lt;strong&gt;值节点&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;包含一个存储类型为 &lt;code&gt;char&lt;/code&gt; to &lt;code&gt;unique_ptr&amp;lt;TrieNode&amp;gt;&lt;/code&gt;映射的哈希表
+&lt;strong&gt;需要注意的点：&lt;/strong&gt;
+C++中智能指针&lt;a href=&#34;https://www.learncpp.com/cpp-tutorial/stdunique_ptr/&#34;&gt;std::unique_ptr的特性&lt;/a&gt;所带来的：
+The &lt;code&gt;InsertChildNode&lt;/code&gt; and &lt;code&gt;GetChildNode&lt;/code&gt; both return a pointer to &lt;code&gt;unique_ptr&lt;/code&gt;
+这个独享类型的智能指针也不支持被复制，所以要么使用&lt;code&gt;std::move()&lt;/code&gt;把所有权交出去，要么就用&lt;code&gt;get()&lt;/code&gt;函数把裸指针交出去。
+the move constructor &lt;code&gt;TrieNode(TrieNode &amp;amp;&amp;amp;other_trie_node)&lt;/code&gt; is used to transfer old TrieNode&amp;rsquo;s unique pointers to a new TrieNode。因为是unique_ptr所以在传递的时候不能对指针进行复制。（解决方法就是使用move()函数）。
+&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231129173037.png&#34;&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20231129173224.png&#34;&gt;&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

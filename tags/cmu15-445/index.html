@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>CMU15-445 | JiaLog</title>
+<meta name="keywords" content="">
+<meta name="description" content="Theme PaperMod - https://github.com/adityatelange/hugo-PaperMod">
+<meta name="author" content="Theme PaperMod">
+<link rel="canonical" href="http://localhost:1313/tags/cmu15-445/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.6da9a63d25a9608bca2f7f907a030e887a7dd3c3f3918e4cc113129361414bda.css" integrity="sha256-bammPSWpYIvKL3&#43;QegMOiHp908PzkY5MwRMSk2FBS9o=" rel="preload stylesheet" as="style">
+<link rel="icon" href="http://localhost:1313/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://localhost:1313/apple-touch-icon.png">
+<link rel="mask-icon" href="http://localhost:1313/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" type="application/rss+xml" href="http://localhost:1313/tags/cmu15-445/index.xml">
+<link rel="alternate" hreflang="en" href="http://localhost:1313/tags/cmu15-445/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:url" content="http://localhost:1313/tags/cmu15-445/">
+  <meta property="og:site_name" content="JiaLog">
+  <meta property="og:title" content="CMU15-445">
+  <meta property="og:description" content="Theme PaperMod - https://github.com/adityatelange/hugo-PaperMod">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="website">
+      <meta property="og:image" content="http://localhost:1313/images/papermod-cover.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://localhost:1313/images/papermod-cover.png">
+<meta name="twitter:title" content="CMU15-445">
+<meta name="twitter:description" content="Theme PaperMod - https://github.com/adityatelange/hugo-PaperMod">
+
+</head>
+
+<body class="list" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="http://localhost:1313/" accesskey="h" title="JiaLog (Alt + H)">JiaLog</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="http://localhost:1313/" title="Home">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/posts/" title="Blog">
+                    <span>Blog</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/essay/" title="Essay">
+                    <span>Essay</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/archives" title="Archive">
+                    <span>Archive</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/search/" title="Search (Alt &#43; /)" accesskey=/>
+                    <span>Search</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/tags/" title="Tags">
+                    <span>Tags</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main"> 
+<header class="page-header"><div class="breadcrumbs"><a href="http://localhost:1313/">Home</a>&nbsp;»&nbsp;<a href="http://localhost:1313/tags/">Tags</a></div>
+  <h1>
+    CMU15-445
+    <a href="/tags/cmu15-445/index.xml" title="RSS" aria-label="RSS">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" height="23">
+        <path d="M4 11a9 9 0 0 1 9 9" />
+        <path d="M4 4a16 16 0 0 1 16 16" />
+        <circle cx="5" cy="19" r="1" />
+      </svg>
+    </a>
+  </h1>
+</header>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">CMU15-445总结
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>先随便写几个要点，等整个结束了再详细写。
+动手之前先计划，详细周到考虑 多动手，多试错 多读源代码，多练习debug 英语好好学，英语太重要了。 </p>
+  </div>
+  <footer class="entry-footer"><span title='2024-02-22 00:00:00 +0000 UTC'>February 22, 2024</span>&nbsp;·&nbsp;1 min&nbsp;·&nbsp;Theme PaperMod</footer>
+  <a class="entry-link" aria-label="post link to CMU15-445总结" href="http://localhost:1313/posts/database/note/cmu15-445%E6%80%BB%E7%BB%93/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">Bustub架构简单分析
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>写在前面 在这篇文章中我们先抛开SQL在bustub的中的历程，直接快进到最后开始执行的阶段，这篇文章只关注设计上的细节。
+至于如何理顺这些细节在[[CMU15-445 Project3 - Query Execution]]文章中会有详细的介绍，这里就不再赘述。😃
+架构总览 上图中catalog其实不是特别准确，按照我的理解应该是下面这种情况👇。通过一个table_id双向映射表的名字和实体table。 接下来就按照从上到下的顺序依次介绍各个部分的结构。
+Catalog 下面这个图是是整个catalog关于table的。👇这里引出了TableInfo. Catalog中不仅仅包含table的信息还储存了index的信息。这里引出了IndexInfo,但是后边用的不是很多。 接下来看TableInfo的组成。（TableInfo的定义就在Catalog.h文件中）
+TableInfo name_:就是表的名字 table_: 是一个每个节点都是tablepage的双向链表 oid_: 顾名思义就是表的id Schema_：其实到现在我都没有很弄懂这个是干什么的东西，但是chat给出了答案。 什么是Schema 按照我的理解应该是一个类似于表头的包含各种配置信息的一个抽象集合。现在就看看源码。👇 在bustub中schema的信息似乎没有包含很多，就是对每一个列的数据类型约束进行了记录。以及对所有的列进行一个汇总，方便获取到每一个列。 ==Column==
+实际上每个列的实现实体是Column，在这个实体中包含列名，数据类型，长度等基本信息。 ⚠️值得注意的是column对于varchar单独做了处理🙂,变长数组终究还是不一样啊。 TableHeap 实质上就是配合TablePage里面的信息构成的双向链表，我觉得这个设计真的非常的巧妙。只用了基本的pre_page_id 和next_page_id这两个变量就把双向链表给建立起来而且耦合度非常的低。
+first_page_id_: 就是第一个pageid bufferpool：所有的page都需要从bufferpool中去取。 TablePage的结构 ok看到这里有疑问了？ 那么多的信息都存在那里， 这继承的加上初始化的也不够啊。 答案在这里👇 通过偏移量直接在page的剩余空间里去定义各种变量。
+==通过InsertTuple（）函数了解详细结构==
+直接看源代码：
+if (tuple.size_ &#43; 32 &gt; BUSTUB_PAGE_SIZE) { // larger than one page size txn-&gt;SetState(TransactionState::ABORTED); return false; } auto cur_page = static_cast&lt;TablePage *&gt;(buffer_pool_manager_-&gt;FetchPage(first_page_id_)); if (cur_page == nullptr) { txn-&gt;SetState(TransactionState::ABORTED); return false; } 这主要是判断一些前置条件的合法性 为什么要用tuple的大小&#43;32进行比较呢？ 文末给出答案
+在第一页中进行插入，如果没有足够的空间就开一个新页然后插进去 ⚠️需要注意的是，在离开第一页的时候仍然要持有写锁，因为还要写next_page_id变量. 💡跟随代码跳转到TablePage::InserTuple().
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2024-02-21 00:00:00 +0000 UTC'>February 21, 2024</span>&nbsp;·&nbsp;2 min&nbsp;·&nbsp;Theme PaperMod</footer>
+  <a class="entry-link" aria-label="post link to Bustub架构简单分析" href="http://localhost:1313/posts/database/note/bustub%E6%89%A7%E8%A1%8C%E5%99%A8%E6%9E%B6%E6%9E%84%E7%AE%80%E5%8D%95%E5%88%86%E6%9E%90/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">数据库事务
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>事务 ==Transaction==
+在英文中事务用transaction表示，一般约定俗成的缩写为txn，所以在数据库的源代码中看到txn的话多半就是事务。
+==事务诞生的背景==
+我们假设一个银行的场景，转账这一操作在外界看来是单一的操作，但是在数据库内部涉及到很多的操作，假如转账操作发生了失败，那么数据的不一致是不能被接受的。所以这一连串的操作可以被归为逻辑上的一个操作集。要么整体都成功要么都失败。
+事务的概念 在chatgpt上问事务的概念他会这样子进行回答。 这也正是事务的关键。 我们回归课本，看课本上给出的定义 事务的隔离性级别 我个人觉得对于隔离性的的理解是非常重要的，在后续的算子的实现当中几乎都要考虑事务的隔离等级，根据不同的隔离等级去进行不同的操作。（我个人现在比较迷茫的是怎么能比较周全的考虑不同隔离等级所带来的影响。：）。看来是时候找个大佬请教一下了。🙃
+</p>
+  </div>
+  <footer class="entry-footer"><span title='2024-02-20 00:00:00 +0000 UTC'>February 20, 2024</span>&nbsp;·&nbsp;1 min&nbsp;·&nbsp;Theme PaperMod</footer>
+  <a class="entry-link" aria-label="post link to 数据库事务" href="http://localhost:1313/posts/database/note/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%BA%8B%E5%8A%A1/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">查询的处理和优化
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p> Join Operation， 连表 在查询过程中经常会涉及到连表的操作。那么为什么总是需要连表呢？
+==为什么需要连表？==
+在存储的时候为了避免数据的冗杂，将表进行规范化，导致表的割裂。 在查询的时候需要获取完整的信息，所以将表进行重新的组装。 连表的算法 Fetching Title#i6kq
+</p>
+  </div>
+  <footer class="entry-footer"><span title='2024-02-09 00:00:00 +0000 UTC'>February 9, 2024</span>&nbsp;·&nbsp;1 min&nbsp;·&nbsp;Theme PaperMod</footer>
+  <a class="entry-link" aria-label="post link to 查询的处理和优化" href="http://localhost:1313/posts/database/note/%E6%9F%A5%E8%AF%A2%E7%9A%84%E5%A4%84%E7%90%86%E5%92%8C%E4%BC%98%E5%8C%96/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">CMU15-445-Project #3 - Project3 - Query Execution
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>做这个p3首先需要明晰整个bustub的架构[[Bustub执行器架构简单分析]],在这个文章中进行了很详细的分析。 </p>
+  </div>
+  <footer class="entry-footer"><span title='2024-02-08 00:00:00 +0000 UTC'>February 8, 2024</span>&nbsp;·&nbsp;1 min&nbsp;·&nbsp;Theme PaperMod</footer>
+  <a class="entry-link" aria-label="post link to CMU15-445-Project #3 - Project3 - Query Execution" href="http://localhost:1313/posts/database/project/cmu15-445-project3---query-execution/"></a>
+</article>
+<footer class="page-footer">
+  <nav class="pagination">
+    <a class="next" href="http://localhost:1313/tags/cmu15-445/page/2/">Next&nbsp;2/2&nbsp;»
+    </a>
+  </nav>
+</footer>
+    </main>
+    
+<footer class="footer">
+        <span>© <a href="https://jialog.top">JiaLog</a> 豫ICP备2024077894号-1 苏公网安备32031202000962号 32031202000962</span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>
