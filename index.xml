@@ -2,23 +2,23 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <title>JiaLog</title>
-    <link>http://localhost:1313/</link>
+    <link>https://jialog.top/</link>
     <description>Recent content on JiaLog</description>
     <image>
       <title>JiaLog</title>
-      <url>http://localhost:1313/images/papermod-cover.png</url>
-      <link>http://localhost:1313/images/papermod-cover.png</link>
+      <url>https://jialog.top/images/papermod-cover.png</url>
+      <link>https://jialog.top/images/papermod-cover.png</link>
     </image>
     <generator>Hugo -- 0.144.2</generator>
     <language>en</language>
     <copyright>JiaLog 豫ICP备2024077894号-1 苏公网安备32031202000962号 32031202000962</copyright>
     <lastBuildDate>Tue, 25 Feb 2025 00:00:00 +0000</lastBuildDate>
-    <atom:link href="http://localhost:1313/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://jialog.top/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Lab1 Xv6 &amp;&amp; system calls</title>
-      <link>http://localhost:1313/posts/os/lab1-xv6--system-calls/</link>
+      <link>https://jialog.top/posts/os/lab1-xv6--system-calls/</link>
       <pubDate>Tue, 25 Feb 2025 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/posts/os/lab1-xv6--system-calls/</guid>
+      <guid>https://jialog.top/posts/os/lab1-xv6--system-calls/</guid>
       <description>&lt;h2 id=&#34;using-gdb&#34;&gt;Using gdb&lt;/h2&gt;
 &lt;p&gt;平时我们用的调试工具其实都是图形化后的gdb，使用起来非常的方便，但是熟悉原生的gdb会使我们的效率进一步提升。我认为学习好用gdb调试是一项非常重要的技能。&lt;/p&gt;
 &lt;h3 id=&#34;编译并启动&#34;&gt;编译并启动&lt;/h3&gt;
@@ -61,9 +61,9 @@ spp位表示其在什么状态。 通过图示得出，spp在二进制的第8bit
     </item>
     <item>
       <title>变量</title>
-      <link>http://localhost:1313/posts/rust/%E5%8F%98%E9%87%8F/</link>
+      <link>https://jialog.top/posts/rust/%E5%8F%98%E9%87%8F/</link>
       <pubDate>Mon, 03 Feb 2025 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/posts/rust/%E5%8F%98%E9%87%8F/</guid>
+      <guid>https://jialog.top/posts/rust/%E5%8F%98%E9%87%8F/</guid>
       <description>&lt;h2 id=&#34;变量的绑定与解构&#34;&gt;变量的绑定与解构&lt;/h2&gt;
 &lt;p&gt;&lt;strong&gt;手动设置可变性&lt;/strong&gt;&lt;/p&gt;
 &lt;p&gt;在rust语言中可以手动设置变量的可变性。这是灵活性和安全性的结合。但是这样肯定会在编码的过程中付出更多的思考，但这也是&lt;strong&gt;权衡&lt;/strong&gt;之后做出的选择。&lt;/p&gt;
@@ -100,9 +100,9 @@ spp位表示其在什么状态。 通过图示得出，spp在二进制的第8bit
     </item>
     <item>
       <title>虚拟化--进程管理API：fork, execve, exit</title>
-      <link>http://localhost:1313/posts/os/%E8%99%9A%E6%8B%9F%E5%8C%96--%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%86apifork-execve-exit/</link>
+      <link>https://jialog.top/posts/os/%E8%99%9A%E6%8B%9F%E5%8C%96--%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%86apifork-execve-exit/</link>
       <pubDate>Sun, 02 Feb 2025 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/posts/os/%E8%99%9A%E6%8B%9F%E5%8C%96--%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%86apifork-execve-exit/</guid>
+      <guid>https://jialog.top/posts/os/%E8%99%9A%E6%8B%9F%E5%8C%96--%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%86apifork-execve-exit/</guid>
       <description>&lt;h1 id=&#34;操作系统上的进程&#34;&gt;操作系统上的进程&lt;/h1&gt;
 &lt;p&gt;&lt;strong&gt;背景回顾&lt;/strong&gt;：有关状态机、并发和中断的讨论给我们真正理解操作系统奠定了基础，现在我们正式进入操作系统和应用程序的 “边界” 了。让我们把视角回到单线程应用程序，即 “执行计算指令和系统调用指令的状态机”，开始对操作系统和进程的讨论。&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;本讲内容&lt;/strong&gt;：操作系统上的进程&lt;/p&gt;
@@ -122,9 +122,9 @@ spp位表示其在什么状态。 通过图示得出，spp在二进制的第8bit
     </item>
     <item>
       <title>xv6-环境搭建</title>
-      <link>http://localhost:1313/posts/os/xv6%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA%E4%BB%A3%E7%A0%81%E5%AF%BC%E8%AF%BB/</link>
+      <link>https://jialog.top/posts/os/xv6%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA%E4%BB%A3%E7%A0%81%E5%AF%BC%E8%AF%BB/</link>
       <pubDate>Sat, 04 Jan 2025 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/posts/os/xv6%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA%E4%BB%A3%E7%A0%81%E5%AF%BC%E8%AF%BB/</guid>
+      <guid>https://jialog.top/posts/os/xv6%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA%E4%BB%A3%E7%A0%81%E5%AF%BC%E8%AF%BB/</guid>
       <description>&lt;h2 id=&#34;xv6-启动&#34;&gt;xv6 启动！&lt;/h2&gt;
 &lt;p&gt;万事开头难！
 &lt;img alt=&#34;PixPin_2024-12-27_21-38-12.png|675&#34; loading=&#34;lazy&#34; src=&#34;https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/PixPin_2024-12-27_21-38-12.png&#34;&gt;
@@ -146,9 +146,9 @@ spp位表示其在什么状态。 通过图示得出，spp在二进制的第8bit
     </item>
     <item>
       <title>CMU15-445总结</title>
-      <link>http://localhost:1313/posts/database/note/cmu15-445%E6%80%BB%E7%BB%93/</link>
+      <link>https://jialog.top/posts/database/note/cmu15-445%E6%80%BB%E7%BB%93/</link>
       <pubDate>Thu, 22 Feb 2024 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/posts/database/note/cmu15-445%E6%80%BB%E7%BB%93/</guid>
+      <guid>https://jialog.top/posts/database/note/cmu15-445%E6%80%BB%E7%BB%93/</guid>
       <description>&lt;p&gt;先随便写几个要点，等整个结束了再详细写。&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;动手之前先计划，详细周到考虑&lt;/li&gt;
@@ -160,9 +160,9 @@ spp位表示其在什么状态。 通过图示得出，spp在二进制的第8bit
     </item>
     <item>
       <title>Bustub架构简单分析</title>
-      <link>http://localhost:1313/posts/database/note/bustub%E6%89%A7%E8%A1%8C%E5%99%A8%E6%9E%B6%E6%9E%84%E7%AE%80%E5%8D%95%E5%88%86%E6%9E%90/</link>
+      <link>https://jialog.top/posts/database/note/bustub%E6%89%A7%E8%A1%8C%E5%99%A8%E6%9E%B6%E6%9E%84%E7%AE%80%E5%8D%95%E5%88%86%E6%9E%90/</link>
       <pubDate>Wed, 21 Feb 2024 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/posts/database/note/bustub%E6%89%A7%E8%A1%8C%E5%99%A8%E6%9E%B6%E6%9E%84%E7%AE%80%E5%8D%95%E5%88%86%E6%9E%90/</guid>
+      <guid>https://jialog.top/posts/database/note/bustub%E6%89%A7%E8%A1%8C%E5%99%A8%E6%9E%B6%E6%9E%84%E7%AE%80%E5%8D%95%E5%88%86%E6%9E%90/</guid>
       <description>&lt;h2 id=&#34;写在前面&#34;&gt;写在前面&lt;/h2&gt;
 &lt;p&gt;在这篇文章中我们先抛开SQL在bustub的中的历程，直接快进到最后开始执行的阶段，这篇文章只关注设计上的细节。&lt;/p&gt;
 &lt;p&gt;至于如何理顺这些细节在[[CMU15-445 Project3 - Query Execution]]文章中会有详细的介绍，这里就不再赘述。😃&lt;/p&gt;
@@ -237,9 +237,9 @@ spp位表示其在什么状态。 通过图示得出，spp在二进制的第8bit
     </item>
     <item>
       <title>数据库事务</title>
-      <link>http://localhost:1313/posts/database/note/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%BA%8B%E5%8A%A1/</link>
+      <link>https://jialog.top/posts/database/note/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%BA%8B%E5%8A%A1/</link>
       <pubDate>Tue, 20 Feb 2024 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/posts/database/note/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%BA%8B%E5%8A%A1/</guid>
+      <guid>https://jialog.top/posts/database/note/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%BA%8B%E5%8A%A1/</guid>
       <description>&lt;h1 id=&#34;事务&#34;&gt;事务&lt;/h1&gt;
 &lt;p&gt;==Transaction==&lt;/p&gt;
 &lt;p&gt;在英文中事务用transaction表示，一般约定俗成的缩写为&lt;code&gt;txn&lt;/code&gt;，所以在数据库的源代码中看到&lt;code&gt;txn&lt;/code&gt;的话多半就是事务。&lt;/p&gt;
@@ -257,9 +257,9 @@ spp位表示其在什么状态。 通过图示得出，spp在二进制的第8bit
     </item>
     <item>
       <title>查询的处理和优化</title>
-      <link>http://localhost:1313/posts/database/note/%E6%9F%A5%E8%AF%A2%E7%9A%84%E5%A4%84%E7%90%86%E5%92%8C%E4%BC%98%E5%8C%96/</link>
+      <link>https://jialog.top/posts/database/note/%E6%9F%A5%E8%AF%A2%E7%9A%84%E5%A4%84%E7%90%86%E5%92%8C%E4%BC%98%E5%8C%96/</link>
       <pubDate>Fri, 09 Feb 2024 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/posts/database/note/%E6%9F%A5%E8%AF%A2%E7%9A%84%E5%A4%84%E7%90%86%E5%92%8C%E4%BC%98%E5%8C%96/</guid>
+      <guid>https://jialog.top/posts/database/note/%E6%9F%A5%E8%AF%A2%E7%9A%84%E5%A4%84%E7%90%86%E5%92%8C%E4%BC%98%E5%8C%96/</guid>
       <description>&lt;hr&gt;
 &lt;h2 id=&#34;join-operation-连表&#34;&gt;Join Operation， 连表&lt;/h2&gt;
 &lt;p&gt;在查询过程中经常会涉及到连表的操作。那么为什么总是需要连表呢？&lt;/p&gt;
@@ -274,17 +274,17 @@ spp位表示其在什么状态。 通过图示得出，spp在二进制的第8bit
     </item>
     <item>
       <title>CMU15-445-Project #3 - Project3 - Query Execution</title>
-      <link>http://localhost:1313/posts/database/project/cmu15-445-project3---query-execution/</link>
+      <link>https://jialog.top/posts/database/project/cmu15-445-project3---query-execution/</link>
       <pubDate>Thu, 08 Feb 2024 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/posts/database/project/cmu15-445-project3---query-execution/</guid>
+      <guid>https://jialog.top/posts/database/project/cmu15-445-project3---query-execution/</guid>
       <description>&lt;p&gt;做这个p3首先需要明晰整个bustub的架构[[Bustub执行器架构简单分析]],在这个文章中进行了很详细的分析。
 &lt;img alt=&#34;image.png|600&#34; loading=&#34;lazy&#34; src=&#34;https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240221215146.png&#34;&gt;&lt;/p&gt;</description>
     </item>
     <item>
       <title>CMU15-445-Project #2 - B&#43; Tree Index Checkpoint 2</title>
-      <link>http://localhost:1313/posts/database/project/cmu15-445-project2-b&#43;-tree-index-checkpoint-2/</link>
+      <link>https://jialog.top/posts/database/project/cmu15-445-project2-b&#43;-tree-index-checkpoint-2/</link>
       <pubDate>Sun, 04 Feb 2024 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/posts/database/project/cmu15-445-project2-b&#43;-tree-index-checkpoint-2/</guid>
+      <guid>https://jialog.top/posts/database/project/cmu15-445-project2-b&#43;-tree-index-checkpoint-2/</guid>
       <description>&lt;h2 id=&#34;checkpoint-2&#34;&gt;CHECKPOINT-2&lt;/h2&gt;
 &lt;h3 id=&#34;task-3---index-iterator&#34;&gt;Task #3 - Index Iterator&lt;/h3&gt;
 &lt;p&gt;简单来说就是实现一个迭代器&lt;/p&gt;
@@ -357,9 +357,9 @@ spp位表示其在什么状态。 通过图示得出，spp在二进制的第8bit
     </item>
     <item>
       <title>CMU15-445-Project #2 - B&#43; Tree Index Checkpoint 1</title>
-      <link>http://localhost:1313/posts/database/project/cmu15-445-project2-b&#43;-tree-index-checkpoint-1/</link>
+      <link>https://jialog.top/posts/database/project/cmu15-445-project2-b&#43;-tree-index-checkpoint-1/</link>
       <pubDate>Thu, 01 Feb 2024 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/posts/database/project/cmu15-445-project2-b&#43;-tree-index-checkpoint-1/</guid>
+      <guid>https://jialog.top/posts/database/project/cmu15-445-project2-b&#43;-tree-index-checkpoint-1/</guid>
       <description>&lt;h2 id=&#34;一些工具&#34;&gt;一些工具&lt;/h2&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a href=&#34;https://15445.courses.cs.cmu.edu/fall2022/bpt-printer/&#34;&gt;BusTub B+Tree Printer&lt;/a&gt;CMU官方在线的B+树的生成工具。我主要用来细节实现的时候进行参考。&lt;/li&gt;
@@ -423,9 +423,9 @@ spp位表示其在什么状态。 通过图示得出，spp在二进制的第8bit
     </item>
     <item>
       <title>基本类型</title>
-      <link>http://localhost:1313/posts/rust/%E5%9F%BA%E6%9C%AC%E7%B1%BB%E5%9E%8B/</link>
+      <link>https://jialog.top/posts/rust/%E5%9F%BA%E6%9C%AC%E7%B1%BB%E5%9E%8B/</link>
       <pubDate>Sun, 07 Jan 2024 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/posts/rust/%E5%9F%BA%E6%9C%AC%E7%B1%BB%E5%9E%8B/</guid>
+      <guid>https://jialog.top/posts/rust/%E5%9F%BA%E6%9C%AC%E7%B1%BB%E5%9E%8B/</guid>
       <description>&lt;h2 id=&#34;数值类型&#34;&gt;数值类型&lt;/h2&gt;
 &lt;h3 id=&#34;整数类型&#34;&gt;整数类型&lt;/h3&gt;
 &lt;p&gt;&lt;em&gt;整数&lt;/em&gt;就是没有小数部分的数字。之前使用过的 &lt;code&gt;i32&lt;/code&gt; 类型，表示有符号的 32 位整数（ &lt;code&gt;i&lt;/code&gt; 是英文单词 &lt;em&gt;integer&lt;/em&gt; 的首字母，与之相反的是 &lt;code&gt;u&lt;/code&gt;，代表无符号 &lt;code&gt;unsigned&lt;/code&gt; 类型）。下表显示了 Rust 中的内置的整数类型：
@@ -473,18 +473,18 @@ spp位表示其在什么状态。 通过图示得出，spp在二进制的第8bit
     </item>
     <item>
       <title>some ideas</title>
-      <link>http://localhost:1313/posts/rust/some-ideas/</link>
+      <link>https://jialog.top/posts/rust/some-ideas/</link>
       <pubDate>Sat, 06 Jan 2024 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/posts/rust/some-ideas/</guid>
+      <guid>https://jialog.top/posts/rust/some-ideas/</guid>
       <description>&lt;h2 id=&#34;一些关于为什么要学rust的想法&#34;&gt;一些关于为什么要学rust的想法&lt;/h2&gt;
 &lt;p&gt;其实在大一的时候我就有了解过rust语言，当时甚至还看了一周b站的视频，在我最近准备再看rust的时候发现我大一装的环境还在，我甚至自己都不记得有这件事了。&lt;/p&gt;
 &lt;p&gt;rust语言据说有非常好的内存管理机制和安全措施，以及极高的执行效率，所以近些年被用作开发底层非常的多，而我对这方面也是非常的感兴趣，也算是兴趣驱动吧。希望能有助于提高一下自己的编程能力，让自己也多了解一下rust语言。&lt;/p&gt;</description>
     </item>
     <item>
       <title>Effective Modern C&#43;&#43; 笔记</title>
-      <link>http://localhost:1313/posts/c&#43;&#43;/effective-modern-c&#43;&#43;/</link>
+      <link>https://jialog.top/posts/c&#43;&#43;/effective-modern-c&#43;&#43;/</link>
       <pubDate>Sat, 09 Dec 2023 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/posts/c&#43;&#43;/effective-modern-c&#43;&#43;/</guid>
+      <guid>https://jialog.top/posts/c&#43;&#43;/effective-modern-c&#43;&#43;/</guid>
       <description>&lt;h2 id=&#34;auto&#34;&gt;auto&lt;/h2&gt;
 &lt;p&gt;在概念上auto已经极简了，但是实际上仍然要微妙许多。它可以节约声明类型，也可以避免许多手动类型的正确性和声明问题。但是从结果的角度来说，尽管auto很努力在做事了，但是仍然可能是错误的。如果出现这种情况我们要知道如何去引导auto让他成为正确的类型，因为退回使用手动声明类型仍然是下下策。&lt;/p&gt;
 &lt;p&gt;接下来的内容会涵盖&lt;code&gt;auto&lt;/code&gt;的所有细节&lt;/p&gt;
@@ -526,9 +526,9 @@ eg1.&lt;/p&gt;
     </item>
     <item>
       <title>CMU15-445- Project #1 - Buffer Pool Manager</title>
-      <link>http://localhost:1313/posts/database/project/cmu15-445-project1-buffer-pool-manager/</link>
+      <link>https://jialog.top/posts/database/project/cmu15-445-project1-buffer-pool-manager/</link>
       <pubDate>Fri, 08 Dec 2023 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/posts/database/project/cmu15-445-project1-buffer-pool-manager/</guid>
+      <guid>https://jialog.top/posts/database/project/cmu15-445-project1-buffer-pool-manager/</guid>
       <description>&lt;h2 id=&#34;环境搭建&#34;&gt;环境搭建&lt;/h2&gt;
 &lt;p&gt;按照P0的指导中进行环境的搭建，由于我本人现在时WIN平台，课程没有提供一键配置环境的脚本，所以我选择云服务器进行环境的构建，很稳。&lt;/p&gt;
 &lt;p&gt;但是我的云服务器配置只有2核2G在编译的时候会爆内存。这里还有个故事，在爆内存之后我已经意识到这个问题，我给阿里云客服提了个工单试图能白嫖一些配置，客服还是很有水平的，直接就分析出来我是内存爆了导致的，但是直接建议我加钱升级配置，不告诉我设置swap分区，有点不厚道了。&lt;/p&gt;
@@ -597,9 +597,9 @@ eg1.&lt;/p&gt;
     </item>
     <item>
       <title>B&#43; Tree Index</title>
-      <link>http://localhost:1313/posts/database/note/b&#43;-tree-index/</link>
+      <link>https://jialog.top/posts/database/note/b&#43;-tree-index/</link>
       <pubDate>Thu, 07 Dec 2023 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/posts/database/note/b&#43;-tree-index/</guid>
+      <guid>https://jialog.top/posts/database/note/b&#43;-tree-index/</guid>
       <description>&lt;h2 id=&#34;table-index&#34;&gt;TABLE INDEX&lt;/h2&gt;
 &lt;blockquote&gt;
 &lt;p&gt;A table index is a replica of a subset of a table&amp;rsquo;s attributes that are organized and/or sorted for efficient access using those attributes.The DBMS ensures that the contents of the table and the index are logically synchronized.&lt;/p&gt;&lt;/blockquote&gt;
@@ -632,9 +632,9 @@ eg1.&lt;/p&gt;
     </item>
     <item>
       <title>CMU15-445- Project #0 - C&#43;&#43; Primer</title>
-      <link>http://localhost:1313/posts/database/project/cmu15-445-project-0---c&#43;&#43;-primer/</link>
+      <link>https://jialog.top/posts/database/project/cmu15-445-project-0---c&#43;&#43;-primer/</link>
       <pubDate>Tue, 28 Nov 2023 23:44:18 +0000</pubDate>
-      <guid>http://localhost:1313/posts/database/project/cmu15-445-project-0---c&#43;&#43;-primer/</guid>
+      <guid>https://jialog.top/posts/database/project/cmu15-445-project-0---c&#43;&#43;-primer/</guid>
       <description>&lt;h1 id=&#34;cmu15-445&#34;&gt;CMU15-445&lt;/h1&gt;
 &lt;p&gt;作为 CMU 数据库的入门课，这门课由数据库领域的大牛 Andy Pavlo 讲授（“这个世界上我只在乎两件事，一是我的老婆，二就是数据库”）。&lt;/p&gt;
 &lt;p&gt;这是一门质量极高，资源极齐全的 Database 入门课，这门课的 Faculty 和背后的 CMU Database Group 将课程对应的基础设施 (Autograder, Discord) 和课程资料 (Lectures, Notes, Homework) 完全开源，让每一个愿意学习数据库的同学都可以享受到几乎等同于 CMU 本校学生的课程体验。&lt;/p&gt;
@@ -682,16 +682,16 @@ the move constructor &lt;code&gt;TrieNode(TrieNode &amp;amp;&amp;amp;other_trie
     </item>
     <item>
       <title></title>
-      <link>http://localhost:1313/essay/321/</link>
+      <link>https://jialog.top/essay/321/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/essay/321/</guid>
+      <guid>https://jialog.top/essay/321/</guid>
       <description></description>
     </item>
     <item>
       <title></title>
-      <link>http://localhost:1313/posts/os/xv6%E7%AE%80%E4%BB%8B/</link>
+      <link>https://jialog.top/posts/os/xv6%E7%AE%80%E4%BB%8B/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/posts/os/xv6%E7%AE%80%E4%BB%8B/</guid>
+      <guid>https://jialog.top/posts/os/xv6%E7%AE%80%E4%BB%8B/</guid>
       <description>&lt;p&gt;麻雀虽小五脏俱全的一个小而全的类unix教学用操作系统，由MIT开发&lt;/p&gt;
 &lt;p&gt;多核的操作系统，大约6000行还有大约300行的汇编，代码简洁易懂，有很多设计都值得借鉴。&lt;/p&gt;
 &lt;h2 id=&#34;一些特性&#34;&gt;一些特性&lt;/h2&gt;

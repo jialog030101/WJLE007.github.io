@@ -2,23 +2,23 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <title>Note on JiaLog</title>
-    <link>http://localhost:1313/tags/note/</link>
+    <link>https://jialog.top/tags/note/</link>
     <description>Recent content in Note on JiaLog</description>
     <image>
       <title>JiaLog</title>
-      <url>http://localhost:1313/images/papermod-cover.png</url>
-      <link>http://localhost:1313/images/papermod-cover.png</link>
+      <url>https://jialog.top/images/papermod-cover.png</url>
+      <link>https://jialog.top/images/papermod-cover.png</link>
     </image>
     <generator>Hugo -- 0.144.2</generator>
     <language>en</language>
     <copyright>JiaLog 豫ICP备2024077894号-1 苏公网安备32031202000962号 32031202000962</copyright>
     <lastBuildDate>Mon, 03 Feb 2025 00:00:00 +0000</lastBuildDate>
-    <atom:link href="http://localhost:1313/tags/note/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://jialog.top/tags/note/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>变量</title>
-      <link>http://localhost:1313/posts/rust/%E5%8F%98%E9%87%8F/</link>
+      <link>https://jialog.top/posts/rust/%E5%8F%98%E9%87%8F/</link>
       <pubDate>Mon, 03 Feb 2025 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/posts/rust/%E5%8F%98%E9%87%8F/</guid>
+      <guid>https://jialog.top/posts/rust/%E5%8F%98%E9%87%8F/</guid>
       <description>&lt;h2 id=&#34;变量的绑定与解构&#34;&gt;变量的绑定与解构&lt;/h2&gt;
 &lt;p&gt;&lt;strong&gt;手动设置可变性&lt;/strong&gt;&lt;/p&gt;
 &lt;p&gt;在rust语言中可以手动设置变量的可变性。这是灵活性和安全性的结合。但是这样肯定会在编码的过程中付出更多的思考，但这也是&lt;strong&gt;权衡&lt;/strong&gt;之后做出的选择。&lt;/p&gt;
@@ -55,9 +55,9 @@
     </item>
     <item>
       <title>xv6-环境搭建</title>
-      <link>http://localhost:1313/posts/os/xv6%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA%E4%BB%A3%E7%A0%81%E5%AF%BC%E8%AF%BB/</link>
+      <link>https://jialog.top/posts/os/xv6%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA%E4%BB%A3%E7%A0%81%E5%AF%BC%E8%AF%BB/</link>
       <pubDate>Sat, 04 Jan 2025 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/posts/os/xv6%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA%E4%BB%A3%E7%A0%81%E5%AF%BC%E8%AF%BB/</guid>
+      <guid>https://jialog.top/posts/os/xv6%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA%E4%BB%A3%E7%A0%81%E5%AF%BC%E8%AF%BB/</guid>
       <description>&lt;h2 id=&#34;xv6-启动&#34;&gt;xv6 启动！&lt;/h2&gt;
 &lt;p&gt;万事开头难！
 &lt;img alt=&#34;PixPin_2024-12-27_21-38-12.png|675&#34; loading=&#34;lazy&#34; src=&#34;https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/PixPin_2024-12-27_21-38-12.png&#34;&gt;
@@ -79,9 +79,9 @@
     </item>
     <item>
       <title>CMU15-445总结</title>
-      <link>http://localhost:1313/posts/database/note/cmu15-445%E6%80%BB%E7%BB%93/</link>
+      <link>https://jialog.top/posts/database/note/cmu15-445%E6%80%BB%E7%BB%93/</link>
       <pubDate>Thu, 22 Feb 2024 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/posts/database/note/cmu15-445%E6%80%BB%E7%BB%93/</guid>
+      <guid>https://jialog.top/posts/database/note/cmu15-445%E6%80%BB%E7%BB%93/</guid>
       <description>&lt;p&gt;先随便写几个要点，等整个结束了再详细写。&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;动手之前先计划，详细周到考虑&lt;/li&gt;
@@ -93,9 +93,9 @@
     </item>
     <item>
       <title>Bustub架构简单分析</title>
-      <link>http://localhost:1313/posts/database/note/bustub%E6%89%A7%E8%A1%8C%E5%99%A8%E6%9E%B6%E6%9E%84%E7%AE%80%E5%8D%95%E5%88%86%E6%9E%90/</link>
+      <link>https://jialog.top/posts/database/note/bustub%E6%89%A7%E8%A1%8C%E5%99%A8%E6%9E%B6%E6%9E%84%E7%AE%80%E5%8D%95%E5%88%86%E6%9E%90/</link>
       <pubDate>Wed, 21 Feb 2024 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/posts/database/note/bustub%E6%89%A7%E8%A1%8C%E5%99%A8%E6%9E%B6%E6%9E%84%E7%AE%80%E5%8D%95%E5%88%86%E6%9E%90/</guid>
+      <guid>https://jialog.top/posts/database/note/bustub%E6%89%A7%E8%A1%8C%E5%99%A8%E6%9E%B6%E6%9E%84%E7%AE%80%E5%8D%95%E5%88%86%E6%9E%90/</guid>
       <description>&lt;h2 id=&#34;写在前面&#34;&gt;写在前面&lt;/h2&gt;
 &lt;p&gt;在这篇文章中我们先抛开SQL在bustub的中的历程，直接快进到最后开始执行的阶段，这篇文章只关注设计上的细节。&lt;/p&gt;
 &lt;p&gt;至于如何理顺这些细节在[[CMU15-445 Project3 - Query Execution]]文章中会有详细的介绍，这里就不再赘述。😃&lt;/p&gt;
@@ -170,9 +170,9 @@
     </item>
     <item>
       <title>数据库事务</title>
-      <link>http://localhost:1313/posts/database/note/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%BA%8B%E5%8A%A1/</link>
+      <link>https://jialog.top/posts/database/note/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%BA%8B%E5%8A%A1/</link>
       <pubDate>Tue, 20 Feb 2024 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/posts/database/note/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%BA%8B%E5%8A%A1/</guid>
+      <guid>https://jialog.top/posts/database/note/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%BA%8B%E5%8A%A1/</guid>
       <description>&lt;h1 id=&#34;事务&#34;&gt;事务&lt;/h1&gt;
 &lt;p&gt;==Transaction==&lt;/p&gt;
 &lt;p&gt;在英文中事务用transaction表示，一般约定俗成的缩写为&lt;code&gt;txn&lt;/code&gt;，所以在数据库的源代码中看到&lt;code&gt;txn&lt;/code&gt;的话多半就是事务。&lt;/p&gt;
@@ -190,9 +190,9 @@
     </item>
     <item>
       <title>查询的处理和优化</title>
-      <link>http://localhost:1313/posts/database/note/%E6%9F%A5%E8%AF%A2%E7%9A%84%E5%A4%84%E7%90%86%E5%92%8C%E4%BC%98%E5%8C%96/</link>
+      <link>https://jialog.top/posts/database/note/%E6%9F%A5%E8%AF%A2%E7%9A%84%E5%A4%84%E7%90%86%E5%92%8C%E4%BC%98%E5%8C%96/</link>
       <pubDate>Fri, 09 Feb 2024 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/posts/database/note/%E6%9F%A5%E8%AF%A2%E7%9A%84%E5%A4%84%E7%90%86%E5%92%8C%E4%BC%98%E5%8C%96/</guid>
+      <guid>https://jialog.top/posts/database/note/%E6%9F%A5%E8%AF%A2%E7%9A%84%E5%A4%84%E7%90%86%E5%92%8C%E4%BC%98%E5%8C%96/</guid>
       <description>&lt;hr&gt;
 &lt;h2 id=&#34;join-operation-连表&#34;&gt;Join Operation， 连表&lt;/h2&gt;
 &lt;p&gt;在查询过程中经常会涉及到连表的操作。那么为什么总是需要连表呢？&lt;/p&gt;
@@ -207,9 +207,9 @@
     </item>
     <item>
       <title>基本类型</title>
-      <link>http://localhost:1313/posts/rust/%E5%9F%BA%E6%9C%AC%E7%B1%BB%E5%9E%8B/</link>
+      <link>https://jialog.top/posts/rust/%E5%9F%BA%E6%9C%AC%E7%B1%BB%E5%9E%8B/</link>
       <pubDate>Sun, 07 Jan 2024 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/posts/rust/%E5%9F%BA%E6%9C%AC%E7%B1%BB%E5%9E%8B/</guid>
+      <guid>https://jialog.top/posts/rust/%E5%9F%BA%E6%9C%AC%E7%B1%BB%E5%9E%8B/</guid>
       <description>&lt;h2 id=&#34;数值类型&#34;&gt;数值类型&lt;/h2&gt;
 &lt;h3 id=&#34;整数类型&#34;&gt;整数类型&lt;/h3&gt;
 &lt;p&gt;&lt;em&gt;整数&lt;/em&gt;就是没有小数部分的数字。之前使用过的 &lt;code&gt;i32&lt;/code&gt; 类型，表示有符号的 32 位整数（ &lt;code&gt;i&lt;/code&gt; 是英文单词 &lt;em&gt;integer&lt;/em&gt; 的首字母，与之相反的是 &lt;code&gt;u&lt;/code&gt;，代表无符号 &lt;code&gt;unsigned&lt;/code&gt; 类型）。下表显示了 Rust 中的内置的整数类型：
@@ -257,18 +257,18 @@
     </item>
     <item>
       <title>some ideas</title>
-      <link>http://localhost:1313/posts/rust/some-ideas/</link>
+      <link>https://jialog.top/posts/rust/some-ideas/</link>
       <pubDate>Sat, 06 Jan 2024 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/posts/rust/some-ideas/</guid>
+      <guid>https://jialog.top/posts/rust/some-ideas/</guid>
       <description>&lt;h2 id=&#34;一些关于为什么要学rust的想法&#34;&gt;一些关于为什么要学rust的想法&lt;/h2&gt;
 &lt;p&gt;其实在大一的时候我就有了解过rust语言，当时甚至还看了一周b站的视频，在我最近准备再看rust的时候发现我大一装的环境还在，我甚至自己都不记得有这件事了。&lt;/p&gt;
 &lt;p&gt;rust语言据说有非常好的内存管理机制和安全措施，以及极高的执行效率，所以近些年被用作开发底层非常的多，而我对这方面也是非常的感兴趣，也算是兴趣驱动吧。希望能有助于提高一下自己的编程能力，让自己也多了解一下rust语言。&lt;/p&gt;</description>
     </item>
     <item>
       <title>Effective Modern C&#43;&#43; 笔记</title>
-      <link>http://localhost:1313/posts/c&#43;&#43;/effective-modern-c&#43;&#43;/</link>
+      <link>https://jialog.top/posts/c&#43;&#43;/effective-modern-c&#43;&#43;/</link>
       <pubDate>Sat, 09 Dec 2023 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/posts/c&#43;&#43;/effective-modern-c&#43;&#43;/</guid>
+      <guid>https://jialog.top/posts/c&#43;&#43;/effective-modern-c&#43;&#43;/</guid>
       <description>&lt;h2 id=&#34;auto&#34;&gt;auto&lt;/h2&gt;
 &lt;p&gt;在概念上auto已经极简了，但是实际上仍然要微妙许多。它可以节约声明类型，也可以避免许多手动类型的正确性和声明问题。但是从结果的角度来说，尽管auto很努力在做事了，但是仍然可能是错误的。如果出现这种情况我们要知道如何去引导auto让他成为正确的类型，因为退回使用手动声明类型仍然是下下策。&lt;/p&gt;
 &lt;p&gt;接下来的内容会涵盖&lt;code&gt;auto&lt;/code&gt;的所有细节&lt;/p&gt;
@@ -310,9 +310,9 @@ eg1.&lt;/p&gt;
     </item>
     <item>
       <title>B&#43; Tree Index</title>
-      <link>http://localhost:1313/posts/database/note/b&#43;-tree-index/</link>
+      <link>https://jialog.top/posts/database/note/b&#43;-tree-index/</link>
       <pubDate>Thu, 07 Dec 2023 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/posts/database/note/b&#43;-tree-index/</guid>
+      <guid>https://jialog.top/posts/database/note/b&#43;-tree-index/</guid>
       <description>&lt;h2 id=&#34;table-index&#34;&gt;TABLE INDEX&lt;/h2&gt;
 &lt;blockquote&gt;
 &lt;p&gt;A table index is a replica of a subset of a table&amp;rsquo;s attributes that are organized and/or sorted for efficient access using those attributes.The DBMS ensures that the contents of the table and the index are logically synchronized.&lt;/p&gt;&lt;/blockquote&gt;
