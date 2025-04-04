@@ -2,16 +2,16 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <title>Series on JiaLog</title>
-    <link>https://jialog.top/series/</link>
+    <link>https://wjle007.github.io/series/</link>
     <description>Recent content in Series on JiaLog</description>
     <image>
       <title>JiaLog</title>
-      <url>https://jialog.top/images/papermod-cover.png</url>
-      <link>https://jialog.top/images/papermod-cover.png</link>
+      <url>https://wjle007.github.io/images/papermod-cover.png</url>
+      <link>https://wjle007.github.io/images/papermod-cover.png</link>
     </image>
     <generator>Hugo -- 0.144.2</generator>
     <language>en</language>
-    <copyright>JiaLog 豫ICP备2024077894号-1 苏公网安备32031202000962号 32031202000962</copyright>
-    <atom:link href="https://jialog.top/series/index.xml" rel="self" type="application/rss+xml" />
+    <copyright>JiaLog</copyright>
+    <atom:link href="https://wjle007.github.io/series/index.xml" rel="self" type="application/rss+xml" />
   </channel>
 </rss>

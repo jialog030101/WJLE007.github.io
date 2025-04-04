@@ -2,23 +2,23 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <title>Rust on JiaLog</title>
-    <link>https://jialog.top/categories/rust/</link>
+    <link>https://wjle007.github.io/categories/rust/</link>
     <description>Recent content in Rust on JiaLog</description>
     <image>
       <title>JiaLog</title>
-      <url>https://jialog.top/images/papermod-cover.png</url>
-      <link>https://jialog.top/images/papermod-cover.png</link>
+      <url>https://wjle007.github.io/images/papermod-cover.png</url>
+      <link>https://wjle007.github.io/images/papermod-cover.png</link>
     </image>
     <generator>Hugo -- 0.144.2</generator>
     <language>en</language>
-    <copyright>JiaLog 豫ICP备2024077894号-1 苏公网安备32031202000962号 32031202000962</copyright>
+    <copyright>JiaLog</copyright>
     <lastBuildDate>Mon, 03 Feb 2025 00:00:00 +0000</lastBuildDate>
-    <atom:link href="https://jialog.top/categories/rust/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://wjle007.github.io/categories/rust/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>变量</title>
-      <link>https://jialog.top/posts/rust/%E5%8F%98%E9%87%8F/</link>
+      <link>https://wjle007.github.io/posts/rust/%E5%8F%98%E9%87%8F/</link>
       <pubDate>Mon, 03 Feb 2025 00:00:00 +0000</pubDate>
-      <guid>https://jialog.top/posts/rust/%E5%8F%98%E9%87%8F/</guid>
+      <guid>https://wjle007.github.io/posts/rust/%E5%8F%98%E9%87%8F/</guid>
       <description>&lt;h2 id=&#34;变量的绑定与解构&#34;&gt;变量的绑定与解构&lt;/h2&gt;
 &lt;p&gt;&lt;strong&gt;手动设置可变性&lt;/strong&gt;&lt;/p&gt;
 &lt;p&gt;在rust语言中可以手动设置变量的可变性。这是灵活性和安全性的结合。但是这样肯定会在编码的过程中付出更多的思考，但这也是&lt;strong&gt;权衡&lt;/strong&gt;之后做出的选择。&lt;/p&gt;
@@ -55,9 +55,9 @@
     </item>
     <item>
       <title>基本类型</title>
-      <link>https://jialog.top/posts/rust/%E5%9F%BA%E6%9C%AC%E7%B1%BB%E5%9E%8B/</link>
+      <link>https://wjle007.github.io/posts/rust/%E5%9F%BA%E6%9C%AC%E7%B1%BB%E5%9E%8B/</link>
       <pubDate>Sun, 07 Jan 2024 00:00:00 +0000</pubDate>
-      <guid>https://jialog.top/posts/rust/%E5%9F%BA%E6%9C%AC%E7%B1%BB%E5%9E%8B/</guid>
+      <guid>https://wjle007.github.io/posts/rust/%E5%9F%BA%E6%9C%AC%E7%B1%BB%E5%9E%8B/</guid>
       <description>&lt;h2 id=&#34;数值类型&#34;&gt;数值类型&lt;/h2&gt;
 &lt;h3 id=&#34;整数类型&#34;&gt;整数类型&lt;/h3&gt;
 &lt;p&gt;&lt;em&gt;整数&lt;/em&gt;就是没有小数部分的数字。之前使用过的 &lt;code&gt;i32&lt;/code&gt; 类型，表示有符号的 32 位整数（ &lt;code&gt;i&lt;/code&gt; 是英文单词 &lt;em&gt;integer&lt;/em&gt; 的首字母，与之相反的是 &lt;code&gt;u&lt;/code&gt;，代表无符号 &lt;code&gt;unsigned&lt;/code&gt; 类型）。下表显示了 Rust 中的内置的整数类型：
@@ -105,9 +105,9 @@
     </item>
     <item>
       <title>some ideas</title>
-      <link>https://jialog.top/posts/rust/some-ideas/</link>
+      <link>https://wjle007.github.io/posts/rust/some-ideas/</link>
       <pubDate>Sat, 06 Jan 2024 00:00:00 +0000</pubDate>
-      <guid>https://jialog.top/posts/rust/some-ideas/</guid>
+      <guid>https://wjle007.github.io/posts/rust/some-ideas/</guid>
       <description>&lt;h2 id=&#34;一些关于为什么要学rust的想法&#34;&gt;一些关于为什么要学rust的想法&lt;/h2&gt;
 &lt;p&gt;其实在大一的时候我就有了解过rust语言，当时甚至还看了一周b站的视频，在我最近准备再看rust的时候发现我大一装的环境还在，我甚至自己都不记得有这件事了。&lt;/p&gt;
 &lt;p&gt;rust语言据说有非常好的内存管理机制和安全措施，以及极高的执行效率，所以近些年被用作开发底层非常的多，而我对这方面也是非常的感兴趣，也算是兴趣驱动吧。希望能有助于提高一下自己的编程能力，让自己也多了解一下rust语言。&lt;/p&gt;</description>

@@ -2,23 +2,23 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <title>Summary on JiaLog</title>
-    <link>https://jialog.top/tags/summary/</link>
+    <link>https://wjle007.github.io/tags/summary/</link>
     <description>Recent content in Summary on JiaLog</description>
     <image>
       <title>JiaLog</title>
-      <url>https://jialog.top/images/papermod-cover.png</url>
-      <link>https://jialog.top/images/papermod-cover.png</link>
+      <url>https://wjle007.github.io/images/papermod-cover.png</url>
+      <link>https://wjle007.github.io/images/papermod-cover.png</link>
     </image>
     <generator>Hugo -- 0.144.2</generator>
     <language>en</language>
-    <copyright>JiaLog 豫ICP备2024077894号-1 苏公网安备32031202000962号 32031202000962</copyright>
+    <copyright>JiaLog</copyright>
     <lastBuildDate>Thu, 22 Feb 2024 00:00:00 +0000</lastBuildDate>
-    <atom:link href="https://jialog.top/tags/summary/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://wjle007.github.io/tags/summary/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>CMU15-445总结</title>
-      <link>https://jialog.top/posts/database/note/cmu15-445%E6%80%BB%E7%BB%93/</link>
+      <link>https://wjle007.github.io/posts/database/note/cmu15-445%E6%80%BB%E7%BB%93/</link>
       <pubDate>Thu, 22 Feb 2024 00:00:00 +0000</pubDate>
-      <guid>https://jialog.top/posts/database/note/cmu15-445%E6%80%BB%E7%BB%93/</guid>
+      <guid>https://wjle007.github.io/posts/database/note/cmu15-445%E6%80%BB%E7%BB%93/</guid>
       <description>&lt;p&gt;先随便写几个要点，等整个结束了再详细写。&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;动手之前先计划，详细周到考虑&lt;/li&gt;

@@ -2,31 +2,31 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <title>Project on JiaLog</title>
-    <link>https://jialog.top/tags/project/</link>
+    <link>https://wjle007.github.io/tags/project/</link>
     <description>Recent content in Project on JiaLog</description>
     <image>
       <title>JiaLog</title>
-      <url>https://jialog.top/images/papermod-cover.png</url>
-      <link>https://jialog.top/images/papermod-cover.png</link>
+      <url>https://wjle007.github.io/images/papermod-cover.png</url>
+      <link>https://wjle007.github.io/images/papermod-cover.png</link>
     </image>
     <generator>Hugo -- 0.144.2</generator>
     <language>en</language>
-    <copyright>JiaLog 豫ICP备2024077894号-1 苏公网安备32031202000962号 32031202000962</copyright>
+    <copyright>JiaLog</copyright>
     <lastBuildDate>Thu, 08 Feb 2024 00:00:00 +0000</lastBuildDate>
-    <atom:link href="https://jialog.top/tags/project/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://wjle007.github.io/tags/project/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>CMU15-445-Project #3 - Project3 - Query Execution</title>
-      <link>https://jialog.top/posts/database/project/cmu15-445-project3---query-execution/</link>
+      <link>https://wjle007.github.io/posts/database/project/cmu15-445-project3---query-execution/</link>
       <pubDate>Thu, 08 Feb 2024 00:00:00 +0000</pubDate>
-      <guid>https://jialog.top/posts/database/project/cmu15-445-project3---query-execution/</guid>
+      <guid>https://wjle007.github.io/posts/database/project/cmu15-445-project3---query-execution/</guid>
       <description>&lt;p&gt;做这个p3首先需要明晰整个bustub的架构[[Bustub执行器架构简单分析]],在这个文章中进行了很详细的分析。
 &lt;img alt=&#34;image.png|600&#34; loading=&#34;lazy&#34; src=&#34;https://weijiale.oss-cn-shanghai.aliyuncs.com/picgo/20240221215146.png&#34;&gt;&lt;/p&gt;</description>
     </item>
     <item>
       <title>CMU15-445-Project #2 - B&#43; Tree Index Checkpoint 2</title>
-      <link>https://jialog.top/posts/database/project/cmu15-445-project2-b&#43;-tree-index-checkpoint-2/</link>
+      <link>https://wjle007.github.io/posts/database/project/cmu15-445-project2-b&#43;-tree-index-checkpoint-2/</link>
       <pubDate>Sun, 04 Feb 2024 00:00:00 +0000</pubDate>
-      <guid>https://jialog.top/posts/database/project/cmu15-445-project2-b&#43;-tree-index-checkpoint-2/</guid>
+      <guid>https://wjle007.github.io/posts/database/project/cmu15-445-project2-b&#43;-tree-index-checkpoint-2/</guid>
       <description>&lt;h2 id=&#34;checkpoint-2&#34;&gt;CHECKPOINT-2&lt;/h2&gt;
 &lt;h3 id=&#34;task-3---index-iterator&#34;&gt;Task #3 - Index Iterator&lt;/h3&gt;
 &lt;p&gt;简单来说就是实现一个迭代器&lt;/p&gt;
@@ -99,9 +99,9 @@
     </item>
     <item>
       <title>CMU15-445-Project #2 - B&#43; Tree Index Checkpoint 1</title>
-      <link>https://jialog.top/posts/database/project/cmu15-445-project2-b&#43;-tree-index-checkpoint-1/</link>
+      <link>https://wjle007.github.io/posts/database/project/cmu15-445-project2-b&#43;-tree-index-checkpoint-1/</link>
       <pubDate>Thu, 01 Feb 2024 00:00:00 +0000</pubDate>
-      <guid>https://jialog.top/posts/database/project/cmu15-445-project2-b&#43;-tree-index-checkpoint-1/</guid>
+      <guid>https://wjle007.github.io/posts/database/project/cmu15-445-project2-b&#43;-tree-index-checkpoint-1/</guid>
       <description>&lt;h2 id=&#34;一些工具&#34;&gt;一些工具&lt;/h2&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a href=&#34;https://15445.courses.cs.cmu.edu/fall2022/bpt-printer/&#34;&gt;BusTub B+Tree Printer&lt;/a&gt;CMU官方在线的B+树的生成工具。我主要用来细节实现的时候进行参考。&lt;/li&gt;
@@ -165,9 +165,9 @@
     </item>
     <item>
       <title>CMU15-445- Project #1 - Buffer Pool Manager</title>
-      <link>https://jialog.top/posts/database/project/cmu15-445-project1-buffer-pool-manager/</link>
+      <link>https://wjle007.github.io/posts/database/project/cmu15-445-project1-buffer-pool-manager/</link>
       <pubDate>Fri, 08 Dec 2023 00:00:00 +0000</pubDate>
-      <guid>https://jialog.top/posts/database/project/cmu15-445-project1-buffer-pool-manager/</guid>
+      <guid>https://wjle007.github.io/posts/database/project/cmu15-445-project1-buffer-pool-manager/</guid>
       <description>&lt;h2 id=&#34;环境搭建&#34;&gt;环境搭建&lt;/h2&gt;
 &lt;p&gt;按照P0的指导中进行环境的搭建，由于我本人现在时WIN平台，课程没有提供一键配置环境的脚本，所以我选择云服务器进行环境的构建，很稳。&lt;/p&gt;
 &lt;p&gt;但是我的云服务器配置只有2核2G在编译的时候会爆内存。这里还有个故事，在爆内存之后我已经意识到这个问题，我给阿里云客服提了个工单试图能白嫖一些配置，客服还是很有水平的，直接就分析出来我是内存爆了导致的，但是直接建议我加钱升级配置，不告诉我设置swap分区，有点不厚道了。&lt;/p&gt;
@@ -236,9 +236,9 @@
     </item>
     <item>
       <title>CMU15-445- Project #0 - C&#43;&#43; Primer</title>
-      <link>https://jialog.top/posts/database/project/cmu15-445-project-0---c&#43;&#43;-primer/</link>
+      <link>https://wjle007.github.io/posts/database/project/cmu15-445-project-0---c&#43;&#43;-primer/</link>
       <pubDate>Tue, 28 Nov 2023 23:44:18 +0000</pubDate>
-      <guid>https://jialog.top/posts/database/project/cmu15-445-project-0---c&#43;&#43;-primer/</guid>
+      <guid>https://wjle007.github.io/posts/database/project/cmu15-445-project-0---c&#43;&#43;-primer/</guid>
       <description>&lt;h1 id=&#34;cmu15-445&#34;&gt;CMU15-445&lt;/h1&gt;
 &lt;p&gt;作为 CMU 数据库的入门课，这门课由数据库领域的大牛 Andy Pavlo 讲授（“这个世界上我只在乎两件事，一是我的老婆，二就是数据库”）。&lt;/p&gt;
 &lt;p&gt;这是一门质量极高，资源极齐全的 Database 入门课，这门课的 Faculty 和背后的 CMU Database Group 将课程对应的基础设施 (Autograder, Discord) 和课程资料 (Lectures, Notes, Homework) 完全开源，让每一个愿意学习数据库的同学都可以享受到几乎等同于 CMU 本校学生的课程体验。&lt;/p&gt;

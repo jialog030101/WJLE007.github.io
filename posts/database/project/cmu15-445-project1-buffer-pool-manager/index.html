@@ -73,16 +73,16 @@ auto ExtendibleHashTable&lt;K, V&gt;::IndexOf(const K &amp;key) -&gt; size_t {
 mask 的作用就是取一个位数和global_depth_一样的全1的二进制数，为了取低global_depth_位做铺垫。
 现在假如key的值进行完hash之后是 10110100011010 和 mask进行进行 &amp; 的操作之后就变成了 010 （低3位）">
 <meta name="author" content="Theme PaperMod">
-<link rel="canonical" href="https://jialog.top/posts/database/project/cmu15-445-project1-buffer-pool-manager/">
+<link rel="canonical" href="https://wjle007.github.io/posts/database/project/cmu15-445-project1-buffer-pool-manager/">
 <link crossorigin="anonymous" href="/assets/css/stylesheet.6da9a63d25a9608bca2f7f907a030e887a7dd3c3f3918e4cc113129361414bda.css" integrity="sha256-bammPSWpYIvKL3&#43;QegMOiHp908PzkY5MwRMSk2FBS9o=" rel="preload stylesheet" as="style">
-<link rel="icon" href="https://jialog.top/favicon.ico">
-<link rel="icon" type="image/png" sizes="16x16" href="https://jialog.top/favicon-16x16.png">
-<link rel="icon" type="image/png" sizes="32x32" href="https://jialog.top/favicon-32x32.png">
-<link rel="apple-touch-icon" href="https://jialog.top/apple-touch-icon.png">
-<link rel="mask-icon" href="https://jialog.top/safari-pinned-tab.svg">
+<link rel="icon" href="https://wjle007.github.io/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://wjle007.github.io/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://wjle007.github.io/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://wjle007.github.io/apple-touch-icon.png">
+<link rel="mask-icon" href="https://wjle007.github.io/safari-pinned-tab.svg">
 <meta name="theme-color" content="#2e2e33">
 <meta name="msapplication-TileColor" content="#2e2e33">
-<link rel="alternate" hreflang="en" href="https://jialog.top/posts/database/project/cmu15-445-project1-buffer-pool-manager/">
+<link rel="alternate" hreflang="en" href="https://wjle007.github.io/posts/database/project/cmu15-445-project1-buffer-pool-manager/">
 <noscript>
     <style>
         #theme-toggle,
@@ -119,7 +119,7 @@ mask 的作用就是取一个位数和global_depth_一样的全1的二进制数�
         }
 
     </style>
-</noscript><meta property="og:url" content="https://jialog.top/posts/database/project/cmu15-445-project1-buffer-pool-manager/">
+</noscript><meta property="og:url" content="https://wjle007.github.io/posts/database/project/cmu15-445-project1-buffer-pool-manager/">
   <meta property="og:site_name" content="JiaLog">
   <meta property="og:title" content="CMU15-445- Project #1 - Buffer Pool Manager">
   <meta property="og:description" content="环境搭建 按照P0的指导中进行环境的搭建，由于我本人现在时WIN平台，课程没有提供一键配置环境的脚本，所以我选择云服务器进行环境的构建，很稳。
@@ -144,9 +144,9 @@ mask 的作用就是取一个位数和global_depth_一样的全1的二进制数�
     <meta property="article:modified_time" content="2023-12-08T00:00:00+00:00">
     <meta property="article:tag" content="Project">
     <meta property="article:tag" content="CMU15-445">
-      <meta property="og:image" content="https://jialog.top/images/papermod-cover.png">
+      <meta property="og:image" content="https://wjle007.github.io/images/papermod-cover.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://jialog.top/images/papermod-cover.png">
+<meta name="twitter:image" content="https://wjle007.github.io/images/papermod-cover.png">
 <meta name="twitter:title" content="CMU15-445- Project #1 - Buffer Pool Manager">
 <meta name="twitter:description" content="环境搭建
 按照P0的指导中进行环境的搭建，由于我本人现在时WIN平台，课程没有提供一键配置环境的脚本，所以我选择云服务器进行环境的构建，很稳。
@@ -224,13 +224,13 @@ mask 的作用就是取一个位数和global_depth_一样的全1的二进制数�
       "@type": "ListItem",
       "position":  1 ,
       "name": "Posts",
-      "item": "https://jialog.top/posts/"
+      "item": "https://wjle007.github.io/posts/"
     }, 
     {
       "@type": "ListItem",
       "position":  2 ,
       "name": "CMU15-445- Project #1 - Buffer Pool Manager",
-      "item": "https://jialog.top/posts/database/project/cmu15-445-project1-buffer-pool-manager/"
+      "item": "https://wjle007.github.io/posts/database/project/cmu15-445-project1-buffer-pool-manager/"
     }
   ]
 }
@@ -248,7 +248,7 @@ mask 的作用就是取一个位数和global_depth_一样的全1的二进制数�
   "articleBody": "环境搭建 按照P0的指导中进行环境的搭建，由于我本人现在时WIN平台，课程没有提供一键配置环境的脚本，所以我选择云服务器进行环境的构建，很稳。\n但是我的云服务器配置只有2核2G在编译的时候会爆内存。这里还有个故事，在爆内存之后我已经意识到这个问题，我给阿里云客服提了个工单试图能白嫖一些配置，客服还是很有水平的，直接就分析出来我是内存爆了导致的，但是直接建议我加钱升级配置，不告诉我设置swap分区，有点不厚道了。\n话说回来，设置完swap分区之后就没有再出现过爆内存的现象。用VScode的远程开发，体验还是很不错的。\nOverview p1主要是内存管理部分的内容，这门课程的课本和录制视频还是很有必要看一下的。\n主要的任务是以下三个部分：\n可扩展的哈希表 LRU-K的淘汰策略的视线 Buffer Pool的一个实例 在开始梳理项目之前我想要先解释清楚一下三个任务之间的关系，以及各个部分的负责。\nframe更像是一个载体，而page是其中的内容。打个比方来说，一个仓库（buffer pool）只有100辆货车（frame），而货物（page）成千上万种，每次都是仓库告诉货车需要什么货物然后由货车带着货物来到仓库，而可扩展的哈希表就是登记货车和货物的对应关系。因为只有100辆货车，当每辆车都是满的时候（没有闲置的车辆free_list不为空）就需要根据task2的LRU-K算法挑选出一个符合要求的货车清空后去装载指定的货物。 而task3就是负责整个的管理和交互。\n大概解释了一下，可能比方不是很恰当，做的时候一定要多看文档和注释，因为漏看注释给我带来了极大的痛苦。\nTask #1 -ExtendibleHashTable 相关函数 Find(K,V): 查询一个Key是否存在，如果存在则将其V指针指向相关的值，返回true，否则返回false Insert(K,V): 插入一个（K，V），如果插入失败需要进行一下步骤的重试： 插入失败肯定是桶满了，但是桶满了分为两种不同的情况。 一种是global深度和桶的local深度不相同的时候，需要对桶进行重新的分配。 当两个深度相同的时候说明桶是真的满了，需要对哈希表进行扩展 Remove(K): 在哈希表中移除对应的（K，V）对，但是需要进行哈希表缩小的操作。 IndexOf(K): 当前global深度下的映射规则。 项目架构 首先要清楚这个是自己动手实现一个可扩展哈希表用于保存frame和page的映射关系的。我觉得首先要明白frame和page之间的关系。不清楚的可以回看上文的解释。\nBucket 存储桶 在可可以扩展的哈希表种引入和Bucket的概念，用于解决哈希冲突的问题，每一个Bucket的大小都是固定的，当一个Bucket满了的时候就需要进行哈希表的扩展。\nBucket的组成 depth_：表示本地深度的一个标识，用于识别当前的深度是否和全局深度相同。要特别注意这个变量。 list_：发生哈希冲突时保存多个（K，V）映射的双向链表。 size：为了保证效率，list的长度不能无限延伸，所以达到一定长度的时候要进行哈希表的扩展。 可扩展的哈希表结构 Bucket_size:用于限制每个bucket的list的长度 dir_:用于哈西运算后保存映射关系。 global_depth_:全局深度，在插入的时候根据全局深度和局部深度来确定这个桶是否要进行重新的分配。 num_buckets:用于统计现在一共有多少bucket。 ReHash的过程详解 1.hash的规则是什么样的\ntemplate \u003ctypename K, typename V\u003e auto ExtendibleHashTable\u003cK, V\u003e::IndexOf(const K \u0026key) -\u003e size_t { int mask = (1 \u003c\u003c global_depth_) - 1; return std::hash\u003cK\u003e()(key) \u0026 mask; } 上述函数就是该哈希表的映射规则，总的来说就是取hash函数值的低global_depth位\n假如现在global_depth_的值为3。 那么 1 \u003c\u003c global_depth_的值就是8转换为二进制就是 1000 。mask=8-1=7，转换为二进制就是 111.\nmask 的作用就是取一个位数和global_depth_一样的全1的二进制数，为了取低global_depth_位做铺垫。\n现在假如key的值进行完hash之后是 10110100011010 和 mask进行进行 \u0026 的操作之后就变成了 010 （低3位）\n刚开始的时候我看这个函数设计左移操作和\u0026操作很复杂的样子，我就没怎么在意，不是很懂这个函数在干什么。但是现在想来 mask 应该是掩码的意思，所以和计网里掩码的作用是一样的，都是取二进制数位的作用。\n这个函数没搞懂真的给我带来很大的困扰，一直搞不懂到底是怎么映射的。\n2.什么时候进行ReHash，以及详细过程。\n当一个桶内的list长度达到规定上限的时候进行Rehash。\n但不是立刻将所有桶内的映射关系都立刻进行重新分配。因为当哈希表比较大的时候这样会带来瞬时的高负载，给机器带来不必要的负担。\n那么什么时候对扩展哈希表后的桶内的（k,v）进行重新的映射呢？\n可以认为是什么时候用上了什么时候再进行重新的映射。这里就提现了局部深度和全局深度的作用。如果我们将每一次哈希表的扩展都立即为一次版本的迭代的话。那么局部深度和全局深度就分别代表了桶所处的版本和现在的最近版本。这样就能实现对哈希表的线性时间扩展。\n我们可以想象这样一个过程，现在全局版本为V3（global_depth_=3）而某个桶的局部版本为V2（local_depth_=2）. 这时候我们刚好需要向这个桶中插入一个数据，这时候发现不仅这个桶满了而且还落后版本，我们首先要做的就是更新桶的版本，把桶里面不符合新的映射规则（比原来多一位）的给送到新桶里。\n这里有一个小坑：哈希表扩展后，取哈希的规则随之而改变，所以当要Find一个page的时候就有可能会映射到新的位置上，但是原来的桶内在没插满之前是不会进行重新分配的这时该如何保证能找到这个数据呢？\n下面用一个例子解释一下这个过程。 假设现在取低 1 位 也就是global=1，假设现在来了一个101需要插入而刚好满了需要进行扩容操作。 这里也给了上边那个小坑的答案，就是在扩展哈希表的时候后面新扩展出来的仍然指向原来的桶。\n插入101之后原来 1 对应的桶被重新分配 分别对应01 和 11而原来的 0 对应的桶因为还没有需要插入的数据所以不进行重新分配。当需要的时候再进行重新的分配。\n这样就保证了扩展是线性的，不会每一次扩展的时候负载激增。 可以理解为“懒扩展”。\n具体代码实现 因为教授的要求不能放出全部的源代码所以我只给出关键部分\ntemplate \u003ctypename K, typename V\u003e auto ExtendibleHashTable\u003cK, V\u003e::RedistributeBucket(std::shared_ptr\u003cBucket\u003e bucket) -\u003e void { bucket-\u003eIncrementDepth(); size_t deepth = bucket-\u003eGetDepth(); num_buckets_++; std::shared_ptr\u003cBucket\u003e new_bucket = std::make_shared\u003cBucket\u003e(bucket_size_, deepth); size_t pre_hash_sign = std::hash\u003cK\u003e()((bucket-\u003eGetItems().begin())-\u003efirst) \u0026 ((1 \u003c\u003c (deepth - 1)) - 1); // 遍历原来的bucket进行符合要求就是新老哈希值不一样的就放进新桶里 for (auto i = bucket-\u003eGetItems().begin(); i != bucket-\u003eGetItems().end();) { size_t temp_hash_sign = std::hash\u003cK\u003e()(i-\u003efirst) \u0026 ((1 \u003c\u003c (deepth)) - 1); if (pre_hash_sign != temp_hash_sign) { new_bucket-\u003eInsert(i-\u003efirst, i-\u003esecond); bucket-\u003eGetItems().erase(i++); } else { i++; } } // 就该把新桶放在后边那新位置 // size_t new_hash_sign= std::hash()((new_bucket-\u003eGetItems().begin())-\u003efirst) \u0026 ((1 \u003c\u003c (deepth)) -1 ); for (size_t i = 0; i \u003c dir_.size(); i++) { if ((i \u0026 ((1 \u003c\u003c (deepth)) - 1)) != pre_hash_sign \u0026\u0026 (i \u0026 ((1 \u003c\u003c (deepth - 1)) - 1)) == pre_hash_sign) { dir_[i] = new_bucket; } } } template \u003ctypename K, typename V\u003e void ExtendibleHashTable\u003cK, V\u003e::Insert(const K \u0026key, const V \u0026value) { // UNREACHABLE(\"not implemented\"); std::scoped_lock\u003cstd::mutex\u003e lock(latch_); while (true) { size_t index = IndexOf(key); if (dir_[index]-\u003eInsert(key, value)) { break; } // 判断当前bucket的depth和全局depth 如果相同就进行哈希表的扩容操作，如果不相同就进行桶的重新分配 // 这样做的一个好处就是时间复杂度是线性的，不会遇到桶满的时候就负载激增，导致效率下降。 if (GetLocalDepthInternal(index) != GetGlobalDepthInternal()) { RedistributeBucket(dir_[index]); } else { global_depth_++; size_t size = dir_.size(); // 这里就是在扩展后将指针指向对应的老桶就是扩展前的桶。 for (size_t i = 0; i \u003c size; i++) { dir_.emplace_back(dir_[i]); } } } } Task #2 LRU-K LRU-K Replacer Design LRU-K Replacer 用于存储 buffer pool 中 page 被引用的记录，并根据引用记录来选出在 buffer pool 满时需要被驱逐的 page。\nLRU 应该都比较熟悉了，LRU-K 则是一个小小的变种,出现的目的是为了在一定程度上解决缓存污染的问题，有兴趣的可以读一下有关论文，有很详细的介绍。 cs.cmu.edu/~natassa/courses/15-721/papers/p297-o_neil.pdf\n在普通的 LRU 中，我们仅需记录 page 最近一次被引用的时间，在驱逐时，选择最近一次引用时间最早的 page。\n在 LRU-K 中，我们需要记录 page 最近 K 次被引用的时间。假如 list 中所有 page 都被引用了大于等于 K 次，则比较最近第 K 次被引用的时间，驱逐最早的。假如 list 中存在引用次数少于 K 次的 page，则将这些 page 挑选出来，用普通的 LRU 来比较这些 page 第一次被引用的时间，驱逐最早的。\n所有的page大概能够分为两类：\n达到k次的，那么则选择distance最大的进行淘汰 没有达到k次的，就根据普通的LRU进行淘汰 具体实现不是很难，按照给的注释一步步写就好了 刚开始我建议先去力扣（LeetCode）官网 - 全球极客挚爱的技术成长平台写一下这个LRU，实现的思路不能说差不多也能说是差不多。\n对于数据结构的组织我推荐2023fall封装好的这个，我自己做的是2022fall没有这个封装，需要自己设计，给出了一个推荐的方案，对于一个项目的起步还是非常友好的。\nclass LRUKNode { private: std::list\u003csize_t\u003e history_; size_t k_; frame_id_t fid_; bool is_evictable_{false}; }; std::unordered_map\u003cframe_id_t, LRUKNode\u003e node_store_; 只有一个需要注意的点：在SetEvictable 这个函数中只有发生改变才修改curr_size_（可驱逐的个数）这个变量。\nTask# 3-Buffer Pool Manager 这个我认为最主要的就是要厘清各个函数之间的关系\n/** Array of buffer pool pages. */ Page *pages_; /** Page table for keeping track of buffer pool pages. */ ExtendibleHashTable\u003cpage_id_t, frame_id_t\u003e *page_table_; /** Replacer to find unpinned pages for replacement. */ LRUKReplacer *replacer_; /** List of free frames that don't have any pages on them. */ std::list\u003cframe_id_t\u003e free_list_; 上述的定义要和初始化函数结合在一起看\n// we allocate a consecutive memory space for the buffer pool pages_ = new Page[pool_size_]; page_table_ = new ExtendibleHashTable\u003cpage_id_t, frame_id_t\u003e(bucket_size_); replacer_ = new LRUKReplacer(pool_size, replacer_k); // Initially, every page is in the free list. for (size_t i = 0; i \u003c pool_size_; ++i) { free_list_.emplace_back(static_cast\u003cint\u003e(i)); } 结合注释不难发现他们之间的关系\npages_:Array of buffer pool pages 。buffer pool的一个数组。他的下标就是frame_id。 page_table_:记录page和frame之间的映射关系。 replacer_: 记录访问历史，在free_list中没有空闲frame可以承载page的时候进行驱逐。 free_list:表示有无空闲的frame可供使用 上图引用自：BusTub Lab1 Buffer Pool Manager | Fischer.space\n这个图很好的解释了三者之间的关系以及各部分所负责的东西。\n接下来梳理一下task3中比较重要的部分\nNewPgImp()和FetchPgImp() 两个函数有很大一部分都是相同的 重点也是这相同的一部分\n先来看NewPgImp() 的要求：\nCreate a new page in the buffer pool. Set page_id to the new page’s id, or nullptr if all frames are currently in use and not evictable (in another word, pinned)\n就是新建一个页，但是新建页的过程非常的有讲究：\n首先需要找到一个空闲的frame_承载这个page，优先从free_list中找frame 如果free_list中不存在的话，就需要在replacer_中用驱逐函数将一个frame上的page数据清空，清空在table里的映射关系。用来承载新建的page。 在驱逐的时候如果原来的页是脏的要先吧脏页写回磁盘，防止数据的丢失 之后就是页的初始化操作，注意要顾及到每一个变量。 将新的映射关系写入table，新的访问历史放入replacer\nFetchPgImp() 的流程大致相同：\n只是第一步先去table里找有无这个page存在，如果没有就类似于NewPgImp() 先找一个frame，然后通过disk_manager_将磁盘的数据读入新页。之后建立新的关系。\nUnpinPgImp（page_id_t page_id, bool is_dirty） 当上层有一个进程在读取这个页的时候这个页都要被pin住不能被淘汰，在使用结束的时候会对该页进行一次unpin的操作，这会使得pin_count_–，当这个数值为0的时候该页就可被SetEvictable()函数将其在replacer中标记为可淘汰。\n随着page_id一同传进来的还有一个bool变量is_dirty这个变量用来表示使用这个页的进程对这个页干了什么，如果仅仅只是读的话is_dirty的值就为false，但是进行的改动的话is_dirty的值就为true。 需要注意的一定，只有当原来这个页是干净的时候才能进行状态的修改。\nSummary \u0026\u0026 踩坑记录 在task1的时候没有搞懂IndexOf（）函数的作用是什么，看到进行位操作本能的进行回避，导致被卡了好长时间，毫无头绪，在写的时候还是要搞懂细节，多看官方的注释。 SetEvictable（）这个函数中明白curr_size_什么时候能改，什么时候不能改。 在FlushAllPgsImp()中复用了FlushPgImp()函数，导致在线评测虽然样例都过了但是一直超时，最后还是在BusTub Lab1 Buffer Pool Manager | Fischer.space这篇文章中得到启发。总的来说还是多线程编程学的不是很好。 以上三个都是卡我时间比较长而且处理起来毫无头绪的。不过幸好项目用cmake构建，debug起来算是比较方便，帮我节约了很多的时间。\n我认为比较有挑战的就是task1，大的框架建好之后这种修修补补的编程很有意思。相比于有些课程的全面铺开完全从0开始实现，这种直入主题，学习核心思想的过程让我受益匪浅。\n最后附上通过截图，rank比较靠后就不放了，因为全局一把大锁，能跑下来我已经很开心了。\n",
   "wordCount" : "581",
   "inLanguage": "en",
-  "image": "https://jialog.top/images/papermod-cover.png","datePublished": "2023-12-08T00:00:00Z",
+  "image": "https://wjle007.github.io/images/papermod-cover.png","datePublished": "2023-12-08T00:00:00Z",
   "dateModified": "2023-12-08T00:00:00Z",
   "author":{
     "@type": "Person",
@@ -256,14 +256,14 @@ mask 的作用就是取一个位数和global_depth_一样的全1的二进制数�
   },
   "mainEntityOfPage": {
     "@type": "WebPage",
-    "@id": "https://jialog.top/posts/database/project/cmu15-445-project1-buffer-pool-manager/"
+    "@id": "https://wjle007.github.io/posts/database/project/cmu15-445-project1-buffer-pool-manager/"
   },
   "publisher": {
     "@type": "Organization",
     "name": "JiaLog",
     "logo": {
       "@type": "ImageObject",
-      "url": "https://jialog.top/favicon.ico"
+      "url": "https://wjle007.github.io/favicon.ico"
     }
   }
 }
@@ -285,7 +285,7 @@ mask 的作用就是取一个位数和global_depth_一样的全1的二进制数�
 <header class="header">
     <nav class="nav">
         <div class="logo">
-            <a href="https://jialog.top/" accesskey="h" title="JiaLog (Alt + H)">JiaLog</a>
+            <a href="https://wjle007.github.io/" accesskey="h" title="JiaLog (Alt + H)">JiaLog</a>
             <div class="logo-switches">
                 <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
                     <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
@@ -311,32 +311,32 @@ mask 的作用就是取一个位数和global_depth_一样的全1的二进制数�
         </div>
         <ul id="menu">
             <li>
-                <a href="https://jialog.top/" title="Home">
+                <a href="https://wjle007.github.io/" title="Home">
                     <span>Home</span>
                 </a>
             </li>
             <li>
-                <a href="https://jialog.top/posts/" title="Blog">
+                <a href="https://wjle007.github.io/posts/" title="Blog">
                     <span>Blog</span>
                 </a>
             </li>
             <li>
-                <a href="https://jialog.top/essay/" title="Essay">
+                <a href="https://wjle007.github.io/essay/" title="Essay">
                     <span>Essay</span>
                 </a>
             </li>
             <li>
-                <a href="https://jialog.top/archives" title="Archive">
+                <a href="https://wjle007.github.io/archives" title="Archive">
                     <span>Archive</span>
                 </a>
             </li>
             <li>
-                <a href="https://jialog.top/search/" title="Search (Alt &#43; /)" accesskey=/>
+                <a href="https://wjle007.github.io/search/" title="Search (Alt &#43; /)" accesskey=/>
                     <span>Search</span>
                 </a>
             </li>
             <li>
-                <a href="https://jialog.top/tags/" title="Tags">
+                <a href="https://wjle007.github.io/tags/" title="Tags">
                     <span>Tags</span>
                 </a>
             </li>
@@ -347,7 +347,7 @@ mask 的作用就是取一个位数和global_depth_一样的全1的二进制数�
 
 <article class="post-single">
   <header class="post-header">
-    <div class="breadcrumbs"><a href="https://jialog.top/">Home</a>&nbsp;»&nbsp;<a href="https://jialog.top/posts/">Posts</a></div>
+    <div class="breadcrumbs"><a href="https://wjle007.github.io/">Home</a>&nbsp;»&nbsp;<a href="https://wjle007.github.io/posts/">Posts</a></div>
     <h1 class="post-title entry-hint-parent">
       CMU15-445- Project #1 - Buffer Pool Manager
     </h1>
@@ -633,16 +633,16 @@ mask 的作用就是取一个位数和global_depth_一样的全1的二进制数�
 
   <footer class="post-footer">
     <ul class="post-tags">
-      <li><a href="https://jialog.top/tags/project/">Project</a></li>
-      <li><a href="https://jialog.top/tags/cmu15-445/">CMU15-445</a></li>
+      <li><a href="https://wjle007.github.io/tags/project/">Project</a></li>
+      <li><a href="https://wjle007.github.io/tags/cmu15-445/">CMU15-445</a></li>
     </ul>
 <nav class="paginav">
-  <a class="prev" href="https://jialog.top/posts/c&#43;&#43;/effective-modern-c&#43;&#43;/">
+  <a class="prev" href="https://wjle007.github.io/posts/c&#43;&#43;/effective-modern-c&#43;&#43;/">
     <span class="title">« Prev</span>
     <br>
     <span>Effective Modern C&#43;&#43; 笔记</span>
   </a>
-  <a class="next" href="https://jialog.top/posts/database/note/b&#43;-tree-index/">
+  <a class="next" href="https://wjle007.github.io/posts/database/note/b&#43;-tree-index/">
     <span class="title">Next »</span>
     <br>
     <span>B&#43; Tree Index</span>
@@ -653,7 +653,7 @@ mask 的作用就是取一个位数和global_depth_一样的全1的二进制数�
 <ul class="share-buttons">
     <li>
         <a target="_blank" rel="noopener noreferrer" aria-label="share CMU15-445- Project #1 - Buffer Pool Manager on x"
-            href="https://x.com/intent/tweet/?text=CMU15-445-%20Project%20%231%20-%20Buffer%20Pool%20Manager&amp;url=https%3a%2f%2fjialog.top%2fposts%2fdatabase%2fproject%2fcmu15-445-project1-buffer-pool-manager%2f&amp;hashtags=Project%2cCMU15-445">
+            href="https://x.com/intent/tweet/?text=CMU15-445-%20Project%20%231%20-%20Buffer%20Pool%20Manager&amp;url=https%3a%2f%2fwjle007.github.io%2fposts%2fdatabase%2fproject%2fcmu15-445-project1-buffer-pool-manager%2f&amp;hashtags=Project%2cCMU15-445">
             <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
                 <path
                     d="M512 62.554 L 512 449.446 C 512 483.97 483.97 512 449.446 512 L 62.554 512 C 28.03 512 0 483.97 0 449.446 L 0 62.554 C 0 28.03 28.029 0 62.554 0 L 449.446 0 C 483.971 0 512 28.03 512 62.554 Z M 269.951 190.75 L 182.567 75.216 L 56 75.216 L 207.216 272.95 L 63.9 436.783 L 125.266 436.783 L 235.9 310.383 L 332.567 436.783 L 456 436.783 L 298.367 228.367 L 432.367 75.216 L 371.033 75.216 Z M 127.633 110 L 164.101 110 L 383.481 400.065 L 349.5 400.065 Z" />
@@ -662,7 +662,7 @@ mask 的作用就是取一个位数和global_depth_一样的全1的二进制数�
     </li>
     <li>
         <a target="_blank" rel="noopener noreferrer" aria-label="share CMU15-445- Project #1 - Buffer Pool Manager on linkedin"
-            href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3a%2f%2fjialog.top%2fposts%2fdatabase%2fproject%2fcmu15-445-project1-buffer-pool-manager%2f&amp;title=CMU15-445-%20Project%20%231%20-%20Buffer%20Pool%20Manager&amp;summary=CMU15-445-%20Project%20%231%20-%20Buffer%20Pool%20Manager&amp;source=https%3a%2f%2fjialog.top%2fposts%2fdatabase%2fproject%2fcmu15-445-project1-buffer-pool-manager%2f">
+            href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3a%2f%2fwjle007.github.io%2fposts%2fdatabase%2fproject%2fcmu15-445-project1-buffer-pool-manager%2f&amp;title=CMU15-445-%20Project%20%231%20-%20Buffer%20Pool%20Manager&amp;summary=CMU15-445-%20Project%20%231%20-%20Buffer%20Pool%20Manager&amp;source=https%3a%2f%2fwjle007.github.io%2fposts%2fdatabase%2fproject%2fcmu15-445-project1-buffer-pool-manager%2f">
             <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
                 <path
                     d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-288.985,423.278l0,-225.717l-75.04,0l0,225.717l75.04,0Zm270.539,0l0,-129.439c0,-69.333 -37.018,-101.586 -86.381,-101.586c-39.804,0 -57.634,21.891 -67.617,37.266l0,-31.958l-75.021,0c0.995,21.181 0,225.717 0,225.717l75.02,0l0,-126.056c0,-6.748 0.486,-13.492 2.474,-18.315c5.414,-13.475 17.767,-27.434 38.494,-27.434c27.135,0 38.007,20.707 38.007,51.037l0,120.768l75.024,0Zm-307.552,-334.556c-25.674,0 -42.448,16.879 -42.448,39.002c0,21.658 16.264,39.002 41.455,39.002l0.484,0c26.165,0 42.452,-17.344 42.452,-39.002c-0.485,-22.092 -16.241,-38.954 -41.943,-39.002Z" />
@@ -671,7 +671,7 @@ mask 的作用就是取一个位数和global_depth_一样的全1的二进制数�
     </li>
     <li>
         <a target="_blank" rel="noopener noreferrer" aria-label="share CMU15-445- Project #1 - Buffer Pool Manager on reddit"
-            href="https://reddit.com/submit?url=https%3a%2f%2fjialog.top%2fposts%2fdatabase%2fproject%2fcmu15-445-project1-buffer-pool-manager%2f&title=CMU15-445-%20Project%20%231%20-%20Buffer%20Pool%20Manager">
+            href="https://reddit.com/submit?url=https%3a%2f%2fwjle007.github.io%2fposts%2fdatabase%2fproject%2fcmu15-445-project1-buffer-pool-manager%2f&title=CMU15-445-%20Project%20%231%20-%20Buffer%20Pool%20Manager">
             <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
                 <path
                     d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-3.446,265.638c0,-22.964 -18.616,-41.58 -41.58,-41.58c-11.211,0 -21.361,4.457 -28.841,11.666c-28.424,-20.508 -67.586,-33.757 -111.204,-35.278l18.941,-89.121l61.884,13.157c0.756,15.734 13.642,28.29 29.56,28.29c16.407,0 29.706,-13.299 29.706,-29.701c0,-16.403 -13.299,-29.702 -29.706,-29.702c-11.666,0 -21.657,6.792 -26.515,16.578l-69.105,-14.69c-1.922,-0.418 -3.939,-0.042 -5.585,1.036c-1.658,1.073 -2.811,2.761 -3.224,4.686l-21.152,99.438c-44.258,1.228 -84.046,14.494 -112.837,35.232c-7.468,-7.164 -17.589,-11.591 -28.757,-11.591c-22.965,0 -41.585,18.616 -41.585,41.58c0,16.896 10.095,31.41 24.568,37.918c-0.639,4.135 -0.99,8.328 -0.99,12.576c0,63.977 74.469,115.836 166.33,115.836c91.861,0 166.334,-51.859 166.334,-115.836c0,-4.218 -0.347,-8.387 -0.977,-12.493c14.564,-6.47 24.735,-21.034 24.735,-38.001Zm-119.474,108.193c-20.27,20.241 -59.115,21.816 -70.534,21.816c-11.428,0 -50.277,-1.575 -70.522,-21.82c-3.007,-3.008 -3.007,-7.882 0,-10.889c3.003,-2.999 7.882,-3.003 10.885,0c12.777,12.781 40.11,17.317 59.637,17.317c19.522,0 46.86,-4.536 59.657,-17.321c3.016,-2.999 7.886,-2.995 10.885,0.008c3.008,3.011 3.003,7.882 -0.008,10.889Zm-5.23,-48.781c-16.373,0 -29.701,-13.324 -29.701,-29.698c0,-16.381 13.328,-29.714 29.701,-29.714c16.378,0 29.706,13.333 29.706,29.714c0,16.374 -13.328,29.698 -29.706,29.698Zm-160.386,-29.702c0,-16.381 13.328,-29.71 29.714,-29.71c16.369,0 29.689,13.329 29.689,29.71c0,16.373 -13.32,29.693 -29.689,29.693c-16.386,0 -29.714,-13.32 -29.714,-29.693Z" />
@@ -680,7 +680,7 @@ mask 的作用就是取一个位数和global_depth_一样的全1的二进制数�
     </li>
     <li>
         <a target="_blank" rel="noopener noreferrer" aria-label="share CMU15-445- Project #1 - Buffer Pool Manager on facebook"
-            href="https://facebook.com/sharer/sharer.php?u=https%3a%2f%2fjialog.top%2fposts%2fdatabase%2fproject%2fcmu15-445-project1-buffer-pool-manager%2f">
+            href="https://facebook.com/sharer/sharer.php?u=https%3a%2f%2fwjle007.github.io%2fposts%2fdatabase%2fproject%2fcmu15-445-project1-buffer-pool-manager%2f">
             <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
                 <path
                     d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-106.468,0l0,-192.915l66.6,0l12.672,-82.621l-79.272,0l0,-53.617c0,-22.603 11.073,-44.636 46.58,-44.636l36.042,0l0,-70.34c0,0 -32.71,-5.582 -63.982,-5.582c-65.288,0 -107.96,39.569 -107.96,111.204l0,62.971l-72.573,0l0,82.621l72.573,0l0,192.915l-191.104,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Z" />
@@ -689,7 +689,7 @@ mask 的作用就是取一个位数和global_depth_一样的全1的二进制数�
     </li>
     <li>
         <a target="_blank" rel="noopener noreferrer" aria-label="share CMU15-445- Project #1 - Buffer Pool Manager on whatsapp"
-            href="https://api.whatsapp.com/send?text=CMU15-445-%20Project%20%231%20-%20Buffer%20Pool%20Manager%20-%20https%3a%2f%2fjialog.top%2fposts%2fdatabase%2fproject%2fcmu15-445-project1-buffer-pool-manager%2f">
+            href="https://api.whatsapp.com/send?text=CMU15-445-%20Project%20%231%20-%20Buffer%20Pool%20Manager%20-%20https%3a%2f%2fwjle007.github.io%2fposts%2fdatabase%2fproject%2fcmu15-445-project1-buffer-pool-manager%2f">
             <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
                 <path
                     d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-58.673,127.703c-33.842,-33.881 -78.847,-52.548 -126.798,-52.568c-98.799,0 -179.21,80.405 -179.249,179.234c-0.013,31.593 8.241,62.428 23.927,89.612l-25.429,92.884l95.021,-24.925c26.181,14.28 55.659,21.807 85.658,21.816l0.074,0c98.789,0 179.206,-80.413 179.247,-179.243c0.018,-47.895 -18.61,-92.93 -52.451,-126.81Zm-126.797,275.782l-0.06,0c-26.734,-0.01 -52.954,-7.193 -75.828,-20.767l-5.441,-3.229l-56.386,14.792l15.05,-54.977l-3.542,-5.637c-14.913,-23.72 -22.791,-51.136 -22.779,-79.287c0.033,-82.142 66.867,-148.971 149.046,-148.971c39.793,0.014 77.199,15.531 105.329,43.692c28.128,28.16 43.609,65.592 43.594,105.4c-0.034,82.149 -66.866,148.983 -148.983,148.984Zm81.721,-111.581c-4.479,-2.242 -26.499,-13.075 -30.604,-14.571c-4.105,-1.495 -7.091,-2.241 -10.077,2.241c-2.986,4.483 -11.569,14.572 -14.182,17.562c-2.612,2.988 -5.225,3.364 -9.703,1.12c-4.479,-2.241 -18.91,-6.97 -36.017,-22.23c-13.314,-11.876 -22.304,-26.542 -24.916,-31.026c-2.612,-4.484 -0.279,-6.908 1.963,-9.14c2.016,-2.007 4.48,-5.232 6.719,-7.847c2.24,-2.615 2.986,-4.484 4.479,-7.472c1.493,-2.99 0.747,-5.604 -0.374,-7.846c-1.119,-2.241 -10.077,-24.288 -13.809,-33.256c-3.635,-8.733 -7.327,-7.55 -10.077,-7.688c-2.609,-0.13 -5.598,-0.158 -8.583,-0.158c-2.986,0 -7.839,1.121 -11.944,5.604c-4.105,4.484 -15.675,15.32 -15.675,37.364c0,22.046 16.048,43.342 18.287,46.332c2.24,2.99 31.582,48.227 76.511,67.627c10.685,4.615 19.028,7.371 25.533,9.434c10.728,3.41 20.492,2.929 28.209,1.775c8.605,-1.285 26.499,-10.833 30.231,-21.295c3.732,-10.464 3.732,-19.431 2.612,-21.298c-1.119,-1.869 -4.105,-2.99 -8.583,-5.232Z" />
@@ -698,7 +698,7 @@ mask 的作用就是取一个位数和global_depth_一样的全1的二进制数�
     </li>
     <li>
         <a target="_blank" rel="noopener noreferrer" aria-label="share CMU15-445- Project #1 - Buffer Pool Manager on telegram"
-            href="https://telegram.me/share/url?text=CMU15-445-%20Project%20%231%20-%20Buffer%20Pool%20Manager&amp;url=https%3a%2f%2fjialog.top%2fposts%2fdatabase%2fproject%2fcmu15-445-project1-buffer-pool-manager%2f">
+            href="https://telegram.me/share/url?text=CMU15-445-%20Project%20%231%20-%20Buffer%20Pool%20Manager&amp;url=https%3a%2f%2fwjle007.github.io%2fposts%2fdatabase%2fproject%2fcmu15-445-project1-buffer-pool-manager%2f">
             <svg version="1.1" xml:space="preserve" viewBox="2 2 28 28" height="30px" width="30px" fill="currentColor">
                 <path
                     d="M26.49,29.86H5.5a3.37,3.37,0,0,1-2.47-1,3.35,3.35,0,0,1-1-2.47V5.48A3.36,3.36,0,0,1,3,3,3.37,3.37,0,0,1,5.5,2h21A3.38,3.38,0,0,1,29,3a3.36,3.36,0,0,1,1,2.46V26.37a3.35,3.35,0,0,1-1,2.47A3.38,3.38,0,0,1,26.49,29.86Zm-5.38-6.71a.79.79,0,0,0,.85-.66L24.73,9.24a.55.55,0,0,0-.18-.46.62.62,0,0,0-.41-.17q-.08,0-16.53,6.11a.59.59,0,0,0-.41.59.57.57,0,0,0,.43.52l4,1.24,1.61,4.83a.62.62,0,0,0,.63.43.56.56,0,0,0,.4-.17L16.54,20l4.09,3A.9.9,0,0,0,21.11,23.15ZM13.8,20.71l-1.21-4q8.72-5.55,8.78-5.55c.15,0,.23,0,.23.16a.18.18,0,0,1,0,.06s-2.51,2.3-7.52,6.8Z" />
@@ -707,7 +707,7 @@ mask 的作用就是取一个位数和global_depth_一样的全1的二进制数�
     </li>
     <li>
         <a target="_blank" rel="noopener noreferrer" aria-label="share CMU15-445- Project #1 - Buffer Pool Manager on ycombinator"
-            href="https://news.ycombinator.com/submitlink?t=CMU15-445-%20Project%20%231%20-%20Buffer%20Pool%20Manager&u=https%3a%2f%2fjialog.top%2fposts%2fdatabase%2fproject%2fcmu15-445-project1-buffer-pool-manager%2f">
+            href="https://news.ycombinator.com/submitlink?t=CMU15-445-%20Project%20%231%20-%20Buffer%20Pool%20Manager&u=https%3a%2f%2fwjle007.github.io%2fposts%2fdatabase%2fproject%2fcmu15-445-project1-buffer-pool-manager%2f">
             <svg version="1.1" xml:space="preserve" width="30px" height="30px" viewBox="0 0 512 512" fill="currentColor"
                 xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape">
                 <path
@@ -736,7 +736,7 @@ mask 的作用就是取一个位数和global_depth_一样的全1的二进制数�
     </main>
     
 <footer class="footer">
-        <span>© <a href="https://jialog.top">JiaLog</a> 豫ICP备2024077894号-1 苏公网安备32031202000962号 32031202000962</span> · 
+        <span>© <a href="https://jialog.top">JiaLog</a></span> · 
 
     <span>
         Powered by

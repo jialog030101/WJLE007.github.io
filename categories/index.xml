@@ -2,44 +2,44 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <title>Categories on JiaLog</title>
-    <link>https://jialog.top/categories/</link>
+    <link>https://wjle007.github.io/categories/</link>
     <description>Recent content in Categories on JiaLog</description>
     <image>
       <title>JiaLog</title>
-      <url>https://jialog.top/images/papermod-cover.png</url>
-      <link>https://jialog.top/images/papermod-cover.png</link>
+      <url>https://wjle007.github.io/images/papermod-cover.png</url>
+      <link>https://wjle007.github.io/images/papermod-cover.png</link>
     </image>
     <generator>Hugo -- 0.144.2</generator>
     <language>en</language>
-    <copyright>JiaLog 豫ICP备2024077894号-1 苏公网安备32031202000962号 32031202000962</copyright>
+    <copyright>JiaLog</copyright>
     <lastBuildDate>Tue, 25 Feb 2025 00:00:00 +0000</lastBuildDate>
-    <atom:link href="https://jialog.top/categories/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://wjle007.github.io/categories/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>OS</title>
-      <link>https://jialog.top/categories/os/</link>
+      <link>https://wjle007.github.io/categories/os/</link>
       <pubDate>Tue, 25 Feb 2025 00:00:00 +0000</pubDate>
-      <guid>https://jialog.top/categories/os/</guid>
+      <guid>https://wjle007.github.io/categories/os/</guid>
       <description></description>
     </item>
     <item>
       <title>Rust</title>
-      <link>https://jialog.top/categories/rust/</link>
+      <link>https://wjle007.github.io/categories/rust/</link>
       <pubDate>Mon, 03 Feb 2025 00:00:00 +0000</pubDate>
-      <guid>https://jialog.top/categories/rust/</guid>
+      <guid>https://wjle007.github.io/categories/rust/</guid>
       <description></description>
     </item>
     <item>
       <title>CMU15-445</title>
-      <link>https://jialog.top/categories/cmu15-445/</link>
+      <link>https://wjle007.github.io/categories/cmu15-445/</link>
       <pubDate>Thu, 22 Feb 2024 00:00:00 +0000</pubDate>
-      <guid>https://jialog.top/categories/cmu15-445/</guid>
+      <guid>https://wjle007.github.io/categories/cmu15-445/</guid>
       <description></description>
     </item>
     <item>
       <title>C&#43;&#43;</title>
-      <link>https://jialog.top/categories/c&#43;&#43;/</link>
+      <link>https://wjle007.github.io/categories/c&#43;&#43;/</link>
       <pubDate>Sat, 09 Dec 2023 00:00:00 +0000</pubDate>
-      <guid>https://jialog.top/categories/c&#43;&#43;/</guid>
+      <guid>https://wjle007.github.io/categories/c&#43;&#43;/</guid>
       <description></description>
     </item>
   </channel>

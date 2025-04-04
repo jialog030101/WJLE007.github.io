@@ -2,23 +2,23 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <title>虚拟化 on JiaLog</title>
-    <link>https://jialog.top/tags/%E8%99%9A%E6%8B%9F%E5%8C%96/</link>
+    <link>https://wjle007.github.io/tags/%E8%99%9A%E6%8B%9F%E5%8C%96/</link>
     <description>Recent content in 虚拟化 on JiaLog</description>
     <image>
       <title>JiaLog</title>
-      <url>https://jialog.top/images/papermod-cover.png</url>
-      <link>https://jialog.top/images/papermod-cover.png</link>
+      <url>https://wjle007.github.io/images/papermod-cover.png</url>
+      <link>https://wjle007.github.io/images/papermod-cover.png</link>
     </image>
     <generator>Hugo -- 0.144.2</generator>
     <language>en</language>
-    <copyright>JiaLog 豫ICP备2024077894号-1 苏公网安备32031202000962号 32031202000962</copyright>
+    <copyright>JiaLog</copyright>
     <lastBuildDate>Sun, 02 Feb 2025 00:00:00 +0000</lastBuildDate>
-    <atom:link href="https://jialog.top/tags/%E8%99%9A%E6%8B%9F%E5%8C%96/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://wjle007.github.io/tags/%E8%99%9A%E6%8B%9F%E5%8C%96/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>虚拟化--进程管理API：fork, execve, exit</title>
-      <link>https://jialog.top/posts/os/%E8%99%9A%E6%8B%9F%E5%8C%96--%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%86apifork-execve-exit/</link>
+      <link>https://wjle007.github.io/posts/os/%E8%99%9A%E6%8B%9F%E5%8C%96--%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%86apifork-execve-exit/</link>
       <pubDate>Sun, 02 Feb 2025 00:00:00 +0000</pubDate>
-      <guid>https://jialog.top/posts/os/%E8%99%9A%E6%8B%9F%E5%8C%96--%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%86apifork-execve-exit/</guid>
+      <guid>https://wjle007.github.io/posts/os/%E8%99%9A%E6%8B%9F%E5%8C%96--%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%86apifork-execve-exit/</guid>
       <description>&lt;h1 id=&#34;操作系统上的进程&#34;&gt;操作系统上的进程&lt;/h1&gt;
 &lt;p&gt;&lt;strong&gt;背景回顾&lt;/strong&gt;：有关状态机、并发和中断的讨论给我们真正理解操作系统奠定了基础，现在我们正式进入操作系统和应用程序的 “边界” 了。让我们把视角回到单线程应用程序，即 “执行计算指令和系统调用指令的状态机”，开始对操作系统和进程的讨论。&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;本讲内容&lt;/strong&gt;：操作系统上的进程&lt;/p&gt;

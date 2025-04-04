@@ -2,23 +2,23 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <title>C&#43;&#43; on JiaLog</title>
-    <link>https://jialog.top/categories/c&#43;&#43;/</link>
+    <link>https://wjle007.github.io/categories/c&#43;&#43;/</link>
     <description>Recent content in C&#43;&#43; on JiaLog</description>
     <image>
       <title>JiaLog</title>
-      <url>https://jialog.top/images/papermod-cover.png</url>
-      <link>https://jialog.top/images/papermod-cover.png</link>
+      <url>https://wjle007.github.io/images/papermod-cover.png</url>
+      <link>https://wjle007.github.io/images/papermod-cover.png</link>
     </image>
     <generator>Hugo -- 0.144.2</generator>
     <language>en</language>
-    <copyright>JiaLog 豫ICP备2024077894号-1 苏公网安备32031202000962号 32031202000962</copyright>
+    <copyright>JiaLog</copyright>
     <lastBuildDate>Sat, 09 Dec 2023 00:00:00 +0000</lastBuildDate>
-    <atom:link href="https://jialog.top/categories/c++/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://wjle007.github.io/categories/c++/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Effective Modern C&#43;&#43; 笔记</title>
-      <link>https://jialog.top/posts/c&#43;&#43;/effective-modern-c&#43;&#43;/</link>
+      <link>https://wjle007.github.io/posts/c&#43;&#43;/effective-modern-c&#43;&#43;/</link>
       <pubDate>Sat, 09 Dec 2023 00:00:00 +0000</pubDate>
-      <guid>https://jialog.top/posts/c&#43;&#43;/effective-modern-c&#43;&#43;/</guid>
+      <guid>https://wjle007.github.io/posts/c&#43;&#43;/effective-modern-c&#43;&#43;/</guid>
       <description>&lt;h2 id=&#34;auto&#34;&gt;auto&lt;/h2&gt;
 &lt;p&gt;在概念上auto已经极简了，但是实际上仍然要微妙许多。它可以节约声明类型，也可以避免许多手动类型的正确性和声明问题。但是从结果的角度来说，尽管auto很努力在做事了，但是仍然可能是错误的。如果出现这种情况我们要知道如何去引导auto让他成为正确的类型，因为退回使用手动声明类型仍然是下下策。&lt;/p&gt;
 &lt;p&gt;接下来的内容会涵盖&lt;code&gt;auto&lt;/code&gt;的所有细节&lt;/p&gt;

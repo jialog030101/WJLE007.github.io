@@ -46,16 +46,16 @@ Item 8: Prefer nullptr to 0 and NULL.
 
 nullptr’s advantage is that it doesn’t have an integral type. To be honest, it doesn’t have a pointer type, either, but you can think of it as a pointer of all types. nullptr’s actual type is std::nullptr_t, and, in a wonderfully circular definition, std::nullptr_t is defined to be the type of nullptr. The type std::nullptr_t implicitly converts to all raw pointer types, and that’s what makes nullptr act as if it were a pointer of all types.">
 <meta name="author" content="Theme PaperMod">
-<link rel="canonical" href="https://jialog.top/posts/c&#43;&#43;/effective-modern-c&#43;&#43;/">
+<link rel="canonical" href="https://wjle007.github.io/posts/c&#43;&#43;/effective-modern-c&#43;&#43;/">
 <link crossorigin="anonymous" href="/assets/css/stylesheet.6da9a63d25a9608bca2f7f907a030e887a7dd3c3f3918e4cc113129361414bda.css" integrity="sha256-bammPSWpYIvKL3&#43;QegMOiHp908PzkY5MwRMSk2FBS9o=" rel="preload stylesheet" as="style">
-<link rel="icon" href="https://jialog.top/favicon.ico">
-<link rel="icon" type="image/png" sizes="16x16" href="https://jialog.top/favicon-16x16.png">
-<link rel="icon" type="image/png" sizes="32x32" href="https://jialog.top/favicon-32x32.png">
-<link rel="apple-touch-icon" href="https://jialog.top/apple-touch-icon.png">
-<link rel="mask-icon" href="https://jialog.top/safari-pinned-tab.svg">
+<link rel="icon" href="https://wjle007.github.io/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://wjle007.github.io/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://wjle007.github.io/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://wjle007.github.io/apple-touch-icon.png">
+<link rel="mask-icon" href="https://wjle007.github.io/safari-pinned-tab.svg">
 <meta name="theme-color" content="#2e2e33">
 <meta name="msapplication-TileColor" content="#2e2e33">
-<link rel="alternate" hreflang="en" href="https://jialog.top/posts/c&#43;&#43;/effective-modern-c&#43;&#43;/">
+<link rel="alternate" hreflang="en" href="https://wjle007.github.io/posts/c&#43;&#43;/effective-modern-c&#43;&#43;/">
 <noscript>
     <style>
         #theme-toggle,
@@ -92,7 +92,7 @@ nullptr’s advantage is that it doesn’t have an integral type. To be honest, 
         }
 
     </style>
-</noscript><meta property="og:url" content="https://jialog.top/posts/c&#43;&#43;/effective-modern-c&#43;&#43;/">
+</noscript><meta property="og:url" content="https://wjle007.github.io/posts/c&#43;&#43;/effective-modern-c&#43;&#43;/">
   <meta property="og:site_name" content="JiaLog">
   <meta property="og:title" content="Effective Modern C&#43;&#43; 笔记">
   <meta property="og:description" content="auto 在概念上auto已经极简了，但是实际上仍然要微妙许多。它可以节约声明类型，也可以避免许多手动类型的正确性和声明问题。但是从结果的角度来说，尽管auto很努力在做事了，但是仍然可能是错误的。如果出现这种情况我们要知道如何去引导auto让他成为正确的类型，因为退回使用手动声明类型仍然是下下策。
@@ -118,9 +118,9 @@ nullptr’s advantage is that it doesn’t have an integral type. To be honest, 
     <meta property="article:modified_time" content="2023-12-09T00:00:00+00:00">
     <meta property="article:tag" content="CPP">
     <meta property="article:tag" content="Note">
-      <meta property="og:image" content="https://jialog.top/images/papermod-cover.png">
+      <meta property="og:image" content="https://wjle007.github.io/images/papermod-cover.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://jialog.top/images/papermod-cover.png">
+<meta name="twitter:image" content="https://wjle007.github.io/images/papermod-cover.png">
 <meta name="twitter:title" content="Effective Modern C&#43;&#43; 笔记">
 <meta name="twitter:description" content="auto
 在概念上auto已经极简了，但是实际上仍然要微妙许多。它可以节约声明类型，也可以避免许多手动类型的正确性和声明问题。但是从结果的角度来说，尽管auto很努力在做事了，但是仍然可能是错误的。如果出现这种情况我们要知道如何去引导auto让他成为正确的类型，因为退回使用手动声明类型仍然是下下策。
@@ -171,13 +171,13 @@ nullptr’s advantage is that it doesn’t have an integral type. To be honest, 
       "@type": "ListItem",
       "position":  1 ,
       "name": "Posts",
-      "item": "https://jialog.top/posts/"
+      "item": "https://wjle007.github.io/posts/"
     }, 
     {
       "@type": "ListItem",
       "position":  2 ,
       "name": "Effective Modern C++ 笔记",
-      "item": "https://jialog.top/posts/c++/effective-modern-c++/"
+      "item": "https://wjle007.github.io/posts/c++/effective-modern-c++/"
     }
   ]
 }
@@ -195,7 +195,7 @@ nullptr’s advantage is that it doesn’t have an integral type. To be honest, 
   "articleBody": "auto 在概念上auto已经极简了，但是实际上仍然要微妙许多。它可以节约声明类型，也可以避免许多手动类型的正确性和声明问题。但是从结果的角度来说，尽管auto很努力在做事了，但是仍然可能是错误的。如果出现这种情况我们要知道如何去引导auto让他成为正确的类型，因为退回使用手动声明类型仍然是下下策。\n接下来的内容会涵盖auto的所有细节\nItem 5: Prefer auto to explicit type declarations. 不仅可以避免出现为初始化的变量，避免啰嗦又繁杂的类型声明，能直接持有闭包，还可以避免一些因为“类型捷径”出现的问题。 eg1.\n有一些程序员会对类型发生误判，到时用范围较小的类型在32位机器上能够运行但是在64位机器上发生了改变，导致程序在移植的时候出现问题。 eg2. 上述代码看起来没什么问题，但是当实际运行之后并没有对哈希表m进行操作。原因在于哈希表中的kay值是const类型的，手动声明的类型不一样的话编译器会进行一个神奇的操作，它会讲m中的内容复制成为临时变量将key的类型改为和声明一致的，再将p绑定到临时变量上。\nSummary auto说到底只是一个可选项罢了，不是必选项，如果你觉得你的项目使用显式的声明能够使得项目变得更加的可读和高效，当然可以继续使用。但是c++引入auto并不是一个多新鲜的东西，只是一个在其他语言中被称为“类型推导”的东西罢了。在其他的静态类型语言中类型推导都或多或少存在。而且动态语言还为类型推导积累了大量的经验。而且此类技术并不会于大型的工程项目产生冲突。\n一些人觉得用完auto之后会让变量的类型变得不是一眼可以识别，但是这个问题随着ide的优化和适配已经被解决的相当完美了。\n事实上手动声明变量经常是在画蛇添足，无论是正确率还是效率上。\nItem 6: Use the explicitly typed initializer idiom when auto deduces undesired types. 纵使auto有万般好，但是auto也会出现推断的类型和你心目中期待的不一样的情况（当然也不完全是auto错了哦😀） 下面举一个auto推断不符合预期的例子。\n上述声明了一个返回vector\u003c bool \u003e类型的函数，使用了auto之后虽然仍然能够直接进行编译和运行但是结果却不是所想要的。\n而发生这样错误的原因是，在c++的设计当中回避了bit的引用所以返回的不是bool\u0026，实际上c++中设计了一个代理类来完成向bool的转换操作，这就不展开细说了，但是代理类并不少见，我们经常使用的两个智能指针就是一种代理类。\n代理类的设计在使用的时候尽量少的对程序员暴露内部细节，这些代理类的使用往往会在文档中标识出来，如果在文档中没有体现的话，也避免不了在头文件中漏出一些破绽，最不济在debug的时候可能也会发觉是使用了代理类。\n但是这些都不重要了，现在重要的事怎么把auto引导到正确的道路上🙃。\n就是使用一个强制的类型转换，让它去到该去的位置，虽然看起来有点滑稽，给人一种头痛医脚的感觉🤣。虽然在这些时候你也可以放弃使用auto，但是在这个踩坑的过程中不是也收获了新的知识么?😁\n总之记住以下两点 隐形的代理类可能会让auto推断出错误的类型。 显式的类型转换可以让auto走向正确道路。 Moving to Modern C++ 接下来这一章会详细介绍现代c++的一些细节特性。我自己会记录几个我认为比较实用的。并不是全部。\nItem 8: Prefer nullptr to 0 and NULL. 非常显然的是0的类型是int，不是一个指针，但是在一个本应该出现指针类型的地方出现了0，编译器也会勉强吧0解释为空指针，但这毕竟是不得已而为之的行为🙉， 总之0是int，不是指针。\nnullptr’s advantage is that it doesn’t have an integral type. To be honest, it doesn’t have a pointer type, either, but you can think of it as a pointer of all types. nullptr’s actual type is std::nullptr_t, and, in a wonderfully circular definition, std::nullptr_t is defined to be the type of nullptr. The type std::nullptr_t implicitly converts to all raw pointer types, and that’s what makes nullptr act as if it were a pointer of all types.\n所以用nullptr总会的到正确类型的空指针，而不用编译器进行不情愿的转换。不仅如此，使用nullptr还会提高代码的可读性。\n通过以上两段代码的对比我相信很快就能感觉到差距所在。其实最重要的是在使用auto的时候0和null可能会进行错误的推导。\n尽量采用nullptr而不是0或者null 避免在整形和指针类型之间的重载。 Item 12: Declare overriding functions override. 在需要重写的函数中添加override声明，好处就是能减少出错的几率吧，算是一个编程的好习惯。\nItem 13: Prefer const_iterators to iterators. 在c++11之前中标准库中缺少cbegin和cend这样带有c语言风格的函数，但是实际上const的begin（）和cbegin（）几乎是没有任何区别的，不知道为什么要这样设计，据说是成员函数设计与自由函数设计之争🙃？不是很懂。\n总之使用const_iterators是有好处的，起码你的代码变得标准起来了不是么？\nItem 16: Make const member functions thread safe. 当我们用一个类表示多项式会非常的方便，一般会有一个计算多项式根的函数，这个多项式一般不会造成多项式值的改动，所以把这个函数声明为const成员函数是一件非常正常的事情。\n（item9是说优先使用别名而不是typedefs）\n由于计算机计算多项式解的过程开销是非常大的，所以即使是计算也会把结果缓存起来，减小开销，以下是一种基本的做法：\n在一般的const函数中不会改变任何值，但是在本例中，由于根的组成部分不只是值还有一些标志位，在求值的过程中标志位会发生改变。\n这两个线程就会产生不安全的行为。最常见的解决办法就是加入互斥变量。\n但是用latch似乎有点杀鸡用牛刀了。\n如果只是记录函数的调用次数并且保证其他函数能够观测到这一行为可以使用 std::atomic counter，下面将演示如何使用这个原子的计数器。 但是需要谨慎的使用这个原子的计数器，以下是两个反例。\n在这个例子中假如第一个线程进行到=true的部分，这时第二个线程进入发现标识位为true于是返回了一个不是经过计算的值。\n如果将这两个句子的顺序颠倒会发生一些不一样的东西么？ 答案是不会。这个函数仍然是不完美的\n因为延迟修改标志位，所以有可能会出现重复的计算。\n对于拥有两个以上的需要同步的变量尽量采用mutex吧。 以下是一个好的示范。\n保证const成员函数的线程安全 使用原子的计数器，但是需要谨慎。 Smart Pointers 原始指针虽然非常的强大，但是往往伴随着以下几点问题：\n指针的声明并不能直观看出是指向一个对象或者一个数组。eg.一个int和一个int数组的指针都是int*。 不知道在使用之后是否应该销毁指针所指的对象。也就是说不知道指针是否拥有所指对象。 即使知道了所指的对象也不确定具体的销毁方法，是用delete还是其他特殊的析构函数。 如果知道了用delete是可行的，但是由于原因1，所以不知道delete一个对象还是delete[]一个数组。 没有什么方法能可靠的检测悬空的指针。 智能指针是解决这种问题的一种方法，智能指针是对原始指针的一种包装。行为很类似，却能避免很多坑，所以在日常的代码中应该优先选用智能指针而非裸指针。\n在我接触到的代码中智能指针基本上就会用两个：std::unique_ptr和std::shared_ptr。\nItem 18: Use std::unique_ptr for exclusive-ownership resource management. 当你需要使用智能指针的时候std::unique_ptr几乎就是首选，它拥有和裸指针差不多的大小，各种操作的效率也差不多。如果裸指针能够满足要求的话，那么std::unique_ptr也一定可以的。\nstd::unique_ptr实现的是专属所有权语义。一个非空的std::unique_ptr总是拥有其对对象的所有权，除非用std::move()函数把所有权从原指针“移动到”目标指针，原指针则会被置为空。但是std::unique_ptr绝对不允许进行复制。\n同时也可以使用get（）函数返回裸指针\nstd::unique_ptr可以非常方便的转换为std::shared_ptr 这就为代码的规范化编写提供了很多的方便。\nstd::unique_ptr是一种高速，小巧，只具有移动语义的对对象想有专属所有权的智能指针。 默认情况下，析构函数是delete，但是也可以手动指定析构函数。 将其转化为std::shared_ptr是非常容易的 ",
   "wordCount" : "208",
   "inLanguage": "en",
-  "image": "https://jialog.top/images/papermod-cover.png","datePublished": "2023-12-09T00:00:00Z",
+  "image": "https://wjle007.github.io/images/papermod-cover.png","datePublished": "2023-12-09T00:00:00Z",
   "dateModified": "2023-12-09T00:00:00Z",
   "author":{
     "@type": "Person",
@@ -203,14 +203,14 @@ nullptr’s advantage is that it doesn’t have an integral type. To be honest, 
   },
   "mainEntityOfPage": {
     "@type": "WebPage",
-    "@id": "https://jialog.top/posts/c++/effective-modern-c++/"
+    "@id": "https://wjle007.github.io/posts/c++/effective-modern-c++/"
   },
   "publisher": {
     "@type": "Organization",
     "name": "JiaLog",
     "logo": {
       "@type": "ImageObject",
-      "url": "https://jialog.top/favicon.ico"
+      "url": "https://wjle007.github.io/favicon.ico"
     }
   }
 }
@@ -232,7 +232,7 @@ nullptr’s advantage is that it doesn’t have an integral type. To be honest, 
 <header class="header">
     <nav class="nav">
         <div class="logo">
-            <a href="https://jialog.top/" accesskey="h" title="JiaLog (Alt + H)">JiaLog</a>
+            <a href="https://wjle007.github.io/" accesskey="h" title="JiaLog (Alt + H)">JiaLog</a>
             <div class="logo-switches">
                 <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
                     <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
@@ -258,32 +258,32 @@ nullptr’s advantage is that it doesn’t have an integral type. To be honest, 
         </div>
         <ul id="menu">
             <li>
-                <a href="https://jialog.top/" title="Home">
+                <a href="https://wjle007.github.io/" title="Home">
                     <span>Home</span>
                 </a>
             </li>
             <li>
-                <a href="https://jialog.top/posts/" title="Blog">
+                <a href="https://wjle007.github.io/posts/" title="Blog">
                     <span>Blog</span>
                 </a>
             </li>
             <li>
-                <a href="https://jialog.top/essay/" title="Essay">
+                <a href="https://wjle007.github.io/essay/" title="Essay">
                     <span>Essay</span>
                 </a>
             </li>
             <li>
-                <a href="https://jialog.top/archives" title="Archive">
+                <a href="https://wjle007.github.io/archives" title="Archive">
                     <span>Archive</span>
                 </a>
             </li>
             <li>
-                <a href="https://jialog.top/search/" title="Search (Alt &#43; /)" accesskey=/>
+                <a href="https://wjle007.github.io/search/" title="Search (Alt &#43; /)" accesskey=/>
                     <span>Search</span>
                 </a>
             </li>
             <li>
-                <a href="https://jialog.top/tags/" title="Tags">
+                <a href="https://wjle007.github.io/tags/" title="Tags">
                     <span>Tags</span>
                 </a>
             </li>
@@ -294,7 +294,7 @@ nullptr’s advantage is that it doesn’t have an integral type. To be honest, 
 
 <article class="post-single">
   <header class="post-header">
-    <div class="breadcrumbs"><a href="https://jialog.top/">Home</a>&nbsp;»&nbsp;<a href="https://jialog.top/posts/">Posts</a></div>
+    <div class="breadcrumbs"><a href="https://wjle007.github.io/">Home</a>&nbsp;»&nbsp;<a href="https://wjle007.github.io/posts/">Posts</a></div>
     <h1 class="post-title entry-hint-parent">
       Effective Modern C&#43;&#43; 笔记
     </h1>
@@ -454,16 +454,16 @@ eg1.</p>
 
   <footer class="post-footer">
     <ul class="post-tags">
-      <li><a href="https://jialog.top/tags/cpp/">CPP</a></li>
-      <li><a href="https://jialog.top/tags/note/">Note</a></li>
+      <li><a href="https://wjle007.github.io/tags/cpp/">CPP</a></li>
+      <li><a href="https://wjle007.github.io/tags/note/">Note</a></li>
     </ul>
 <nav class="paginav">
-  <a class="prev" href="https://jialog.top/posts/rust/some-ideas/">
+  <a class="prev" href="https://wjle007.github.io/posts/rust/some-ideas/">
     <span class="title">« Prev</span>
     <br>
     <span>some ideas</span>
   </a>
-  <a class="next" href="https://jialog.top/posts/database/project/cmu15-445-project1-buffer-pool-manager/">
+  <a class="next" href="https://wjle007.github.io/posts/database/project/cmu15-445-project1-buffer-pool-manager/">
     <span class="title">Next »</span>
     <br>
     <span>CMU15-445- Project #1 - Buffer Pool Manager</span>
@@ -474,7 +474,7 @@ eg1.</p>
 <ul class="share-buttons">
     <li>
         <a target="_blank" rel="noopener noreferrer" aria-label="share Effective Modern C&#43;&#43; 笔记 on x"
-            href="https://x.com/intent/tweet/?text=Effective%20Modern%20C%2b%2b%20%e7%ac%94%e8%ae%b0&amp;url=https%3a%2f%2fjialog.top%2fposts%2fc%2b%2b%2feffective-modern-c%2b%2b%2f&amp;hashtags=CPP%2cNote">
+            href="https://x.com/intent/tweet/?text=Effective%20Modern%20C%2b%2b%20%e7%ac%94%e8%ae%b0&amp;url=https%3a%2f%2fwjle007.github.io%2fposts%2fc%2b%2b%2feffective-modern-c%2b%2b%2f&amp;hashtags=CPP%2cNote">
             <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
                 <path
                     d="M512 62.554 L 512 449.446 C 512 483.97 483.97 512 449.446 512 L 62.554 512 C 28.03 512 0 483.97 0 449.446 L 0 62.554 C 0 28.03 28.029 0 62.554 0 L 449.446 0 C 483.971 0 512 28.03 512 62.554 Z M 269.951 190.75 L 182.567 75.216 L 56 75.216 L 207.216 272.95 L 63.9 436.783 L 125.266 436.783 L 235.9 310.383 L 332.567 436.783 L 456 436.783 L 298.367 228.367 L 432.367 75.216 L 371.033 75.216 Z M 127.633 110 L 164.101 110 L 383.481 400.065 L 349.5 400.065 Z" />
@@ -483,7 +483,7 @@ eg1.</p>
     </li>
     <li>
         <a target="_blank" rel="noopener noreferrer" aria-label="share Effective Modern C&#43;&#43; 笔记 on linkedin"
-            href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3a%2f%2fjialog.top%2fposts%2fc%2b%2b%2feffective-modern-c%2b%2b%2f&amp;title=Effective%20Modern%20C%2b%2b%20%e7%ac%94%e8%ae%b0&amp;summary=Effective%20Modern%20C%2b%2b%20%e7%ac%94%e8%ae%b0&amp;source=https%3a%2f%2fjialog.top%2fposts%2fc%2b%2b%2feffective-modern-c%2b%2b%2f">
+            href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3a%2f%2fwjle007.github.io%2fposts%2fc%2b%2b%2feffective-modern-c%2b%2b%2f&amp;title=Effective%20Modern%20C%2b%2b%20%e7%ac%94%e8%ae%b0&amp;summary=Effective%20Modern%20C%2b%2b%20%e7%ac%94%e8%ae%b0&amp;source=https%3a%2f%2fwjle007.github.io%2fposts%2fc%2b%2b%2feffective-modern-c%2b%2b%2f">
             <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
                 <path
                     d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-288.985,423.278l0,-225.717l-75.04,0l0,225.717l75.04,0Zm270.539,0l0,-129.439c0,-69.333 -37.018,-101.586 -86.381,-101.586c-39.804,0 -57.634,21.891 -67.617,37.266l0,-31.958l-75.021,0c0.995,21.181 0,225.717 0,225.717l75.02,0l0,-126.056c0,-6.748 0.486,-13.492 2.474,-18.315c5.414,-13.475 17.767,-27.434 38.494,-27.434c27.135,0 38.007,20.707 38.007,51.037l0,120.768l75.024,0Zm-307.552,-334.556c-25.674,0 -42.448,16.879 -42.448,39.002c0,21.658 16.264,39.002 41.455,39.002l0.484,0c26.165,0 42.452,-17.344 42.452,-39.002c-0.485,-22.092 -16.241,-38.954 -41.943,-39.002Z" />
@@ -492,7 +492,7 @@ eg1.</p>
     </li>
     <li>
         <a target="_blank" rel="noopener noreferrer" aria-label="share Effective Modern C&#43;&#43; 笔记 on reddit"
-            href="https://reddit.com/submit?url=https%3a%2f%2fjialog.top%2fposts%2fc%2b%2b%2feffective-modern-c%2b%2b%2f&title=Effective%20Modern%20C%2b%2b%20%e7%ac%94%e8%ae%b0">
+            href="https://reddit.com/submit?url=https%3a%2f%2fwjle007.github.io%2fposts%2fc%2b%2b%2feffective-modern-c%2b%2b%2f&title=Effective%20Modern%20C%2b%2b%20%e7%ac%94%e8%ae%b0">
             <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
                 <path
                     d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-3.446,265.638c0,-22.964 -18.616,-41.58 -41.58,-41.58c-11.211,0 -21.361,4.457 -28.841,11.666c-28.424,-20.508 -67.586,-33.757 -111.204,-35.278l18.941,-89.121l61.884,13.157c0.756,15.734 13.642,28.29 29.56,28.29c16.407,0 29.706,-13.299 29.706,-29.701c0,-16.403 -13.299,-29.702 -29.706,-29.702c-11.666,0 -21.657,6.792 -26.515,16.578l-69.105,-14.69c-1.922,-0.418 -3.939,-0.042 -5.585,1.036c-1.658,1.073 -2.811,2.761 -3.224,4.686l-21.152,99.438c-44.258,1.228 -84.046,14.494 -112.837,35.232c-7.468,-7.164 -17.589,-11.591 -28.757,-11.591c-22.965,0 -41.585,18.616 -41.585,41.58c0,16.896 10.095,31.41 24.568,37.918c-0.639,4.135 -0.99,8.328 -0.99,12.576c0,63.977 74.469,115.836 166.33,115.836c91.861,0 166.334,-51.859 166.334,-115.836c0,-4.218 -0.347,-8.387 -0.977,-12.493c14.564,-6.47 24.735,-21.034 24.735,-38.001Zm-119.474,108.193c-20.27,20.241 -59.115,21.816 -70.534,21.816c-11.428,0 -50.277,-1.575 -70.522,-21.82c-3.007,-3.008 -3.007,-7.882 0,-10.889c3.003,-2.999 7.882,-3.003 10.885,0c12.777,12.781 40.11,17.317 59.637,17.317c19.522,0 46.86,-4.536 59.657,-17.321c3.016,-2.999 7.886,-2.995 10.885,0.008c3.008,3.011 3.003,7.882 -0.008,10.889Zm-5.23,-48.781c-16.373,0 -29.701,-13.324 -29.701,-29.698c0,-16.381 13.328,-29.714 29.701,-29.714c16.378,0 29.706,13.333 29.706,29.714c0,16.374 -13.328,29.698 -29.706,29.698Zm-160.386,-29.702c0,-16.381 13.328,-29.71 29.714,-29.71c16.369,0 29.689,13.329 29.689,29.71c0,16.373 -13.32,29.693 -29.689,29.693c-16.386,0 -29.714,-13.32 -29.714,-29.693Z" />
@@ -501,7 +501,7 @@ eg1.</p>
     </li>
     <li>
         <a target="_blank" rel="noopener noreferrer" aria-label="share Effective Modern C&#43;&#43; 笔记 on facebook"
-            href="https://facebook.com/sharer/sharer.php?u=https%3a%2f%2fjialog.top%2fposts%2fc%2b%2b%2feffective-modern-c%2b%2b%2f">
+            href="https://facebook.com/sharer/sharer.php?u=https%3a%2f%2fwjle007.github.io%2fposts%2fc%2b%2b%2feffective-modern-c%2b%2b%2f">
             <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
                 <path
                     d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-106.468,0l0,-192.915l66.6,0l12.672,-82.621l-79.272,0l0,-53.617c0,-22.603 11.073,-44.636 46.58,-44.636l36.042,0l0,-70.34c0,0 -32.71,-5.582 -63.982,-5.582c-65.288,0 -107.96,39.569 -107.96,111.204l0,62.971l-72.573,0l0,82.621l72.573,0l0,192.915l-191.104,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Z" />
@@ -510,7 +510,7 @@ eg1.</p>
     </li>
     <li>
         <a target="_blank" rel="noopener noreferrer" aria-label="share Effective Modern C&#43;&#43; 笔记 on whatsapp"
-            href="https://api.whatsapp.com/send?text=Effective%20Modern%20C%2b%2b%20%e7%ac%94%e8%ae%b0%20-%20https%3a%2f%2fjialog.top%2fposts%2fc%2b%2b%2feffective-modern-c%2b%2b%2f">
+            href="https://api.whatsapp.com/send?text=Effective%20Modern%20C%2b%2b%20%e7%ac%94%e8%ae%b0%20-%20https%3a%2f%2fwjle007.github.io%2fposts%2fc%2b%2b%2feffective-modern-c%2b%2b%2f">
             <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
                 <path
                     d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-58.673,127.703c-33.842,-33.881 -78.847,-52.548 -126.798,-52.568c-98.799,0 -179.21,80.405 -179.249,179.234c-0.013,31.593 8.241,62.428 23.927,89.612l-25.429,92.884l95.021,-24.925c26.181,14.28 55.659,21.807 85.658,21.816l0.074,0c98.789,0 179.206,-80.413 179.247,-179.243c0.018,-47.895 -18.61,-92.93 -52.451,-126.81Zm-126.797,275.782l-0.06,0c-26.734,-0.01 -52.954,-7.193 -75.828,-20.767l-5.441,-3.229l-56.386,14.792l15.05,-54.977l-3.542,-5.637c-14.913,-23.72 -22.791,-51.136 -22.779,-79.287c0.033,-82.142 66.867,-148.971 149.046,-148.971c39.793,0.014 77.199,15.531 105.329,43.692c28.128,28.16 43.609,65.592 43.594,105.4c-0.034,82.149 -66.866,148.983 -148.983,148.984Zm81.721,-111.581c-4.479,-2.242 -26.499,-13.075 -30.604,-14.571c-4.105,-1.495 -7.091,-2.241 -10.077,2.241c-2.986,4.483 -11.569,14.572 -14.182,17.562c-2.612,2.988 -5.225,3.364 -9.703,1.12c-4.479,-2.241 -18.91,-6.97 -36.017,-22.23c-13.314,-11.876 -22.304,-26.542 -24.916,-31.026c-2.612,-4.484 -0.279,-6.908 1.963,-9.14c2.016,-2.007 4.48,-5.232 6.719,-7.847c2.24,-2.615 2.986,-4.484 4.479,-7.472c1.493,-2.99 0.747,-5.604 -0.374,-7.846c-1.119,-2.241 -10.077,-24.288 -13.809,-33.256c-3.635,-8.733 -7.327,-7.55 -10.077,-7.688c-2.609,-0.13 -5.598,-0.158 -8.583,-0.158c-2.986,0 -7.839,1.121 -11.944,5.604c-4.105,4.484 -15.675,15.32 -15.675,37.364c0,22.046 16.048,43.342 18.287,46.332c2.24,2.99 31.582,48.227 76.511,67.627c10.685,4.615 19.028,7.371 25.533,9.434c10.728,3.41 20.492,2.929 28.209,1.775c8.605,-1.285 26.499,-10.833 30.231,-21.295c3.732,-10.464 3.732,-19.431 2.612,-21.298c-1.119,-1.869 -4.105,-2.99 -8.583,-5.232Z" />
@@ -519,7 +519,7 @@ eg1.</p>
     </li>
     <li>
         <a target="_blank" rel="noopener noreferrer" aria-label="share Effective Modern C&#43;&#43; 笔记 on telegram"
-            href="https://telegram.me/share/url?text=Effective%20Modern%20C%2b%2b%20%e7%ac%94%e8%ae%b0&amp;url=https%3a%2f%2fjialog.top%2fposts%2fc%2b%2b%2feffective-modern-c%2b%2b%2f">
+            href="https://telegram.me/share/url?text=Effective%20Modern%20C%2b%2b%20%e7%ac%94%e8%ae%b0&amp;url=https%3a%2f%2fwjle007.github.io%2fposts%2fc%2b%2b%2feffective-modern-c%2b%2b%2f">
             <svg version="1.1" xml:space="preserve" viewBox="2 2 28 28" height="30px" width="30px" fill="currentColor">
                 <path
                     d="M26.49,29.86H5.5a3.37,3.37,0,0,1-2.47-1,3.35,3.35,0,0,1-1-2.47V5.48A3.36,3.36,0,0,1,3,3,3.37,3.37,0,0,1,5.5,2h21A3.38,3.38,0,0,1,29,3a3.36,3.36,0,0,1,1,2.46V26.37a3.35,3.35,0,0,1-1,2.47A3.38,3.38,0,0,1,26.49,29.86Zm-5.38-6.71a.79.79,0,0,0,.85-.66L24.73,9.24a.55.55,0,0,0-.18-.46.62.62,0,0,0-.41-.17q-.08,0-16.53,6.11a.59.59,0,0,0-.41.59.57.57,0,0,0,.43.52l4,1.24,1.61,4.83a.62.62,0,0,0,.63.43.56.56,0,0,0,.4-.17L16.54,20l4.09,3A.9.9,0,0,0,21.11,23.15ZM13.8,20.71l-1.21-4q8.72-5.55,8.78-5.55c.15,0,.23,0,.23.16a.18.18,0,0,1,0,.06s-2.51,2.3-7.52,6.8Z" />
@@ -528,7 +528,7 @@ eg1.</p>
     </li>
     <li>
         <a target="_blank" rel="noopener noreferrer" aria-label="share Effective Modern C&#43;&#43; 笔记 on ycombinator"
-            href="https://news.ycombinator.com/submitlink?t=Effective%20Modern%20C%2b%2b%20%e7%ac%94%e8%ae%b0&u=https%3a%2f%2fjialog.top%2fposts%2fc%2b%2b%2feffective-modern-c%2b%2b%2f">
+            href="https://news.ycombinator.com/submitlink?t=Effective%20Modern%20C%2b%2b%20%e7%ac%94%e8%ae%b0&u=https%3a%2f%2fwjle007.github.io%2fposts%2fc%2b%2b%2feffective-modern-c%2b%2b%2f">
             <svg version="1.1" xml:space="preserve" width="30px" height="30px" viewBox="0 0 512 512" fill="currentColor"
                 xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape">
                 <path
@@ -557,7 +557,7 @@ eg1.</p>
     </main>
     
 <footer class="footer">
-        <span>© <a href="https://jialog.top">JiaLog</a> 豫ICP备2024077894号-1 苏公网安备32031202000962号 32031202000962</span> · 
+        <span>© <a href="https://jialog.top">JiaLog</a></span> · 
 
     <span>
         Powered by

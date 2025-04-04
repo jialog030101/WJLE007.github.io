@@ -1,3 +1,3 @@
 User-agent: *
 Disallow:
-Sitemap: https://jialog.top/sitemap.xml
+Sitemap: https://wjle007.github.io/sitemap.xml
