@@ -167,13 +167,13 @@
       "obsidian-excalidraw-plugin:新建绘图文件": false,
       "obsidian-git:Open Git source control": false,
       "homepage:Open homepage": false,
-      "obsidian-to-notion:Share to notion": false,
       "omnisearch:Omnisearch": false,
       "media-extended:Open media": false
     }
   },
   "active": "e7a7b303c61786dc",
   "lastOpenFiles": [
+    "essay/拟录取有感.md",
     "posts/OS/xv6简介.md",
     "posts/OS/xv6环境搭建&&代码导读.md",
     "posts/OS/Lab1 Xv6 && system calls.md",
@@ -183,7 +183,6 @@
     "posts/C++/Effective Modern C++.md",
     "conflict-files-obsidian-git.md",
     "archives.md",
-    "essay/拟录取有感.md",
     "Excalidraw/HomePage.md",
     "OS/演讲稿.md",
     "Database/Note/数据库事务.md",
