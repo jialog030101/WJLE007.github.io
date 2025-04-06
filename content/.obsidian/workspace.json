@@ -11,14 +11,10 @@
             "id": "e7a7b303c61786dc",
             "type": "leaf",
             "state": {
-              "type": "markdown",
-              "state": {
-                "file": "essay/拟录取有感.md",
-                "mode": "source",
-                "source": false
-              },
+              "type": "empty",
+              "state": {},
               "icon": "lucide-file",
-              "title": "拟录取有感"
+              "title": "新标签页"
             }
           }
         ]
@@ -174,8 +170,8 @@
   },
   "active": "e7a7b303c61786dc",
   "lastOpenFiles": [
-    "posts/OS/虚拟化--进程管理API：fork, execve, exit.md",
     "essay/拟录取有感.md",
+    "posts/OS/虚拟化--进程管理API：fork, execve, exit.md",
     "Excalidraw/HomePage.md",
     "OS/演讲稿.md",
     "Database/Note/数据库事务.md",
