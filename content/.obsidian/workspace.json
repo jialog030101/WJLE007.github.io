@@ -11,10 +11,14 @@
             "id": "e7a7b303c61786dc",
             "type": "leaf",
             "state": {
-              "type": "empty",
-              "state": {},
+              "type": "markdown",
+              "state": {
+                "file": "conflict-files-obsidian-git.md",
+                "mode": "source",
+                "source": false
+              },
               "icon": "lucide-file",
-              "title": "新标签页"
+              "title": "conflict-files-obsidian-git"
             }
           }
         ]
@@ -170,6 +174,9 @@
   },
   "active": "e7a7b303c61786dc",
   "lastOpenFiles": [
+    "posts/C++/Effective Modern C++.md",
+    "archives.md",
+    "conflict-files-obsidian-git.md",
     "essay/拟录取有感.md",
     "posts/OS/虚拟化--进程管理API：fork, execve, exit.md",
     "Excalidraw/HomePage.md",
@@ -193,9 +200,6 @@
     "Database/Project/CMU15-445 Project3 - Query Execution.md",
     "OS/虚拟化--进程管理API：fork, execve, exit.md",
     "Database/Note/CMU15-445总结.md",
-    "Rust/基本类型.md",
-    "Rust/some ideas.md",
-    "C++/Effective Modern C++.md",
     "OS",
     "Excalidraw/未命名.canvas",
     "Excalidraw/软件工程课上题",
