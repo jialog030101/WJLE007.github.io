@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "conflict-files-obsidian-git.md",
+                "file": "posts/OS/xv6简介.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "conflict-files-obsidian-git"
+              "title": "xv6简介"
             }
           }
         ]
@@ -174,11 +174,15 @@
   },
   "active": "e7a7b303c61786dc",
   "lastOpenFiles": [
-    "posts/C++/Effective Modern C++.md",
-    "archives.md",
-    "conflict-files-obsidian-git.md",
-    "essay/拟录取有感.md",
+    "posts/OS/xv6环境搭建&&代码导读.md",
+    "posts/OS/Lab1 Xv6 && system calls.md",
     "posts/OS/虚拟化--进程管理API：fork, execve, exit.md",
+    "posts/Database/Project/CMU15-445 Project 0 - C++ Primer.md",
+    "posts/Database/Note/查询的处理和优化.md",
+    "posts/C++/Effective Modern C++.md",
+    "conflict-files-obsidian-git.md",
+    "archives.md",
+    "essay/拟录取有感.md",
     "Excalidraw/HomePage.md",
     "OS/演讲稿.md",
     "Database/Note/数据库事务.md",
@@ -196,10 +200,6 @@
     "Excalidraw/复试相关.md",
     "Database/Project/CMU15-445 Project2-B+ Tree Index Checkpoint 2.md",
     "Database/Project/CMU15-445 Project1 Buffer Pool Manager.md",
-    "Database/Project/CMU15-445 Project 0 - C++ Primer.md",
-    "Database/Project/CMU15-445 Project3 - Query Execution.md",
-    "OS/虚拟化--进程管理API：fork, execve, exit.md",
-    "Database/Note/CMU15-445总结.md",
     "OS",
     "Excalidraw/未命名.canvas",
     "Excalidraw/软件工程课上题",
