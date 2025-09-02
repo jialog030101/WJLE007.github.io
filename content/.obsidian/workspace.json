@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "essay/我与杭高——25国科大杭高院上岸记录.md",
+                "file": "posts/OAuth2.0/project 6-.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "我与杭高——25国科大杭高院上岸记录"
+              "title": "project 6-"
             }
           }
         ]
@@ -156,6 +156,7 @@
   },
   "left-ribbon": {
     "hiddenItems": {
+      "bases:创建新数据库": false,
       "markdown-importer:打开 Markdown 格式转换器": false,
       "audio-recorder:开始/结束录音": false,
       "switcher:打开快速切换": false,
@@ -173,8 +174,16 @@
   },
   "active": "e7a7b303c61786dc",
   "lastOpenFiles": [
-    "essay/拟录取有感.md",
+    "posts/OAuth2.0/project 5-.md",
+    "posts/OAuth2.0/project 4-.md",
+    "posts/OAuth2.0/project 3-.md",
+    "posts/OAuth2.0/project 2-第2周实验指南：用户和客户端应用程序.md",
+    "posts/OAuth2.0/Project 1-环境搭建与系统设计.md",
+    "posts/OAuth2.0/Project 0-实验准备.md",
+    "posts/OAuth2.0/project 6-.md",
+    "posts/OAuth2.0",
     "essay/我与杭高——25国科大杭高院上岸记录.md",
+    "essay/拟录取有感.md",
     "posts/OS/xv6简介.md",
     "posts/OS/xv6环境搭建&&代码导读.md",
     "posts/OS/Lab1 Xv6 && system calls.md",
@@ -192,13 +201,6 @@
     "OS/xv6面试问题准备.md",
     "OS/Lab0 Xv6 and Unix utilities.md",
     "OS/xv6简介.md",
-    "OS/Lab2 Xv6.md",
-    "OS/xv6环境搭建&&代码导读.md",
-    "Database/Project/CMU15-445 Project2-B+ Tree Index Checkpoint 1.md",
-    "Database/Note/B+ Tree Index.md",
-    "OS/Lab1 Xv6 && system calls.md",
-    "Excalidraw/Drawing 2024-02-02 22.05.42.excalidraw.md",
-    "Excalidraw/复试相关.md",
     "OS",
     "Excalidraw/未命名.canvas",
     "Excalidraw/软件工程课上题",
@@ -208,7 +210,6 @@
     "Excalidraw/软件设计大赛",
     "Course/数学",
     "Course/王道/~syncthing~错题本.md.tmp",
-    "Course/王道/~syncthing~复习资料.md.tmp",
-    "Excalidraw/Course/王道"
+    "Course/王道/~syncthing~复习资料.md.tmp"
   ]
 }
